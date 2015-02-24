@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using NetComm;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
 
 namespace RaptorTCP3
 {
@@ -16,9 +18,16 @@ namespace RaptorTCP3
     {
         delegate void SetTextCallback(string text);
         delegate void SetLabelTextCallback(Label ctrl, string text);
+
         NetComm.Host tcpServer = new Host(9119);
 
-        public frmMain()
+        private static string connectionString = "Server=tcp:jy4i6onk8b.database.windows.net,1433;Database=Damocles;User ID=AtarashiNoDaveGordon@jy4i6onk8b;Password=P@r1n@zK0k@b1;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;";
+        private SqlConnection con = new SqlConnection(connectionString);
+        private bool sqlWorking = false;
+        private static int ClientCount = 1;
+
+
+        public frmMain(bool ForceRegistration = false)
         {
             InitializeComponent();
             panel1.Top = 0;
@@ -43,6 +52,16 @@ namespace RaptorTCP3
                 tcpServer.CloseConnection();
 
             }
+
+            if (con.State != ConnectionState.Closed)
+            {
+                while (sqlWorking)
+                {
+                    System.Threading.Thread.Sleep(2000);
+                }
+                con.Close();
+            }
+
             Application.Exit();
         }
 
@@ -65,10 +84,48 @@ namespace RaptorTCP3
         {
             // Subscribe to NetComm Events
             SubscribeToNetCommEvents();
-
+            SubscribeToSQLEvents();
             // Start Listening
             StartServerListening();
+            StartSQLClient();
+        }
 
+        private void StartSQLClient()
+        {
+            con.Open();
+        }
+
+        private void SubscribeToSQLEvents()
+        {
+            con.Disposed += con_Disposed;
+            con.InfoMessage += con_InfoMessage;
+            con.StateChange += con_StateChange;
+            con.FireInfoMessageEventOnUserErrors = true;
+
+        }
+
+        void con_StateChange(object sender, StateChangeEventArgs e)
+        {
+            switch (con.State)
+            {
+                case ConnectionState.Broken:
+                    con.Close();
+                    con.Open();
+                    break;
+                case ConnectionState.Closed:
+                    con.Open();
+                    break;
+            }
+        }
+
+        void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
+        {
+            Log("SQL ERROR: " + e.Message);
+        }
+
+        void con_Disposed(object sender, EventArgs e)
+        {
+            sqlWorking = false;
         }
 
         private void StartServerListening()
@@ -100,7 +157,7 @@ namespace RaptorTCP3
             Log(id + " Connected");
         }
 
-       
+
         private void SetLabel(Label lbl, string message)
         {
             if (lbl.InvokeRequired)
@@ -179,10 +236,28 @@ namespace RaptorTCP3
             return false;
         }
 
-        private bool Login(string p1, string p2)
+        private bool Login(string emailAddress, string Password)
         {
+            // Does the User Exist in the Database?
+            SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = " + HashPassword(Password) + ";");
+            int uid = (int)command.ExecuteScalar();
+
+            if (uid != 0)
+            {
+                // Set the User to IsOnline
+                command = new SqlCommand("UPDATE Users SET IsOnline = " + true + " WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = " + HashPassword(Password) + ";");
+                int r = command.ExecuteNonQuery();
+                if (r > 0) { Log("Updated User " + emailAddress + " to Online"); }
+
+                // Update the User's Logon history - We will Update their LoggedOffDate when their TCP Connection is closed.
+                command = new SqlCommand("UPDATE LogonHistory SET LoggedOnDate = " + DateTime.UtcNow + " WHERE UserId = " + uid + ";");
+                command.ExecuteNonQuery();
+                return true;
+            }
             return false;
         }
+
+       
 
         private void Reply(string ID, string callingCommand, string Result)
         {
@@ -202,6 +277,13 @@ namespace RaptorTCP3
 
         #region Utilities
 
+
+        /// <summary>
+        /// Logs the activities of both the TCP Server AND the SQL sub-system.
+        /// </summary>
+        /// <param name="message">
+        /// String: Any message that needs to be displayed.
+        /// </param>
         private void Log(string message)
         {
             if (!ConOut.IsDisposed)
@@ -218,14 +300,69 @@ namespace RaptorTCP3
             }
         }
 
+        /// <summary>
+        /// Converts A byte array to a string
+        /// </summary>
+        /// <param name="data">
+        /// Byte[]: The Byte Array to convert
+        /// </param>
+        /// <returns>
+        /// String: The results of the conversion
+        /// </returns>
         private string GetString(byte[] data)
         {
             return Encoding.UTF8.GetString(data, 0, data.Length);
         }
 
+        /// <summary>
+        /// Converts a string to a Byte Array
+        /// </summary>
+        /// <param name="data">
+        /// String: The text to convert
+        /// </param>
+        /// <returns>
+        /// Byte[]: The result of the conversion
+        /// </returns>
         private byte[] GetBytes(string data)
         {
             return Encoding.UTF8.GetBytes(data);
+        }
+
+        /// <summary>
+        /// The SHA512 Method for hashing passwords before they are stored in the Database
+        /// </summary>
+        /// <param name="Password">
+        /// string: The string representation of the password
+        /// </param>
+        /// <returns>
+        /// String: A Hexadecimal string of 128 characters which represent the password.
+        /// </returns>
+        /// <remarks>
+        /// The Client should send a Hashed Password instead of a plain text password.
+        /// </remarks>
+        private string HashPassword(string Password)
+        {
+            using (SHA512 shaM = new SHA512Managed())
+            {
+                byte[] hash = shaM.ComputeHash(GetBytes(Password));
+                return GetHex(hash);
+            }
+
+        }
+
+        /// <summary>
+        /// Converts a Byte Array to a Hexadecimal string
+        /// </summary>
+        /// <param name="hash">
+        /// Byte[]: The byte array of the password hash to convert to a Hexadecimal string
+        /// </param>
+        /// <returns>
+        /// String: The Hexadecimal string that results from the conversion. 128 characters long.
+        /// </returns>
+        private string GetHex(byte[] hash)
+        {
+            string hex = BitConverter.ToString(hash);
+            return hex.Replace("-", "");
         }
         #endregion
     }
