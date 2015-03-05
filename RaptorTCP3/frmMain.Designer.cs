@@ -30,15 +30,15 @@
         {
             this.components = new System.ComponentModel.Container();
             this.cmsSystem = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.ConOut = new System.Windows.Forms.RichTextBox();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.operationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label1 = new System.Windows.Forms.Label();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ConOut = new System.Windows.Forms.RichTextBox();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.lblConnections = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.cmsSystem.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -52,17 +52,38 @@
             this.cmsSystem.Name = "cmsSystem";
             this.cmsSystem.Size = new System.Drawing.Size(128, 54);
             // 
+            // operationToolStripMenuItem
+            // 
+            this.operationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startToolStripMenuItem,
+            this.restartToolStripMenuItem});
+            this.operationToolStripMenuItem.Name = "operationToolStripMenuItem";
+            this.operationToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.operationToolStripMenuItem.Text = "Operation";
+            // 
+            // startToolStripMenuItem
+            // 
+            this.startToolStripMenuItem.Name = "startToolStripMenuItem";
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.startToolStripMenuItem.Text = "Pause";
+            // 
+            // restartToolStripMenuItem
+            // 
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(124, 6);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(124, 6);
             // 
             // ConOut
             // 
@@ -92,26 +113,14 @@
             this.panel1.Size = new System.Drawing.Size(1122, 236);
             this.panel1.TabIndex = 2;
             // 
-            // operationToolStripMenuItem
+            // lblConnections
             // 
-            this.operationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.startToolStripMenuItem,
-            this.restartToolStripMenuItem});
-            this.operationToolStripMenuItem.Name = "operationToolStripMenuItem";
-            this.operationToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
-            this.operationToolStripMenuItem.Text = "Operation";
-            // 
-            // startToolStripMenuItem
-            // 
-            this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.startToolStripMenuItem.Text = "Pause";
-            // 
-            // restartToolStripMenuItem
-            // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
+            this.lblConnections.AutoSize = true;
+            this.lblConnections.Location = new System.Drawing.Point(87, 9);
+            this.lblConnections.Name = "lblConnections";
+            this.lblConnections.Size = new System.Drawing.Size(13, 13);
+            this.lblConnections.TabIndex = 1;
+            this.lblConnections.Text = "0";
             // 
             // label1
             // 
@@ -121,15 +130,6 @@
             this.label1.Size = new System.Drawing.Size(69, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Connections:";
-            // 
-            // lblConnections
-            // 
-            this.lblConnections.AutoSize = true;
-            this.lblConnections.Location = new System.Drawing.Point(87, 9);
-            this.lblConnections.Name = "lblConnections";
-            this.lblConnections.Size = new System.Drawing.Size(13, 13);
-            this.lblConnections.TabIndex = 1;
-            this.lblConnections.Text = "0";
             // 
             // frmMain
             // 
@@ -143,6 +143,7 @@
             this.ForeColor = System.Drawing.SystemColors.ActiveCaption;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmMain";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.cmsSystem.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

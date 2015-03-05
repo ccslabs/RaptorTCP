@@ -24,7 +24,7 @@ namespace RaptorTCP3
         private static string connectionString = "Server=tcp:jy4i6onk8b.database.windows.net,1433;Database=Damocles;User ID=AtarashiNoDaveGordon@jy4i6onk8b;Password=P@r1n@zK0k@b1;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;";
         private SqlConnection con = new SqlConnection(connectionString);
         private bool sqlWorking = false;
-        private static int ClientCount = 1;
+        private static int ClientCount = 0;
 
 
         public frmMain(bool ForceRegistration = false)
@@ -47,7 +47,7 @@ namespace RaptorTCP3
         {
             if (tcpServer.Listening)
             {
-                Broadcast("Wait"); // Tell all the Clients to wait till I return
+                Broadcast(ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
                 DisconnectAll();
                 tcpServer.CloseConnection();
 
@@ -64,31 +64,7 @@ namespace RaptorTCP3
 
             Application.Exit();
         }
-
-        private void DisconnectAll()
-        {
-            Parallel.ForEach(tcpServer.Users, ClientID =>
-            {
-                tcpServer.DisconnectUser(ClientID.ToString());
-            });
-
-            //foreach(string ClientID in tcpServer.Users)
-            //{
-            //    tcpServer.DisconnectUser(ClientID);
-            //}
-        }
         #endregion
-
-        #region fmrMain Events
-        private void frmMain_Load(object sender, EventArgs e)
-        {
-            // Subscribe to NetComm Events
-            SubscribeToNetCommEvents();
-            SubscribeToSQLEvents();
-            // Start Listening
-            StartServerListening();
-            StartSQLClient();
-        }
 
         private void StartSQLClient()
         {
@@ -98,7 +74,6 @@ namespace RaptorTCP3
         private void SubscribeToSQLEvents()
         {
             con.Disposed += con_Disposed;
-            con.InfoMessage += con_InfoMessage;
             con.StateChange += con_StateChange;
             con.FireInfoMessageEventOnUserErrors = true;
 
@@ -118,11 +93,6 @@ namespace RaptorTCP3
             }
         }
 
-        void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
-        {
-            Log("SQL ERROR: " + e.Message);
-        }
-
         void con_Disposed(object sender, EventArgs e)
         {
             sqlWorking = false;
@@ -132,7 +102,7 @@ namespace RaptorTCP3
         {
             Log("Server is Listening");
             tcpServer.StartConnection();
-            Broadcast("Resume");  // Tell any waiting Clients they can resume communications.
+            Broadcast(ServerCommands.Resume.ToString());  // Tell any waiting Clients they can resume communications.
         }
 
         private void SubscribeToNetCommEvents()
@@ -157,27 +127,12 @@ namespace RaptorTCP3
             Log(id + " Connected");
         }
 
-
-        private void SetLabel(Label lbl, string message)
-        {
-            if (lbl.InvokeRequired)
-            {
-                SetLabelTextCallback d = new SetLabelTextCallback(SetLabel);
-                this.Invoke(d, new object[] { lbl, message });
-            }
-            else
-            {
-                lbl.Text = message;
-            }
-        }
-
-
-
         void tcpServer_lostConnection(string id)
         {
             SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
             try
             {
+                LogOffUser(id);
                 Log(id + " Disconnected");
             }
             catch (System.ObjectDisposedException de)
@@ -189,6 +144,8 @@ namespace RaptorTCP3
 
             }
         }
+
+
 
         void tcpServer_errEncounter(Exception ex)
         {
@@ -204,6 +161,9 @@ namespace RaptorTCP3
         {
             Successful,
             Failed,
+            UseCache,
+            Wait,
+            Resume,
         }
 
         void tcpServer_DataReceived(string ID, byte[] Data)
@@ -220,10 +180,136 @@ namespace RaptorTCP3
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "register":
+                    if (RegistrationSuccessful(GetString(Data)))
+                        Reply(ID, command[0], ServerCommands.Successful.ToString());
+                    else
+                        Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 default:
                     break;
             }
+        }
+
+        private bool RegistrationSuccessful(string commandParams)
+        {
+            string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
+            if (command[0] == "register")
+            {
+                return Register(command[1], command[2]);
+            }
+            return false;
+        }
+
+        private bool Register(string emailAddress, string Password)
+        {
+
+            // getutcdate() is SQL servers built in utc DateTime.UtcNow command
+
+            SqlCommand command = null;
+            try
+            {
+                command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
+                               "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber() + "',N'" + emailAddress + "')");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                int res = command.ExecuteNonQuery();
+                if (res > 0)
+                {
+                    // Update - create the LogonHistory table
+                    UpdateLoginHistory(emailAddress);
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (SqlException sqle)
+            {
+                Log("SQL Error: (Register) " + sqle.Message + "\n\r" + command);
+                return false;
+            }
+
+        }
+
+        private void UpdateLoginHistory(string emailAddress)
+        {
+            // Get UserID from the Email Address
+            // insert new record
+
+            int uid = GetUserID(emailAddress);
+            if (uid > 0)
+            {
+                try
+                {
+                    // INSERT INTO LogonHistory VALUES(3,  getutcdate(),)
+                    SqlCommand command = new SqlCommand("INSERT INTO LogonHistory (UserId, LoggedOnDate) VALUES(" + uid + ",  getutcdate())");
+                    command.CommandType = CommandType.Text;
+                    command.Connection = con;
+                    command.ExecuteNonQuery();
+                }
+                catch (SqlException sqle)
+                {
+                    Log("SQL ERROR: (UpdateLoginHistory) " + sqle.Message);
+                }
+            }
+            else
+            {
+                Log("Error: (UpdateLoginHistory) Failed to getUuid");
+            }
+        }
+
+        private int GetUserID(string emailAddress)
+        {
+            try
+            {
+
+                // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
+                SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                int uid = (int)command.ExecuteScalar();
+                return uid;
+            }
+            catch (SqlException sqle)
+            {
+                Log("SQL ERROR: " + sqle.Message);
+                return -1;
+            }
+        }
+
+        private string GenerateTemporaryLicenseNumber()
+        {
+            string lNumberType = "t"; // temporary
+            string lNumberAuthorisedFromYear = DateTime.UtcNow.Year.ToString();
+            string lNumberCountryStateLanguageIDS = "zzz";
+            string lNumberCounter = GetLicenseNumberCount();
+            string ln = lNumberType + lNumberAuthorisedFromYear + lNumberCountryStateLanguageIDS + lNumberCounter;
+            saveTemporaryLicenseNumber(ln);
+            return ln;
+        }
+
+        private void saveTemporaryLicenseNumber(string ln)
+        {
+            try
+            {
+                SqlCommand command = new SqlCommand("INSERT INTO LicenseNumbers VALUES('" + ln + "')");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+            }
+            catch (SqlException sqle)
+            {
+                Log("SQL ERROR: " + sqle.Message);
+            }
+
+        }
+
+        private string GetLicenseNumberCount()
+        {
+            SqlCommand command = new SqlCommand("SELECT COUNT(Id) FROM LicenseNumbers");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int num = (int)command.ExecuteScalar();
+            return (num + 1).ToString();
         }
 
         private bool LoginSuccessful(string commandParams)
@@ -239,15 +325,27 @@ namespace RaptorTCP3
         private bool Login(string emailAddress, string Password)
         {
             // Does the User Exist in the Database?
-            SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = " + HashPassword(Password) + ";");
-            int uid = (int)command.ExecuteScalar();
 
-            if (uid != 0)
+            SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int? uid = 0;
+            try
+            {
+                uid = (int)command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Log("SQL ERROR: (Login) " + ex.Message);
+            }
+
+
+            if (uid > 0)
             {
                 // Set the User to IsOnline
-                command = new SqlCommand("UPDATE Users SET IsOnline = " + true + " WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = " + HashPassword(Password) + ";");
+                command = new SqlCommand("UPDATE Users SET IsOnline = " + true + " WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
                 int r = command.ExecuteNonQuery();
-                if (r > 0) { Log("Updated User " + emailAddress + " to Online"); }
+                if (r > 0) { Log("Updated User '" + emailAddress + "' to Online"); }
 
                 // Update the User's Logon history - We will Update their LoggedOffDate when their TCP Connection is closed.
                 command = new SqlCommand("UPDATE LogonHistory SET LoggedOnDate = " + DateTime.UtcNow + " WHERE UserId = " + uid + ";");
@@ -257,13 +355,53 @@ namespace RaptorTCP3
             return false;
         }
 
-       
+        private void LogOffUser(string id)
+        {
+            // Log the user off Users and Update LogonHistory
+            if (id.Length > 5) // Ignore internal connections
+            {
+                try
+                {
+                    SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE UserId = " + id + ";");
+                    command.ExecuteNonQuery();
+                    command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE UserId = " + id + " AND LoggedOffDate = " + null + ";");
+                    command.ExecuteNonQuery();
+                }
+                catch (SqlException sqle)
+                {
+                    Log("SQL Error: (LogOffUser) " + sqle.Message);
+                    throw;
+                }
+
+            }
+
+        }
+
+        private void LogOffAllUsers()
+        {
+            try
+            {
+                SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
+                int r = command.ExecuteNonQuery();
+
+                command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE LoggedOffDate = " + null + ";");
+                command.ExecuteNonQuery();
+
+                Log("All users have been Logged Off");
+            }
+            catch (Exception)
+            {
+                Log("Failed to log all users off");
+                throw;
+            }
+
+        }
 
         private void Reply(string ID, string callingCommand, string Result)
         {
-            //string cr = callingCommand + " " + Result;
-            //byte[] commandResult = GetBytes(cr);
-            //tcpServer.SendData(ID, commandResult);
+            string cr = callingCommand + " " + Result;
+            byte[] commandResult = GetBytes(cr);
+            tcpServer.SendData(ID, commandResult);
 
         }
 
@@ -273,10 +411,33 @@ namespace RaptorTCP3
             Log("Connection Closed");
         }
 
-        #endregion
-
         #region Utilities
 
+        private void DisconnectAll()
+        {
+            Parallel.ForEach(tcpServer.Users, ClientID =>
+            {
+                tcpServer.DisconnectUser(ClientID.ToString());
+            });
+
+            //foreach(string ClientID in tcpServer.Users)
+            //{
+            //    tcpServer.DisconnectUser(ClientID);
+            //}
+        }
+
+        private void SetLabel(Label lbl, string message)
+        {
+            if (lbl.InvokeRequired)
+            {
+                SetLabelTextCallback d = new SetLabelTextCallback(SetLabel);
+                this.Invoke(d, new object[] { lbl, message });
+            }
+            else
+            {
+                lbl.Text = message;
+            }
+        }
 
         /// <summary>
         /// Logs the activities of both the TCP Server AND the SQL sub-system.
@@ -286,16 +447,24 @@ namespace RaptorTCP3
         /// </param>
         private void Log(string message)
         {
-            if (!ConOut.IsDisposed)
+            if (message.StartsWith("1 Connected") ||
+                message.StartsWith(" Connected") ||
+                message.StartsWith(" Disconnected") ||
+                message.StartsWith("1 Disconnected")) // Ignore Internal connections and disconnections
+            { }
+            else
             {
-                if (this.ConOut.InvokeRequired)
+                if (!ConOut.IsDisposed)
                 {
-                    SetTextCallback d = new SetTextCallback(Log);
-                    this.Invoke(d, new object[] { message });
-                }
-                else
-                {
-                    ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                    if (this.ConOut.InvokeRequired)
+                    {
+                        SetTextCallback d = new SetTextCallback(Log);
+                        this.Invoke(d, new object[] { message });
+                    }
+                    else
+                    {
+                        ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                    }
                 }
             }
         }
@@ -363,6 +532,25 @@ namespace RaptorTCP3
         {
             string hex = BitConverter.ToString(hash);
             return hex.Replace("-", "");
+        }
+        #endregion
+
+        #region Form Events
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            // Subscribe to NetComm Events
+            SubscribeToNetCommEvents();
+            SubscribeToSQLEvents();
+            // Start Listening
+            StartServerListening();
+            StartSQLClient();
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            LogOffAllUsers();
+            Broadcast(ServerCommands.UseCache.ToString());
         }
         #endregion
     }
