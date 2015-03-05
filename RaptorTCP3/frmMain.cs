@@ -24,8 +24,8 @@ namespace RaptorTCP3
         private static string connectionString = "Server=tcp:jy4i6onk8b.database.windows.net,1433;Database=Damocles;User ID=AtarashiNoDaveGordon@jy4i6onk8b;Password=P@r1n@zK0k@b1;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;";
         private SqlConnection con = new SqlConnection(connectionString);
         private bool sqlWorking = false;
-        private static int ClientCount = 0;
 
+        private string ClientLicense = null;
 
         public frmMain(bool ForceRegistration = false)
         {
@@ -164,6 +164,13 @@ namespace RaptorTCP3
             UseCache,
             Wait,
             Resume,
+            SendEmailAddress,
+        }
+
+        private enum ClientCommands
+        {
+            Login,
+            Register,
         }
 
         void tcpServer_DataReceived(string ID, byte[] Data)
@@ -175,20 +182,23 @@ namespace RaptorTCP3
             {
                 case "login":
                     if (LoginSuccessful(GetString(Data)))
-                        Reply(ID, command[0], ServerCommands.Successful.ToString());
+                        Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "register":
                     if (RegistrationSuccessful(GetString(Data)))
-                        Reply(ID, command[0], ServerCommands.Successful.ToString());
+                        Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
+                
                 default:
                     break;
             }
         }
+
+      
 
         private bool RegistrationSuccessful(string commandParams)
         {
@@ -209,7 +219,7 @@ namespace RaptorTCP3
             try
             {
                 command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
-                               "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber() + "',N'" + emailAddress + "')");
+                               "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber(emailAddress) + "',N'" + emailAddress + "')");
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
                 int res = command.ExecuteNonQuery();
@@ -276,22 +286,23 @@ namespace RaptorTCP3
             }
         }
 
-        private string GenerateTemporaryLicenseNumber()
+        private string GenerateTemporaryLicenseNumber(string emailAddress)
         {
             string lNumberType = "t"; // temporary
             string lNumberAuthorisedFromYear = DateTime.UtcNow.Year.ToString();
             string lNumberCountryStateLanguageIDS = "zzz";
             string lNumberCounter = GetLicenseNumberCount();
             string ln = lNumberType + lNumberAuthorisedFromYear + lNumberCountryStateLanguageIDS + lNumberCounter;
-            saveTemporaryLicenseNumber(ln);
+            saveLicenseNumber(ln, emailAddress);
             return ln;
         }
 
-        private void saveTemporaryLicenseNumber(string ln)
+        private void saveLicenseNumber(string ln, string emailAddress)
         {
+            ClientLicense = ln;
             try
             {
-                SqlCommand command = new SqlCommand("INSERT INTO LicenseNumbers VALUES('" + ln + "')");
+                SqlCommand command = new SqlCommand("INSERT INTO LicenseNumbers VALUES('" + ln + "', N'" + emailAddress + "')");
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
                 command.ExecuteNonQuery();
@@ -325,14 +336,14 @@ namespace RaptorTCP3
         private bool Login(string emailAddress, string Password)
         {
             // Does the User Exist in the Database?
-
+           
             SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
             command.CommandType = CommandType.Text;
             command.Connection = con;
             int? uid = 0;
             try
             {
-                uid = (int)command.ExecuteNonQuery();
+                uid = (int)command.ExecuteScalar();
             }
             catch (Exception ex)
             {
@@ -344,11 +355,15 @@ namespace RaptorTCP3
             {
                 // Set the User to IsOnline
                 command = new SqlCommand("UPDATE Users SET IsOnline = " + true + " WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
                 int r = command.ExecuteNonQuery();
                 if (r > 0) { Log("Updated User '" + emailAddress + "' to Online"); }
 
                 // Update the User's Logon history - We will Update their LoggedOffDate when their TCP Connection is closed.
                 command = new SqlCommand("UPDATE LogonHistory SET LoggedOnDate = " + DateTime.UtcNow + " WHERE UserId = " + uid + ";");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
                 command.ExecuteNonQuery();
                 return true;
             }
@@ -363,8 +378,12 @@ namespace RaptorTCP3
                 try
                 {
                     SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE UserId = " + id + ";");
+                    command.CommandType = CommandType.Text;
+                    command.Connection = con;
                     command.ExecuteNonQuery();
                     command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE UserId = " + id + " AND LoggedOffDate = " + null + ";");
+                    command.CommandType = CommandType.Text;
+                    command.Connection = con;
                     command.ExecuteNonQuery();
                 }
                 catch (SqlException sqle)
@@ -382,9 +401,13 @@ namespace RaptorTCP3
             try
             {
                 SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
                 int r = command.ExecuteNonQuery();
 
                 command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE LoggedOffDate = " + null + ";");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
                 command.ExecuteNonQuery();
 
                 Log("All users have been Logged Off");
@@ -405,6 +428,14 @@ namespace RaptorTCP3
 
         }
 
+        private void Reply(string ID, string callingCommand, string Result, string returnedValue)
+        {
+            string cr = callingCommand + " " + Result + " " + returnedValue;
+            byte[] commandResult = GetBytes(cr);
+            tcpServer.SendData(ID, commandResult);
+        }
+
+       
         void tcpServer_ConnectionClosed()
         {
             lblConnections.Text = tcpServer.Users.Count().ToString("N0");
