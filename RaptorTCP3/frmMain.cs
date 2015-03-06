@@ -30,6 +30,7 @@ namespace RaptorTCP3
         public frmMain(bool ForceRegistration = false)
         {
             InitializeComponent();
+            Log("Server Starting");
             panel1.Top = 0;
             panel1.Left = 0;
             panel1.Width = this.Width;
@@ -45,8 +46,10 @@ namespace RaptorTCP3
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Log("Exiting");
             if (tcpServer.Listening)
             {
+                
                 Broadcast(ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
                 DisconnectAll();
                 tcpServer.CloseConnection();
@@ -68,11 +71,13 @@ namespace RaptorTCP3
 
         private void StartSQLClient()
         {
+            Log("Starting SQL Client");
             con.Open();
         }
 
         private void SubscribeToSQLEvents()
         {
+            Log("Subscribing to SQL Events");
             con.Disposed += con_Disposed;
             con.StateChange += con_StateChange;
             con.FireInfoMessageEventOnUserErrors = true;
@@ -81,20 +86,28 @@ namespace RaptorTCP3
 
         void con_StateChange(object sender, StateChangeEventArgs e)
         {
-            switch (con.State)
+            if (sqlWorking)
             {
-                case ConnectionState.Broken:
-                    con.Close();
-                    con.Open();
-                    break;
-                case ConnectionState.Closed:
-                    con.Open();
-                    break;
+                switch (con.State)
+                {
+                    case ConnectionState.Broken:
+                        Log("SQL Connection Broken");
+                        con.Close();
+                        con.Open();
+                        break;
+                    case ConnectionState.Closed:
+                        Log("SQL Connection Closed");
+                        con.Open();
+                        break;
+                    case ConnectionState.Open:
+                        Log("SQL Connection Open");
+                        break;
+                }
             }
         }
-
         void con_Disposed(object sender, EventArgs e)
         {
+            Log("SQL Connection Disposed");
             sqlWorking = false;
         }
 
@@ -107,6 +120,7 @@ namespace RaptorTCP3
 
         private void SubscribeToNetCommEvents()
         {
+            Log("Subscribing to NetCom Events");
             tcpServer.ConnectionClosed += tcpServer_ConnectionClosed;
             tcpServer.DataReceived += tcpServer_DataReceived;
             tcpServer.DataTransferred += tcpServer_DataTransferred;
@@ -118,13 +132,14 @@ namespace RaptorTCP3
 
         private void Broadcast(string Message)
         {
+            Log("Broadcasting: " + Message); ;
             tcpServer.Brodcast(GetBytes(Message));
         }
 
         void tcpServer_onConnection(string id)
         {
-            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
-            Log(id + " Connected");
+            Log("Client Connecting");
+            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));            
         }
 
         void tcpServer_lostConnection(string id)
@@ -132,8 +147,8 @@ namespace RaptorTCP3
             SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
             try
             {
-                LogOffUser(id);
-                Log(id + " Disconnected");
+                Log("Client Disconnecting");
+                LogOffUser(id);                
             }
             catch (System.ObjectDisposedException de)
             {
@@ -154,7 +169,7 @@ namespace RaptorTCP3
 
         void tcpServer_DataTransferred(string Sender, string Recipient, byte[] Data)
         {
-            Log("Message Transfer Requested by " + Sender + " to " + Recipient + " Message = " + GetString(Data));
+            Log("Incoming Message from: " + Sender + " to " + Recipient);
         }
 
         private enum ServerCommands
@@ -175,18 +190,18 @@ namespace RaptorTCP3
 
         void tcpServer_DataReceived(string ID, byte[] Data)
         {
-            string[] command = GetString(Data).Split(' ');
-            Log(ID + " Sent this Data: " + GetString(Data));
-
+            string[] command = GetString(Data).Split(' ');            
             switch (command[0].Trim().ToLowerInvariant())
             {
                 case "login":
+                    Log(ID + " Logging In");
                     if (LoginSuccessful(GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "register":
+                    Log(ID + " Registering In");
                     if (RegistrationSuccessful(GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
@@ -227,6 +242,7 @@ namespace RaptorTCP3
                 {
                     // Update - create the LogonHistory table
                     UpdateLoginHistory(emailAddress);
+
                     return true;
                 }
                 else
@@ -377,6 +393,7 @@ namespace RaptorTCP3
             {
                 try
                 {
+                    Log(id + " Logging Off");
                     SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE UserId = " + id + ";");
                     command.CommandType = CommandType.Text;
                     command.Connection = con;
@@ -398,6 +415,7 @@ namespace RaptorTCP3
 
         private void LogOffAllUsers()
         {
+            Log("Logging off all clients");
             try
             {
                 SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
@@ -422,6 +440,7 @@ namespace RaptorTCP3
 
         private void Reply(string ID, string callingCommand, string Result)
         {
+            Log("Replying to " + ID);
             string cr = callingCommand + " " + Result;
             byte[] commandResult = GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
@@ -430,11 +449,11 @@ namespace RaptorTCP3
 
         private void Reply(string ID, string callingCommand, string Result, string returnedValue)
         {
+            Log("Replying to " + ID);
             string cr = callingCommand + " " + Result + " " + returnedValue;
             byte[] commandResult = GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
         }
-
        
         void tcpServer_ConnectionClosed()
         {
@@ -446,15 +465,11 @@ namespace RaptorTCP3
 
         private void DisconnectAll()
         {
+            Log("Disconnecting all Clients");
             Parallel.ForEach(tcpServer.Users, ClientID =>
             {
                 tcpServer.DisconnectUser(ClientID.ToString());
-            });
-
-            //foreach(string ClientID in tcpServer.Users)
-            //{
-            //    tcpServer.DisconnectUser(ClientID);
-            //}
+            });            
         }
 
         private void SetLabel(Label lbl, string message)
@@ -570,6 +585,7 @@ namespace RaptorTCP3
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            Log("Application Loaded");
             // Subscribe to NetComm Events
             SubscribeToNetCommEvents();
             SubscribeToSQLEvents();
@@ -580,6 +596,7 @@ namespace RaptorTCP3
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Log("Application Closing");
             LogOffAllUsers();
             Broadcast(ServerCommands.UseCache.ToString());
         }
