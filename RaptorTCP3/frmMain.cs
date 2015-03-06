@@ -69,7 +69,8 @@ namespace RaptorTCP3
         }
         #endregion
 
-        private void StartSQLClient()
+        #region Startup
+ private void StartSQLClient()
         {
             Log("Starting SQL Client");
             con.Open();
@@ -129,17 +130,58 @@ namespace RaptorTCP3
             tcpServer.onConnection += tcpServer_onConnection;
 
         }
+        #endregion
+       
 
+
+        #region TCP Enums
+         private enum ServerCommands
+        {
+            Successful,
+            Failed,
+            UseCache,
+            Wait,
+            Resume,
+            SendEmailAddress,
+        }
+
+        private enum ClientCommands
+        {
+            Login,
+            Register,
+        }
+        #endregion
+
+        #region Send and Reply TCP Messages
         private void Broadcast(string Message)
         {
             Log("Broadcasting: " + Message); ;
             tcpServer.Brodcast(GetBytes(Message));
         }
 
+        private void Reply(string ID, string callingCommand, string Result)
+        {
+            Log("Replying to " + ID);
+            string cr = callingCommand + " " + Result;
+            byte[] commandResult = GetBytes(cr);
+            tcpServer.SendData(ID, commandResult);
+
+        }
+
+        private void Reply(string ID, string callingCommand, string Result, string returnedValue)
+        {
+            Log("Replying to " + ID);
+            string cr = callingCommand + " " + Result + " " + returnedValue;
+            byte[] commandResult = GetBytes(cr);
+            tcpServer.SendData(ID, commandResult);
+        }
+        #endregion
+
+        #region TCP Events
         void tcpServer_onConnection(string id)
         {
             Log("Client Connecting");
-            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));            
+            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
         }
 
         void tcpServer_lostConnection(string id)
@@ -148,7 +190,7 @@ namespace RaptorTCP3
             try
             {
                 Log("Client Disconnecting");
-                LogOffUser(id);                
+                LogOffUser(id);
             }
             catch (System.ObjectDisposedException de)
             {
@@ -172,25 +214,9 @@ namespace RaptorTCP3
             Log("Incoming Message from: " + Sender + " to " + Recipient);
         }
 
-        private enum ServerCommands
-        {
-            Successful,
-            Failed,
-            UseCache,
-            Wait,
-            Resume,
-            SendEmailAddress,
-        }
-
-        private enum ClientCommands
-        {
-            Login,
-            Register,
-        }
-
         void tcpServer_DataReceived(string ID, byte[] Data)
         {
-            string[] command = GetString(Data).Split(' ');            
+            string[] command = GetString(Data).Split(' ');
             switch (command[0].Trim().ToLowerInvariant())
             {
                 case "login":
@@ -207,13 +233,59 @@ namespace RaptorTCP3
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
-                
+
                 default:
                     break;
             }
         }
 
-      
+        void tcpServer_ConnectionClosed()
+        {
+            lblConnections.Text = tcpServer.Users.Count().ToString("N0");
+            Log("Connection Closed");
+        }
+        #endregion
+
+        #region Licenses
+        private string GenerateTemporaryLicenseNumber(string emailAddress)
+        {
+            string lNumberType = "t"; // temporary
+            string lNumberAuthorisedFromYear = DateTime.UtcNow.Year.ToString();
+            string lNumberCountryStateLanguageIDS = "zzz";
+            string lNumberCounter = GetLicenseNumberCount();
+            string ln = lNumberType + lNumberAuthorisedFromYear + lNumberCountryStateLanguageIDS + lNumberCounter;
+            saveLicenseNumber(ln, emailAddress);
+            return ln;
+        }
+
+        private void saveLicenseNumber(string ln, string emailAddress)
+        {
+            ClientLicense = ln;
+            try
+            {
+                SqlCommand command = new SqlCommand("INSERT INTO LicenseNumbers VALUES('" + ln + "', N'" + emailAddress + "')");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+            }
+            catch (SqlException sqle)
+            {
+                Log("SQL ERROR: " + sqle.Message);
+            }
+
+        }
+
+        private string GetLicenseNumberCount()
+        {
+            SqlCommand command = new SqlCommand("SELECT COUNT(Id) FROM LicenseNumbers");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int num = (int)command.ExecuteScalar();
+            return (num + 1).ToString();
+        }
+        #endregion
+
+        #region Login And Register
 
         private bool RegistrationSuccessful(string commandParams)
         {
@@ -283,62 +355,6 @@ namespace RaptorTCP3
             }
         }
 
-        private int GetUserID(string emailAddress)
-        {
-            try
-            {
-
-                // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
-                SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                int uid = (int)command.ExecuteScalar();
-                return uid;
-            }
-            catch (SqlException sqle)
-            {
-                Log("SQL ERROR: " + sqle.Message);
-                return -1;
-            }
-        }
-
-        private string GenerateTemporaryLicenseNumber(string emailAddress)
-        {
-            string lNumberType = "t"; // temporary
-            string lNumberAuthorisedFromYear = DateTime.UtcNow.Year.ToString();
-            string lNumberCountryStateLanguageIDS = "zzz";
-            string lNumberCounter = GetLicenseNumberCount();
-            string ln = lNumberType + lNumberAuthorisedFromYear + lNumberCountryStateLanguageIDS + lNumberCounter;
-            saveLicenseNumber(ln, emailAddress);
-            return ln;
-        }
-
-        private void saveLicenseNumber(string ln, string emailAddress)
-        {
-            ClientLicense = ln;
-            try
-            {
-                SqlCommand command = new SqlCommand("INSERT INTO LicenseNumbers VALUES('" + ln + "', N'" + emailAddress + "')");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
-            }
-            catch (SqlException sqle)
-            {
-                Log("SQL ERROR: " + sqle.Message);
-            }
-
-        }
-
-        private string GetLicenseNumberCount()
-        {
-            SqlCommand command = new SqlCommand("SELECT COUNT(Id) FROM LicenseNumbers");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int num = (int)command.ExecuteScalar();
-            return (num + 1).ToString();
-        }
-
         private bool LoginSuccessful(string commandParams)
         {
             string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
@@ -352,7 +368,7 @@ namespace RaptorTCP3
         private bool Login(string emailAddress, string Password)
         {
             // Does the User Exist in the Database?
-           
+
             SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
             command.CommandType = CommandType.Text;
             command.Connection = con;
@@ -437,29 +453,7 @@ namespace RaptorTCP3
             }
 
         }
-
-        private void Reply(string ID, string callingCommand, string Result)
-        {
-            Log("Replying to " + ID);
-            string cr = callingCommand + " " + Result;
-            byte[] commandResult = GetBytes(cr);
-            tcpServer.SendData(ID, commandResult);
-
-        }
-
-        private void Reply(string ID, string callingCommand, string Result, string returnedValue)
-        {
-            Log("Replying to " + ID);
-            string cr = callingCommand + " " + Result + " " + returnedValue;
-            byte[] commandResult = GetBytes(cr);
-            tcpServer.SendData(ID, commandResult);
-        }
-       
-        void tcpServer_ConnectionClosed()
-        {
-            lblConnections.Text = tcpServer.Users.Count().ToString("N0");
-            Log("Connection Closed");
-        }
+        #endregion
 
         #region Utilities
 
@@ -578,6 +572,27 @@ namespace RaptorTCP3
         {
             string hex = BitConverter.ToString(hash);
             return hex.Replace("-", "");
+        }
+        #endregion
+
+        #region SQL Utilities
+        private int GetUserID(string emailAddress)
+        {
+            try
+            {
+
+                // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
+                SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                int uid = (int)command.ExecuteScalar();
+                return uid;
+            }
+            catch (SqlException sqle)
+            {
+                Log("SQL ERROR: " + sqle.Message);
+                return -1;
+            }
         }
         #endregion
 
