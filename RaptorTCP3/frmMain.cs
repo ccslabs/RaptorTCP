@@ -11,6 +11,8 @@ using System.Windows.Forms;
 using NetComm;
 using System.Data.SqlClient;
 using System.Security.Cryptography;
+using System.IO;
+using System.Collections;
 
 namespace RaptorTCP3
 {
@@ -18,6 +20,7 @@ namespace RaptorTCP3
     {
         delegate void SetTextCallback(string text);
         delegate void SetLabelTextCallback(Label ctrl, string text);
+        delegate void SetToolStripCallBack(string text);
 
         NetComm.Host tcpServer = new Host(9119);
 
@@ -49,7 +52,7 @@ namespace RaptorTCP3
             Log("Exiting");
             if (tcpServer.Listening)
             {
-                
+
                 Broadcast(ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
                 DisconnectAll();
                 tcpServer.CloseConnection();
@@ -70,7 +73,7 @@ namespace RaptorTCP3
         #endregion
 
         #region Startup
- private void StartSQLClient()
+        private void StartSQLClient()
         {
             Log("Starting SQL Client");
             con.Open();
@@ -81,8 +84,15 @@ namespace RaptorTCP3
             Log("Subscribing to SQL Events");
             con.Disposed += con_Disposed;
             con.StateChange += con_StateChange;
+            con.InfoMessage += con_InfoMessage;
             con.FireInfoMessageEventOnUserErrors = true;
 
+        }
+
+        void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
+        {
+            string m = e.Message;
+            Log("SQL InfoMessage " + e.Message);
         }
 
         void con_StateChange(object sender, StateChangeEventArgs e)
@@ -131,11 +141,11 @@ namespace RaptorTCP3
 
         }
         #endregion
-       
+
 
 
         #region TCP Enums
-         private enum ServerCommands
+        private enum ServerCommands
         {
             Successful,
             Failed,
@@ -463,7 +473,7 @@ namespace RaptorTCP3
             Parallel.ForEach(tcpServer.Users, ClientID =>
             {
                 tcpServer.DisconnectUser(ClientID.ToString());
-            });            
+            });
         }
 
         private void SetLabel(Label lbl, string message)
@@ -487,25 +497,39 @@ namespace RaptorTCP3
         /// </param>
         private void Log(string message)
         {
-            if (message.StartsWith("1 Connected") ||
-                message.StartsWith(" Connected") ||
-                message.StartsWith(" Disconnected") ||
-                message.StartsWith("1 Disconnected")) // Ignore Internal connections and disconnections
-            { }
+           string[] parts = message.Split(' ');
+           if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() =="client")
+           { }
+           else if (parts[0].ToLowerInvariant().Trim() == "client")
+           { }
+           else
+           {
+               if (!ConOut.IsDisposed)
+               {
+                   if (this.ConOut.InvokeRequired)
+                   {
+                       SetTextCallback d = new SetTextCallback(Log);
+                       this.Invoke(d, new object[] { message });
+                   }
+                   else
+                   {
+                       ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                   }
+               }
+               UpdateStatusMessage(message);
+           }          
+        }
+
+        private void UpdateStatusMessage(string message)
+        {
+            if(toolStripContainer1.InvokeRequired)
+            {
+                SetToolStripCallBack d = new SetToolStripCallBack(UpdateStatusMessage);
+                this.Invoke(d, new object[] { message });
+            }
             else
             {
-                if (!ConOut.IsDisposed)
-                {
-                    if (this.ConOut.InvokeRequired)
-                    {
-                        SetTextCallback d = new SetTextCallback(Log);
-                        this.Invoke(d, new object[] { message });
-                    }
-                    else
-                    {
-                        ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
-                    }
-                }
+                lblStatus.Text = message;
             }
         }
 
@@ -616,5 +640,121 @@ namespace RaptorTCP3
             Broadcast(ServerCommands.UseCache.ToString());
         }
         #endregion
+
+
+
+        #region Menu Events
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Delete ALL Database Data - 
+
+            // Seed the Database Again
+
+        }
+        #endregion
+
+        private void seedUrlsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Load URLS from file
+            FileStream fs = null;
+            StreamReader sr = null;
+            ArrayList alUrls = new ArrayList();
+
+            try
+            {
+                fs = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "bookmarks_3_6_15.html"), FileMode.Open, FileAccess.Read, FileShare.None);
+                sr = new StreamReader(fs);
+                this.Cursor = Cursors.WaitCursor;
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine().Replace("\t", "").Trim();
+                    if (line.StartsWith("http://") || line.StartsWith("https://"))
+                    {
+                        string[] parts = line.Split(' ');
+                        string url = parts[0].Replace("\"", "").Trim();
+                        if (!alUrls.Contains(url)) alUrls.Add(url);
+                    }
+                    Application.DoEvents();
+                }
+                this.Cursor = Cursors.Default;
+                sr.Close();
+                fs.Close();
+
+
+                SaveUrls(alUrls);
+            }
+            catch (Exception ex)
+            {
+                Log("Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
+                if (sr != null) sr.Close();
+                if (fs != null) fs.Close();
+            }
+        }
+
+        private static string DecodeUrlString(string url)
+        {
+            string newUrl;
+            while ((newUrl = Uri.UnescapeDataString(url)) != url)
+                url = newUrl;
+            return newUrl;
+        }
+
+        private void SaveUrls(ArrayList alUrls)
+        {
+            Log("Seeding URLS");
+            int rows = 0;
+            this.Cursor = Cursors.WaitCursor;
+            Progress.Maximum = alUrls.Count;
+            SqlCommand command = new SqlCommand("DELETE FROM URLS");
+            command.Connection = con;
+            command.CommandType = CommandType.Text;
+            command.ExecuteNonQuery();
+            int idx = 0;
+            foreach (string url in alUrls)
+            {
+                idx++;
+                Progress.Value = idx;
+               string newurl = DecodeUrlString(url);
+
+                try
+                {                    
+                     command =
+                        new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
+                            " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
+
+                    command.Parameters.Add("@URLHASH", SqlDbType.NVarChar);
+                    command.Parameters["@URLHASH"].Value = InQuotes(HashPassword(newurl));
+                    command.Parameters.Add("@URLPATH", SqlDbType.NVarChar);
+                    command.Parameters["@URLPATH"].Value = InQuotes(newurl);
+                    command.Parameters.Add("@DISCOVEREDBYID", SqlDbType.Int);
+                    command.Parameters["@DISCOVEREDBYID"].Value = 1006;
+                    command.Parameters.Add("@DISCOVERYDATE", SqlDbType.DateTime);
+                    command.Parameters["@DISCOVERYDATE"].Value = DateTime.UtcNow;
+                    command.Parameters.Add("@ISINPROCESSINGQUEUE", SqlDbType.Bit);
+                    command.Parameters["@ISINPROCESSINGQUEUE"].Value = false;
+
+                    command.CommandType = CommandType.Text;
+                    command.Connection = con;
+                    rows += command.ExecuteNonQuery();
+                }
+              
+                catch (Exception ex)
+                {
+                    Log("Error: (SaveUrls) " + ex.Message);
+                }
+                Application.DoEvents();
+            }
+            Progress.Value = 0;
+            this.Cursor = Cursors.Default;
+            Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
+            alUrls.Clear();
+        }
+
+        private object InQuotes(string text)
+        {
+            //  return "N'" + text + "'";
+            return text;
+        }
+
     }
 }
