@@ -38,6 +38,12 @@
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.Progress = new System.Windows.Forms.ToolStripProgressBar();
+            this.status = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblRuntime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblIdleTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblConnections = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -58,8 +64,7 @@
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.status = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timerOneSecond = new System.Windows.Forms.Timer(this.components);
             this.cmsSystem.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -123,7 +128,7 @@
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.ConOut);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1122, 402);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1122, 427);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
@@ -141,7 +146,11 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Progress,
             this.status,
-            this.lblStatus});
+            this.lblStatus,
+            this.toolStripStatusLabel1,
+            this.lblRuntime,
+            this.toolStripStatusLabel2,
+            this.lblIdleTime});
             this.statusStrip1.Location = new System.Drawing.Point(0, 0);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1122, 22);
@@ -154,10 +163,47 @@
             this.Progress.Name = "Progress";
             this.Progress.Size = new System.Drawing.Size(100, 16);
             // 
+            // status
+            // 
+            this.status.Name = "status";
+            this.status.Size = new System.Drawing.Size(42, 17);
+            this.status.Text = "Status:";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(751, 17);
+            this.lblStatus.Spring = true;
+            this.lblStatus.Text = "...";
+            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(58, 17);
+            this.toolStripStatusLabel1.Text = "Run time:";
+            // 
+            // lblRuntime
+            // 
+            this.lblRuntime.Name = "lblRuntime";
+            this.lblRuntime.Size = new System.Drawing.Size(49, 17);
+            this.lblRuntime.Text = "00:00:00";
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(56, 17);
+            this.toolStripStatusLabel2.Text = "Idle time:";
+            // 
+            // lblIdleTime
+            // 
+            this.lblIdleTime.Name = "lblIdleTime";
+            this.lblIdleTime.Size = new System.Drawing.Size(49, 17);
+            this.lblIdleTime.Text = "00:00:00";
+            // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Black;
-            this.panel1.ContextMenuStrip = this.cmsSystem;
             this.panel1.Controls.Add(this.lblConnections);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -196,7 +242,7 @@
             this.ConOut.Name = "ConOut";
             this.ConOut.ReadOnly = true;
             this.ConOut.ShowSelectionMargin = true;
-            this.ConOut.Size = new System.Drawing.Size(1122, 216);
+            this.ConOut.Size = new System.Drawing.Size(1122, 179);
             this.ConOut.TabIndex = 3;
             this.ConOut.Text = "";
             // 
@@ -227,6 +273,7 @@
             this.exitToolStripMenuItem1.Name = "exitToolStripMenuItem1";
             this.exitToolStripMenuItem1.Size = new System.Drawing.Size(92, 22);
             this.exitToolStripMenuItem1.Text = "E&xit";
+            this.exitToolStripMenuItem1.Click += new System.EventHandler(this.exitToolStripMenuItem1_Click);
             // 
             // databaseToolStripMenuItem
             // 
@@ -321,19 +368,11 @@
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             // 
-            // status
+            // timerOneSecond
             // 
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(42, 17);
-            this.status.Text = "Status:";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(932, 17);
-            this.lblStatus.Spring = true;
-            this.lblStatus.Text = "...";
-            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.timerOneSecond.Enabled = true;
+            this.timerOneSecond.Interval = 1000;
+            this.timerOneSecond.Tick += new System.EventHandler(this.timerOneSecond_Tick);
             // 
             // frmMain
             // 
@@ -400,6 +439,11 @@
         private System.Windows.Forms.ToolStripMenuItem seedUrlsToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel status;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel lblRuntime;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel lblIdleTime;
+        private System.Windows.Forms.Timer timerOneSecond;
     }
 }
 

@@ -13,6 +13,8 @@ using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.IO;
 using System.Collections;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace RaptorTCP3
 {
@@ -21,6 +23,7 @@ namespace RaptorTCP3
         delegate void SetTextCallback(string text);
         delegate void SetLabelTextCallback(Label ctrl, string text);
         delegate void SetToolStripCallBack(string text);
+        delegate void SetStatusLabelTextCallback(ToolStripStatusLabel ctrl, string text);
 
         NetComm.Host tcpServer = new Host(9119);
 
@@ -29,6 +32,15 @@ namespace RaptorTCP3
         private bool sqlWorking = false;
 
         private string ClientLicense = null;
+
+        private ObservableCollection<string> alClients = new ObservableCollection<string>();
+
+        private Queue<string> urlQueue = new Queue<string>();
+
+        private int SecondsPastSinceBoot;
+        private int SecondsIdle;
+
+        private bool IsIdle = true;
 
         public frmMain(bool ForceRegistration = false)
         {
@@ -49,6 +61,7 @@ namespace RaptorTCP3
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
             Log("Exiting");
             if (tcpServer.Listening)
             {
@@ -75,8 +88,92 @@ namespace RaptorTCP3
         #region Startup
         private void StartSQLClient()
         {
+            alClients.CollectionChanged += alClients_CollectionChanged;
+
             Log("Starting SQL Client");
             con.Open();
+            if (URLSCount() == 0)
+            {
+                SeedUrls();
+            }
+
+            if (urlQueue.Count() < 50)
+            {
+                PopulateURLQueue(50);
+            }
+        }
+
+        void alClients_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (alClients.Count < 1)
+                IsIdle = true;
+            else
+                IsIdle = false;
+        }
+
+        private int URLSCount()
+        {
+            Log("Counting URLS");
+            SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM URLS");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int res = (int)command.ExecuteScalar();
+            Log("Number of URLS in Database: " + res.ToString("N0"));
+            return res;
+        }
+
+        private void PopulateURLQueue(int numberOfUrlsToGet)
+        {
+            Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
+            SqlCommand command = new SqlCommand("SELECT URLPath FROM URLS WHERE IsInProcessingQueue = '" + false + "'");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            for (int idx = 0; idx < numberOfUrlsToGet; idx++)
+            {
+                string url = (string)command.ExecuteScalar();
+                urlQueue.Enqueue(url);
+                SetUrlToInProcessingQueue(url);
+            }
+        }
+
+        private void UpdateUrlInQueueStatus(string url)
+        {
+            // UPDATE URLS SET IsInProcessingQueue='True' WHERE URLPath=N'http://xxxslon.com/'
+            SqlCommand command = new SqlCommand("UPDATE URLS SET IsInProcessingQueue=@INPROCESSINGQUEUE WHERE URLPath=N'@URL'");
+            command.CommandType = CommandType.Text;
+            
+            command.Parameters.Add("@INPROCESSINGQUEUE", SqlDbType.Bit);
+            command.Parameters["@INPROCESSINGQUEUE"].Value = true;
+            
+            command.Parameters.Add("@URL", SqlDbType.NVarChar);
+            command.Parameters["@URL"].Value = url;
+            
+            command.Connection = con;
+
+            int rows = command.ExecuteNonQuery();
+            if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
+
+            ////int res = command.ExecuteScalar();
+            ////if (res != 1)
+            ////    Log("Failed to update IsInProcessingQueue for URL " + url);
+
+
+        }
+
+        private void SetUrlToInProcessingQueue(string url)
+        {
+            SqlCommand command = new SqlCommand("UPDATE URLS SET IsInProcessingQueue=@INPROCESSINGQUEUE WHERE URLPath=N'@URL'");
+            command.CommandType = CommandType.Text;
+           
+            command.Parameters.Add("@INPROCESSINGQUEUE", SqlDbType.Bit);
+            command.Parameters["@INPROCESSINGQUEUE"].Value = true;
+           
+            command.Parameters.Add("@URL", SqlDbType.NVarChar);
+            command.Parameters["@URL"].Value = url;
+            
+            command.Connection = con;
+            int rows = command.ExecuteNonQuery();
+            if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
         }
 
         private void SubscribeToSQLEvents()
@@ -91,8 +188,13 @@ namespace RaptorTCP3
 
         void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
+            StackFrame frame = new StackFrame(8);
+            var method = frame.GetMethod();
+            var type = method.DeclaringType;
+            var name = method.Name;
+
             string m = e.Message;
-            Log("SQL InfoMessage " + e.Message);
+            Log("SQL InfoMessage (" + name + ") " + e.Message);
         }
 
         void con_StateChange(object sender, StateChangeEventArgs e)
@@ -116,6 +218,7 @@ namespace RaptorTCP3
                 }
             }
         }
+
         void con_Disposed(object sender, EventArgs e)
         {
             Log("SQL Connection Disposed");
@@ -142,8 +245,6 @@ namespace RaptorTCP3
         }
         #endregion
 
-
-
         #region TCP Enums
         private enum ServerCommands
         {
@@ -153,12 +254,15 @@ namespace RaptorTCP3
             Wait,
             Resume,
             SendEmailAddress,
+            SetMessageSize,
         }
 
         private enum ClientCommands
         {
             Login,
             Register,
+            Get,
+            NOP,
         }
         #endregion
 
@@ -190,29 +294,36 @@ namespace RaptorTCP3
         #region TCP Events
         void tcpServer_onConnection(string id)
         {
-            Log("Client Connecting");
-            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
+            if (id.Length > 5)
+            {
+                Log("Client Connecting");
+                alClients.Add(id);
+                SetLabel(lblConnections, alClients.Count.ToString("N0"));
+            }
         }
 
         void tcpServer_lostConnection(string id)
         {
-            SetLabel(lblConnections, tcpServer.Users.Count().ToString("N0"));
-            try
+            if (id.Length > 5)
             {
-                Log("Client Disconnecting");
-                LogOffUser(id);
-            }
-            catch (System.ObjectDisposedException de)
-            {
-                Log("Disposed... " + de.Message);
-            }
-            catch (Exception)
-            {
+                SetLabel(lblConnections, alClients.Count.ToString("N0"));
+                alClients.Remove(id);
+                try
+                {
+                    Log("Client Disconnecting");
+                    LogOffUser(id);
+                }
+                catch (System.ObjectDisposedException de)
+                {
+                    Log("Disposed... " + de.Message);
+                }
+                catch (Exception)
+                {
 
+                }
             }
+
         }
-
-
 
         void tcpServer_errEncounter(Exception ex)
         {
@@ -243,15 +354,59 @@ namespace RaptorTCP3
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
-
+                case "get":
+                    Log(ID + "Getting URLS");
+                    SendUrls(ID, ServerCommands.Successful.ToString(), GetURLS());
+                    break;
+                case "nop":
+                    // if we receive this - which we shouldn't just ignore it.
+                    break;
                 default:
                     break;
             }
         }
 
+        private void SendUrls(string ID, string sc, string[] urlList)
+        {
+            Log("Sending URLS");
+            string strBuffer = sc + " ";
+            foreach (string url in urlList)
+            {
+                strBuffer += url + " ";
+            }
+
+            byte[] buffer = GetBytes(strBuffer);
+            tcpServer.SendBufferSize = buffer.Length;
+            string buffersize = ServerCommands.SetMessageSize.ToString() + " " + buffer.Length.ToString();
+
+            tcpServer.SendData(ID, GetBytes(buffersize));
+
+            tcpServer.SendData(ID, buffer);
+
+        }
+
+        private string[] GetURLS()
+        {
+            Log("Getting URLS to Send");
+            string[] urlList = new string[10];
+
+            for (int idx = 0; idx < 10; idx++)
+            {
+                string url = urlQueue.Dequeue().ToString();
+                urlList[idx] = url;
+                UpdateUrlInQueueStatus(url);
+            }
+
+            return urlList;
+        }
+
+        
+
+
+
         void tcpServer_ConnectionClosed()
         {
-            lblConnections.Text = tcpServer.Users.Count().ToString("N0");
+            lblConnections.Text = alClients.Count().ToString("N0");
             Log("Connection Closed");
         }
         #endregion
@@ -313,8 +468,7 @@ namespace RaptorTCP3
             // getutcdate() is SQL servers built in utc DateTime.UtcNow command
 
             SqlCommand command = null;
-            try
-            {
+           
                 command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
                                "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber(emailAddress) + "',N'" + emailAddress + "')");
                 command.CommandType = CommandType.Text;
@@ -329,13 +483,7 @@ namespace RaptorTCP3
                 }
                 else
                     return false;
-            }
-            catch (SqlException sqle)
-            {
-                Log("SQL Error: (Register) " + sqle.Message + "\n\r" + command);
-                return false;
-            }
-
+           
         }
 
         private void UpdateLoginHistory(string emailAddress)
@@ -346,18 +494,13 @@ namespace RaptorTCP3
             int uid = GetUserID(emailAddress);
             if (uid > 0)
             {
-                try
-                {
-                    // INSERT INTO LogonHistory VALUES(3,  getutcdate(),)
-                    SqlCommand command = new SqlCommand("INSERT INTO LogonHistory (UserId, LoggedOnDate) VALUES(" + uid + ",  getutcdate())");
-                    command.CommandType = CommandType.Text;
-                    command.Connection = con;
-                    command.ExecuteNonQuery();
-                }
-                catch (SqlException sqle)
-                {
-                    Log("SQL ERROR: (UpdateLoginHistory) " + sqle.Message);
-                }
+
+                // INSERT INTO LogonHistory VALUES(3,  getutcdate(),)
+                SqlCommand command = new SqlCommand("INSERT INTO LogonHistory (UserId, LoggedOnDate) VALUES(" + uid + ",  getutcdate())");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+
             }
             else
             {
@@ -383,27 +526,23 @@ namespace RaptorTCP3
             command.CommandType = CommandType.Text;
             command.Connection = con;
             int? uid = 0;
-            try
-            {
-                uid = (int)command.ExecuteScalar();
-            }
-            catch (Exception ex)
-            {
-                Log("SQL ERROR: (Login) " + ex.Message);
-            }
+
+            uid = (int)command.ExecuteScalar();
 
 
             if (uid > 0)
             {
                 // Set the User to IsOnline
-                command = new SqlCommand("UPDATE Users SET IsOnline = " + true + " WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
+                command = new SqlCommand("UPDATE Users SET IsOnline = '" + true + "' WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
                 int r = command.ExecuteNonQuery();
                 if (r > 0) { Log("Updated User '" + emailAddress + "' to Online"); }
 
                 // Update the User's Logon history - We will Update their LoggedOffDate when their TCP Connection is closed.
-                command = new SqlCommand("UPDATE LogonHistory SET LoggedOnDate = " + DateTime.UtcNow + " WHERE UserId = " + uid + ";");
+                command = new SqlCommand("INSERT INTO LogonHistory (LoggedOnDate) VALUES(getutcdate()) WHERE UserId=@UID;");
+                command.Parameters.Add("@UID", SqlDbType.Int);
+                command.Parameters["@UID"].Value = uid;
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
                 command.ExecuteNonQuery();
@@ -417,24 +556,17 @@ namespace RaptorTCP3
             // Log the user off Users and Update LogonHistory
             if (id.Length > 5) // Ignore internal connections
             {
-                try
-                {
+                
                     Log(id + " Logging Off");
-                    SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE UserId = " + id + ";");
+                    SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = '" + false + "' WHERE UserId = '" + id + "';");
                     command.CommandType = CommandType.Text;
                     command.Connection = con;
                     command.ExecuteNonQuery();
-                    command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE UserId = " + id + " AND LoggedOffDate = " + null + ";");
+                    command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = getutcdate() WHERE UserId = '" + id + "' AND LoggedOffDate = '" + null + "';");
                     command.CommandType = CommandType.Text;
                     command.Connection = con;
                     command.ExecuteNonQuery();
-                }
-                catch (SqlException sqle)
-                {
-                    Log("SQL Error: (LogOffUser) " + sqle.Message);
-                    throw;
-                }
-
+                
             }
 
         }
@@ -442,8 +574,7 @@ namespace RaptorTCP3
         private void LogOffAllUsers()
         {
             Log("Logging off all clients");
-            try
-            {
+            
                 SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
@@ -455,13 +586,7 @@ namespace RaptorTCP3
                 command.ExecuteNonQuery();
 
                 Log("All users have been Logged Off");
-            }
-            catch (Exception)
-            {
-                Log("Failed to log all users off");
-                throw;
-            }
-
+           
         }
         #endregion
 
@@ -497,32 +622,33 @@ namespace RaptorTCP3
         /// </param>
         private void Log(string message)
         {
-           string[] parts = message.Split(' ');
-           if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() =="client")
-           { }
-           else if (parts[0].ToLowerInvariant().Trim() == "client")
-           { }
-           else
-           {
-               if (!ConOut.IsDisposed)
-               {
-                   if (this.ConOut.InvokeRequired)
-                   {
-                       SetTextCallback d = new SetTextCallback(Log);
-                       this.Invoke(d, new object[] { message });
-                   }
-                   else
-                   {
-                       ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
-                   }
-               }
-               UpdateStatusMessage(message);
-           }          
+            string[] parts = message.Split(' ');
+            if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() == "client")
+            { }
+            else if (parts[0].ToLowerInvariant().Trim() == "client")
+            { }
+            else
+            {
+                if (!ConOut.IsDisposed)
+                {
+                    if (this.ConOut.InvokeRequired)
+                    {
+                        SetTextCallback d = new SetTextCallback(Log);
+                        this.Invoke(d, new object[] { message });
+                    }
+                    else
+                    {
+                        ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                        ConOut.Focus();
+                    }
+                }
+                UpdateStatusMessage(message);
+            }
         }
 
         private void UpdateStatusMessage(string message)
         {
-            if(toolStripContainer1.InvokeRequired)
+            if (toolStripContainer1.InvokeRequired)
             {
                 SetToolStripCallBack d = new SetToolStripCallBack(UpdateStatusMessage);
                 this.Invoke(d, new object[] { message });
@@ -530,6 +656,19 @@ namespace RaptorTCP3
             else
             {
                 lblStatus.Text = message;
+            }
+        }
+
+        private void UpdateToolStripStatusLabel(ToolStripStatusLabel lbl, string message)
+        {
+            if (toolStripContainer1.InvokeRequired)
+            {
+                SetStatusLabelTextCallback d = new SetStatusLabelTextCallback(UpdateToolStripStatusLabel);
+                this.Invoke(d, new object[] { lbl, message });
+            }
+            else
+            {
+                lbl.Text = message;
             }
         }
 
@@ -602,21 +741,13 @@ namespace RaptorTCP3
         #region SQL Utilities
         private int GetUserID(string emailAddress)
         {
-            try
-            {
-
-                // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
+           // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
                 SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
                 command.CommandType = CommandType.Text;
                 command.Connection = con;
                 int uid = (int)command.ExecuteScalar();
                 return uid;
-            }
-            catch (SqlException sqle)
-            {
-                Log("SQL ERROR: " + sqle.Message);
-                return -1;
-            }
+           
         }
         #endregion
 
@@ -641,19 +772,22 @@ namespace RaptorTCP3
         }
         #endregion
 
-
-
         #region Menu Events
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Delete ALL Database Data - 
 
             // Seed the Database Again
-
+            SeedUrls();
         }
         #endregion
 
         private void seedUrlsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeedUrls();
+        }
+
+        private void SeedUrls()
         {
             // Load URLS from file
             FileStream fs = null;
@@ -714,18 +848,17 @@ namespace RaptorTCP3
             {
                 idx++;
                 Progress.Value = idx;
-               string newurl = DecodeUrlString(url);
+                string newurl = DecodeUrlString(url);
 
-                try
-                {                    
-                     command =
-                        new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
-                            " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
+                
+                    command =
+                       new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
+                           " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
 
                     command.Parameters.Add("@URLHASH", SqlDbType.NVarChar);
-                    command.Parameters["@URLHASH"].Value = InQuotes(HashPassword(newurl));
+                    command.Parameters["@URLHASH"].Value = HashPassword(newurl);
                     command.Parameters.Add("@URLPATH", SqlDbType.NVarChar);
-                    command.Parameters["@URLPATH"].Value = InQuotes(newurl);
+                    command.Parameters["@URLPATH"].Value = newurl;
                     command.Parameters.Add("@DISCOVEREDBYID", SqlDbType.Int);
                     command.Parameters["@DISCOVEREDBYID"].Value = 1006;
                     command.Parameters.Add("@DISCOVERYDATE", SqlDbType.DateTime);
@@ -736,12 +869,7 @@ namespace RaptorTCP3
                     command.CommandType = CommandType.Text;
                     command.Connection = con;
                     rows += command.ExecuteNonQuery();
-                }
-              
-                catch (Exception ex)
-                {
-                    Log("Error: (SaveUrls) " + ex.Message);
-                }
+               
                 Application.DoEvents();
             }
             Progress.Value = 0;
@@ -750,10 +878,28 @@ namespace RaptorTCP3
             alUrls.Clear();
         }
 
-        private object InQuotes(string text)
+        private void timerOneSecond_Tick(object sender, EventArgs e)
         {
-            //  return "N'" + text + "'";
-            return text;
+            SecondsPastSinceBoot++;
+
+            if (IsIdle)
+                SecondsIdle++;
+            else
+                SecondsIdle = 0;
+
+
+            UpdateToolStripStatusLabel(lblRuntime, SecondsToDHMS(SecondsPastSinceBoot).ToString());
+            UpdateToolStripStatusLabel(lblIdleTime, SecondsToDHMS(SecondsIdle).ToString());
+        }
+
+        private string SecondsToDHMS(int Seconds)
+        {
+            return TimeSpan.FromSeconds(Seconds).ToString();
+        }
+
+        private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
     }

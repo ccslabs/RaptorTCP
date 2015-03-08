@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="32d910d0e38548cf8d7fe3ab5cacc4e2" Name="Diagram1">
+        <EntityTypeShape EntityType="DamoclesModel.AccountStatu" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Allowed" Width="1.5" PointX="7.5" PointY="10.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.ARC" Width="1.5" PointX="12.75" PointY="6.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.ContentObject" Width="1.5" PointX="15" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.ContentObjectsSourceURL" Width="1.5" PointX="17.25" PointY="6.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Country" Width="1.5" PointX="3" PointY="10.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.CrimeType" Width="1.5" PointX="12.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Criminal" Width="1.5" PointX="10.5" PointY="10.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Jurisdiction" Width="1.5" PointX="5.25" PointY="10.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Language" Width="1.5" PointX="3" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.LicenseNumber" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.LogonHistory" Width="1.5" PointX="9.75" PointY="13.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.News" Width="1.5" PointX="9.75" PointY="16.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Restricted" Width="1.5" PointX="7.5" PointY="6.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.RestrictionType" Width="1.5" PointX="7.375" PointY="4.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Setting" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.State" Width="1.5" PointX="0.75" PointY="10.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.Table" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.URL" Width="1.5" PointX="9.75" PointY="20.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.UrlSource" Width="1.5" PointX="12" PointY="20.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DamoclesModel.User" Width="1.5" PointX="7.5" PointY="14" IsExpanded="true" />
+        <AssociationConnector Association="DamoclesModel.FK_Allowed_Jurisdictions_JurisdictionId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Allowed_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_ARC_Allowed_AId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_ARC_Criminal_CId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_ARC_Restricted_RId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_ContentObjects_ARC_ARCId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Countries_States_StateId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Jurisdictions_Countries_CountryId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Users_Countries_CountryId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_CrimeTypes_Criminal_CId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Criminal" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Criminal_Jurisdictions_JurisdictionId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Criminal_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Jurisdictions" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Jurisdictions_Languages_LanguageId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Restricted_Jurisdictions_JurisdictionId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Users_Jurisdictions_JurisdictionId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Users_Languages_LanguageId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_LogonHistory_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_News_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Restricted_RestrictionTypes_RestrictionId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Restricted_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_Users_States_StateId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_URLS_Users_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_URLS_UsersDiscoveredBy_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_UrlSources_SourceURLS_UrlId" ManuallyRouted="false" />
+        <AssociationConnector Association="DamoclesModel.FK_UrlSources_URLS_UrlId" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
