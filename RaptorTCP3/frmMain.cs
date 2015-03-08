@@ -897,13 +897,13 @@ namespace RaptorTCP3
             this.Cursor = Cursors.WaitCursor;
             Progress.Maximum = alUrls.Count;
 
-            using(var db = new DamoclesEntities())
+            using (var db = new DamoclesEntities())
             {
                 var all = from c in db.URLS select c;
                 db.URLS.RemoveRange(all);
                 db.SaveChanges();
 
-
+                var urls = db.URLS;
                 int idx = 0;
                 foreach (string url in alUrls)
                 {
@@ -911,14 +911,14 @@ namespace RaptorTCP3
                     Progress.Value = idx;
                     string newurl = DecodeUrlString(url);
 
-                    var urls = db.URLS;
+
                     urls.Add(AddUrl(url));
-                    db.SaveChanges();
+
                     Application.DoEvents();
                 }
-
+                db.SaveChanges();
             }
-           
+
             Progress.Value = 0;
             this.Cursor = Cursors.Default;
             Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
@@ -936,7 +936,7 @@ namespace RaptorTCP3
             return ue;
         }
 
-       
+
         private void timerOneSecond_Tick(object sender, EventArgs e)
         {
             SecondsPastSinceBoot++;

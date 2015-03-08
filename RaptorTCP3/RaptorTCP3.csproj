@@ -197,6 +197,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\Countries.txt" />
     <Content Include="SqlScripts\dbo.AccountStatus.data.sql" />
     <Content Include="SqlScripts\dbo.AccountStatus.sql" />
     <Content Include="SqlScripts\dbo.Allowed.sql" />
