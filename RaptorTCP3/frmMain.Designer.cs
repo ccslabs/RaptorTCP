@@ -65,6 +65,8 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timerOneSecond = new System.Windows.Forms.Timer(this.components);
+            this.lblQueueLength = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.cmsSystem.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -204,6 +206,8 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Black;
+            this.panel1.Controls.Add(this.lblQueueLength);
+            this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.lblConnections);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -374,6 +378,24 @@
             this.timerOneSecond.Interval = 1000;
             this.timerOneSecond.Tick += new System.EventHandler(this.timerOneSecond_Tick);
             // 
+            // lblQueueLength
+            // 
+            this.lblQueueLength.AutoSize = true;
+            this.lblQueueLength.Location = new System.Drawing.Point(396, 9);
+            this.lblQueueLength.Name = "lblQueueLength";
+            this.lblQueueLength.Size = new System.Drawing.Size(13, 13);
+            this.lblQueueLength.TabIndex = 3;
+            this.lblQueueLength.Text = "0";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(312, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(78, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Queue Length:";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -444,6 +466,8 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripStatusLabel lblIdleTime;
         private System.Windows.Forms.Timer timerOneSecond;
+        private System.Windows.Forms.Label lblQueueLength;
+        private System.Windows.Forms.Label label3;
     }
 }
 

@@ -25,6 +25,8 @@ namespace RaptorTCP3
         delegate void SetToolStripCallBack(string text);
         delegate void SetStatusLabelTextCallback(ToolStripStatusLabel ctrl, string text);
 
+        private Task t;
+
         NetComm.Host tcpServer = new Host(9119);
 
         private static string connectionString = "Server=tcp:jy4i6onk8b.database.windows.net,1433;Database=Damocles;User ID=AtarashiNoDaveGordon@jy4i6onk8b;Password=P@r1n@zK0k@b1;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;";
@@ -125,56 +127,54 @@ namespace RaptorTCP3
         private void PopulateURLQueue(int numberOfUrlsToGet)
         {
             Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
-            SqlCommand command = new SqlCommand("SELECT URLPath FROM URLS WHERE IsInProcessingQueue = '" + false + "'");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            for (int idx = 0; idx < numberOfUrlsToGet; idx++)
-            {
-                string url = (string)command.ExecuteScalar();
-                urlQueue.Enqueue(url);
-                SetUrlToInProcessingQueue(url);
-            }
-        }
+
+           
+                using (var db = new DamoclesEntities())
+                {
+                    var urls = db.URLS;
+                    for (int idx = 0; idx < numberOfUrlsToGet; idx++)
+                    {
+                        var result = urls.FirstOrDefault(u => u.IsInProcessingQueue == false);
+                        var urlp = result.URLPath;
+                        urlQueue.Enqueue(urlp);
+                        SetUrlToInProcessingQueue(urlp);
+                        SetLabel(lblQueueLength, urlQueue.Count().ToString("N0"));
+                        Application.DoEvents();
+                    }
+                }
+                Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
+
+             }
 
         private void UpdateUrlInQueueStatus(string url)
         {
-            // UPDATE URLS SET IsInProcessingQueue='True' WHERE URLPath=N'http://xxxslon.com/'
-            SqlCommand command = new SqlCommand("UPDATE URLS SET IsInProcessingQueue=@INPROCESSINGQUEUE WHERE URLPath=N'@URL'");
-            command.CommandType = CommandType.Text;
-            
-            command.Parameters.Add("@INPROCESSINGQUEUE", SqlDbType.Bit);
-            command.Parameters["@INPROCESSINGQUEUE"].Value = true;
-            
-            command.Parameters.Add("@URL", SqlDbType.NVarChar);
-            command.Parameters["@URL"].Value = url;
-            
-            command.Connection = con;
-
-            int rows = command.ExecuteNonQuery();
-            if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
-
-            ////int res = command.ExecuteScalar();
-            ////if (res != 1)
-            ////    Log("Failed to update IsInProcessingQueue for URL " + url);
-
-
-        }
+            if (!string.IsNullOrEmpty(url))
+            {
+                using (var db = new DamoclesEntities())
+                {
+                    var urls = db.URLS;
+                    var result = urls.FirstOrDefault(u => u.URLPath == url);
+                    result.IsInProcessingQueue = true;
+                    int rows = db.SaveChanges();
+                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
+                }
+            }
+}
 
         private void SetUrlToInProcessingQueue(string url)
         {
-            SqlCommand command = new SqlCommand("UPDATE URLS SET IsInProcessingQueue=@INPROCESSINGQUEUE WHERE URLPath=N'@URL'");
-            command.CommandType = CommandType.Text;
-           
-            command.Parameters.Add("@INPROCESSINGQUEUE", SqlDbType.Bit);
-            command.Parameters["@INPROCESSINGQUEUE"].Value = true;
-           
-            command.Parameters.Add("@URL", SqlDbType.NVarChar);
-            command.Parameters["@URL"].Value = url;
-            
-            command.Connection = con;
-            int rows = command.ExecuteNonQuery();
-            if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
-        }
+            if (!string.IsNullOrEmpty(url))
+            {
+                using (var db = new DamoclesEntities())
+                {
+                    var urls = db.URLS;
+                    var result = urls.FirstOrDefault(u => u.URLPath == url);
+                    result.IsInProcessingQueue = true;
+                    int rows = db.SaveChanges();
+                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
+                }
+            }
+}
 
         private void SubscribeToSQLEvents()
         {
@@ -400,7 +400,7 @@ namespace RaptorTCP3
             return urlList;
         }
 
-        
+
 
 
 
@@ -468,22 +468,22 @@ namespace RaptorTCP3
             // getutcdate() is SQL servers built in utc DateTime.UtcNow command
 
             SqlCommand command = null;
-           
-                command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
-                               "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber(emailAddress) + "',N'" + emailAddress + "')");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                int res = command.ExecuteNonQuery();
-                if (res > 0)
-                {
-                    // Update - create the LogonHistory table
-                    UpdateLoginHistory(emailAddress);
 
-                    return true;
-                }
-                else
-                    return false;
-           
+            command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
+                           "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber(emailAddress) + "',N'" + emailAddress + "')");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int res = command.ExecuteNonQuery();
+            if (res > 0)
+            {
+                // Update - create the LogonHistory table
+                UpdateLoginHistory(emailAddress);
+
+                return true;
+            }
+            else
+                return false;
+
         }
 
         private void UpdateLoginHistory(string emailAddress)
@@ -556,37 +556,35 @@ namespace RaptorTCP3
             // Log the user off Users and Update LogonHistory
             if (id.Length > 5) // Ignore internal connections
             {
-                
-                    Log(id + " Logging Off");
-                    SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = '" + false + "' WHERE UserId = '" + id + "';");
-                    command.CommandType = CommandType.Text;
-                    command.Connection = con;
-                    command.ExecuteNonQuery();
-                    command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = getutcdate() WHERE UserId = '" + id + "' AND LoggedOffDate = '" + null + "';");
-                    command.CommandType = CommandType.Text;
-                    command.Connection = con;
-                    command.ExecuteNonQuery();
-                
-            }
 
+                Log(id + " Logging Off");
+                SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = '" + false + "' WHERE UserId = '" + id + "';");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+                command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = getutcdate() WHERE UserId = '" + id + "' AND LoggedOffDate = '" + null + "';");
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+            }
         }
 
         private void LogOffAllUsers()
         {
             Log("Logging off all clients");
-            
-                SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                int r = command.ExecuteNonQuery();
 
-                command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE LoggedOffDate = " + null + ";");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
+            SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int r = command.ExecuteNonQuery();
 
-                Log("All users have been Logged Off");
-           
+            command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE LoggedOffDate = " + null + ";");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            command.ExecuteNonQuery();
+
+            Log("All users have been Logged Off");
+
         }
         #endregion
 
@@ -741,19 +739,25 @@ namespace RaptorTCP3
         #region SQL Utilities
         private int GetUserID(string emailAddress)
         {
-           // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
-                SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                int uid = (int)command.ExecuteScalar();
-                return uid;
-           
+            // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
+            SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
+            command.CommandType = CommandType.Text;
+            command.Connection = con;
+            int uid = (int)command.ExecuteScalar();
+            return uid;
+
         }
         #endregion
 
         #region Form Events
 
         private void frmMain_Load(object sender, EventArgs e)
+        {
+            t = new Task(() => StartUp());
+            t.Start();
+        }
+
+        private void StartUp()
         {
             Log("Application Loaded");
             // Subscribe to NetComm Events
@@ -769,6 +773,8 @@ namespace RaptorTCP3
             Log("Application Closing");
             LogOffAllUsers();
             Broadcast(ServerCommands.UseCache.ToString());
+            t.Dispose();
+            t.Wait();
         }
         #endregion
 
@@ -850,26 +856,26 @@ namespace RaptorTCP3
                 Progress.Value = idx;
                 string newurl = DecodeUrlString(url);
 
-                
-                    command =
-                       new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
-                           " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
 
-                    command.Parameters.Add("@URLHASH", SqlDbType.NVarChar);
-                    command.Parameters["@URLHASH"].Value = HashPassword(newurl);
-                    command.Parameters.Add("@URLPATH", SqlDbType.NVarChar);
-                    command.Parameters["@URLPATH"].Value = newurl;
-                    command.Parameters.Add("@DISCOVEREDBYID", SqlDbType.Int);
-                    command.Parameters["@DISCOVEREDBYID"].Value = 1006;
-                    command.Parameters.Add("@DISCOVERYDATE", SqlDbType.DateTime);
-                    command.Parameters["@DISCOVERYDATE"].Value = DateTime.UtcNow;
-                    command.Parameters.Add("@ISINPROCESSINGQUEUE", SqlDbType.Bit);
-                    command.Parameters["@ISINPROCESSINGQUEUE"].Value = false;
+                command =
+                   new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
+                       " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
 
-                    command.CommandType = CommandType.Text;
-                    command.Connection = con;
-                    rows += command.ExecuteNonQuery();
-               
+                command.Parameters.Add("@URLHASH", SqlDbType.NVarChar);
+                command.Parameters["@URLHASH"].Value = HashPassword(newurl);
+                command.Parameters.Add("@URLPATH", SqlDbType.NVarChar);
+                command.Parameters["@URLPATH"].Value = newurl;
+                command.Parameters.Add("@DISCOVEREDBYID", SqlDbType.Int);
+                command.Parameters["@DISCOVEREDBYID"].Value = 1006;
+                command.Parameters.Add("@DISCOVERYDATE", SqlDbType.DateTime);
+                command.Parameters["@DISCOVERYDATE"].Value = DateTime.UtcNow;
+                command.Parameters.Add("@ISINPROCESSINGQUEUE", SqlDbType.Bit);
+                command.Parameters["@ISINPROCESSINGQUEUE"].Value = false;
+
+                command.CommandType = CommandType.Text;
+                command.Connection = con;
+                rows += command.ExecuteNonQuery();
+
                 Application.DoEvents();
             }
             Progress.Value = 0;
