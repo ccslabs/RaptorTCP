@@ -352,7 +352,7 @@ namespace RaptorTCP3
                     break;
                 case "register":
                     Log(ID + " Registering In");
-                    if (RegistrationSuccessful(ID,GetString(Data)))
+                    if (RegistrationSuccessful(ID, GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
@@ -498,7 +498,7 @@ namespace RaptorTCP3
             eu.LicenseNumber = GenerateTemporaryLicenseNumber(emailAddress);
             eu.emailAddress = emailAddress;
             //TODO: ADD TRACKING OF THE VARIOUS CLIENTS THE USER HAS
-          //  eu.UserClientID =  AddClient(ClientID, emailAddress);
+            //  eu.UserClientID =  AddClient(ClientID, emailAddress);
             return eu;
         }
 
@@ -583,7 +583,7 @@ namespace RaptorTCP3
 
                 using (var db = new DamoclesEntities())
                 {
-                    var user = db.Users.First(u => u.CurrentClientID ==  Cid);
+                    var user = db.Users.First(u => u.CurrentClientID == Cid);
                     user.IsOnline = true;
                     int rows = db.SaveChanges();
                     string emailAddress = GetUserEmailAddressByID(Cid);
@@ -591,12 +591,12 @@ namespace RaptorTCP3
                     if (rows == 1)
                     {
                         Log(emailAddress + " is Logged In");
-                        
+
                     }
                     else
                     {
                         Log(emailAddress + " Failed to Log In");
-                       
+
                     }
                 }
             }
@@ -604,7 +604,7 @@ namespace RaptorTCP3
 
         private void UpdateLogOffHistory(string emailAddress)
         {
-            using(var db = new DamoclesEntities())
+            using (var db = new DamoclesEntities())
             {
                 var uid = GetUserID(emailAddress);
                 var loh = db.LogonHistories.First(lh => lh.LoggedOffDate == null && lh.UserId == uid);
@@ -620,7 +620,7 @@ namespace RaptorTCP3
 
         private string GetUserEmailAddressByID(string Cid)
         {
-            using(var db = new DamoclesEntities())
+            using (var db = new DamoclesEntities())
             {
                 var user = db.Users.First(u => u.CurrentClientID == Cid && u.IsOnline == true);
                 return user.emailAddress;
@@ -631,15 +631,10 @@ namespace RaptorTCP3
         {
             Log("Logging off all clients");
 
-            SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = " + false + " WHERE IsOnline = " + false + "';");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int r = command.ExecuteNonQuery();
-
-            command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = " + DateTime.UtcNow + " WHERE LoggedOffDate = " + null + ";");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            command.ExecuteNonQuery();
+            foreach (string Cid in alClients)
+            {
+                LogOffUser(Cid);
+            }
 
             Log("All users have been Logged Off");
 
@@ -797,13 +792,11 @@ namespace RaptorTCP3
         #region SQL Utilities
         private int GetUserID(string emailAddress)
         {
-            // SELECT UserId FROM Users WHERE emailAddress = N'dave@ccs-labs.com'
-            SqlCommand command = new SqlCommand("SELECT UserId FROM Users WHERE emailAddress = N'" + emailAddress + "'");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int uid = (int)command.ExecuteScalar();
-            return uid;
-
+            using (var db = new DamoclesEntities())
+            {
+                var user = db.Users.First(u => u.emailAddress == emailAddress);
+                return user.UserId;
+            }
         }
         #endregion
 
@@ -903,45 +896,47 @@ namespace RaptorTCP3
             int rows = 0;
             this.Cursor = Cursors.WaitCursor;
             Progress.Maximum = alUrls.Count;
-            SqlCommand command = new SqlCommand("DELETE FROM URLS");
-            command.Connection = con;
-            command.CommandType = CommandType.Text;
-            command.ExecuteNonQuery();
-            int idx = 0;
-            foreach (string url in alUrls)
+
+            using(var db = new DamoclesEntities())
             {
-                idx++;
-                Progress.Value = idx;
-                string newurl = DecodeUrlString(url);
+                var all = from c in db.URLS select c;
+                db.URLS.RemoveRange(all);
+                db.SaveChanges();
 
 
-                command =
-                   new SqlCommand("INSERT INTO URLS (UrlHash, URLPath, DiscoveredById, DiscoveryDate, IsInProcessingQueue) " +
-                       " VALUES(@URLHASH,@URLPATH, @DISCOVEREDBYID, @DISCOVERYDATE, @ISINPROCESSINGQUEUE)");
+                int idx = 0;
+                foreach (string url in alUrls)
+                {
+                    idx++;
+                    Progress.Value = idx;
+                    string newurl = DecodeUrlString(url);
 
-                command.Parameters.Add("@URLHASH", SqlDbType.NVarChar);
-                command.Parameters["@URLHASH"].Value = HashPassword(newurl);
-                command.Parameters.Add("@URLPATH", SqlDbType.NVarChar);
-                command.Parameters["@URLPATH"].Value = newurl;
-                command.Parameters.Add("@DISCOVEREDBYID", SqlDbType.Int);
-                command.Parameters["@DISCOVEREDBYID"].Value = 1006;
-                command.Parameters.Add("@DISCOVERYDATE", SqlDbType.DateTime);
-                command.Parameters["@DISCOVERYDATE"].Value = DateTime.UtcNow;
-                command.Parameters.Add("@ISINPROCESSINGQUEUE", SqlDbType.Bit);
-                command.Parameters["@ISINPROCESSINGQUEUE"].Value = false;
+                    var urls = db.URLS;
+                    urls.Add(AddUrl(url));
+                    db.SaveChanges();
+                    Application.DoEvents();
+                }
 
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                rows += command.ExecuteNonQuery();
-
-                Application.DoEvents();
             }
+           
             Progress.Value = 0;
             this.Cursor = Cursors.Default;
             Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
         }
 
+        private URL AddUrl(string url)
+        {
+            URL ue = new URL();
+            ue.UrlHash = HashPassword(url);
+            ue.URLPath = url;
+            ue.DiscoveredById = 1006;
+            ue.DiscoveryDate = DateTime.UtcNow;
+            ue.IsInProcessingQueue = false;
+            return ue;
+        }
+
+       
         private void timerOneSecond_Tick(object sender, EventArgs e)
         {
             SecondsPastSinceBoot++;
