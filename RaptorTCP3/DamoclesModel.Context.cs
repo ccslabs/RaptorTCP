@@ -46,5 +46,7 @@ namespace RaptorTCP3
         public virtual DbSet<URL> URLS { get; set; }
         public virtual DbSet<UrlSource> UrlSources { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<ClientID> ClientIDs { get; set; }
+        public virtual DbSet<Client> Clients { get; set; }
     }
 }

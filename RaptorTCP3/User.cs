@@ -23,6 +23,7 @@ namespace RaptorTCP3
             this.Restricteds = new HashSet<Restricted>();
             this.URLS = new HashSet<URL>();
             this.URLS1 = new HashSet<URL>();
+            this.ClientIDs = new HashSet<ClientID>();
         }
     
         public int UserId { get; set; }
@@ -37,6 +38,8 @@ namespace RaptorTCP3
         public int AccountStatusId { get; set; }
         public string LicenseNumber { get; set; }
         public string emailAddress { get; set; }
+        public Nullable<int> UserClientID { get; set; }
+        public string CurrentClientID { get; set; }
     
         public virtual ICollection<Allowed> Alloweds { get; set; }
         public virtual Country Country { get; set; }
@@ -49,5 +52,6 @@ namespace RaptorTCP3
         public virtual State State { get; set; }
         public virtual ICollection<URL> URLS { get; set; }
         public virtual ICollection<URL> URLS1 { get; set; }
+        public virtual ICollection<ClientID> ClientIDs { get; set; }
     }
 }

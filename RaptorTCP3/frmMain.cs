@@ -345,14 +345,14 @@ namespace RaptorTCP3
             {
                 case "login":
                     Log(ID + " Logging In");
-                    if (LoginSuccessful(GetString(Data)))
+                    if (LoginSuccessful(ID, GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "register":
                     Log(ID + " Registering In");
-                    if (RegistrationSuccessful(GetString(Data)))
+                    if (RegistrationSuccessful(ID,GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
@@ -451,33 +451,24 @@ namespace RaptorTCP3
 
         #region Login And Register
 
-        private bool RegistrationSuccessful(string commandParams)
+        private bool RegistrationSuccessful(string ID, string commandParams)
         {
             string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
             if (command[0] == "register")
             {
-                return Register(command[1], command[2]);
+                return Register(ID, command[1], command[2]);
             }
             return false;
         }
 
-        private bool Register(string emailAddress, string Password)
+        private bool Register(string ClientID, string emailAddress, string Password)
         {
 
             using (var db = new DamoclesEntities())
             {
                 System.Data.Entity.DbSet<User> users = db.Users;
 
-                var eu = new User();
-                eu.Username = emailAddress;
-                eu.UserPasswordHash = Password;
-                eu.RegisteredDate = DateTime.UtcNow;
-                eu.CountryId = 3;
-                eu.StateId = 2;
-                eu.JurisidictionId = 4;
-                eu.LanguagesId = 1;
-                eu.LicenseNumber = GenerateTemporaryLicenseNumber(emailAddress);
-                eu.emailAddress = emailAddress;
+                var eu = CreateUser(ClientID, emailAddress, Password);
                 users.Add(eu);
 
                 int rows = db.SaveChanges();
@@ -494,9 +485,46 @@ namespace RaptorTCP3
             }
         }
 
+        private User CreateUser(string ClientID, string emailAddress, string Password)
+        {
+            var eu = new User();
+            eu.Username = emailAddress;
+            eu.UserPasswordHash = Password;
+            eu.RegisteredDate = DateTime.UtcNow;
+            eu.CountryId = 3;
+            eu.StateId = 2;
+            eu.JurisidictionId = 4;
+            eu.LanguagesId = 1;
+            eu.LicenseNumber = GenerateTemporaryLicenseNumber(emailAddress);
+            eu.emailAddress = emailAddress;
+            //TODO: ADD TRACKING OF THE VARIOUS CLIENTS THE USER HAS
+          //  eu.UserClientID =  AddClient(ClientID, emailAddress);
+            return eu;
+        }
+
+        private int AddClient(string ClientID, string emailAddress)
+        {
+            int rid = 0;
+            using (var db = new DamoclesEntities())
+            {
+                var client = new Client();
+                client.ClientId = ClientID;
+                db.SaveChanges();
+                rid = client.ClientsID; // Newly saved Client RowID
+
+                int uid = GetUserID(emailAddress); // The User associated with this Email Address and ClientID
+
+                var cids = new ClientID();
+                cids.UserID = uid;
+                cids.ClientID1 = rid;
+                db.SaveChanges();
+                return cids.UserClientID;
+            }
+        }
+
         private void UpdateLoginHistory(string emailAddress)
         {
-           
+
             using (var db = new DamoclesEntities())
             {
                 var loh = db.LogonHistories;
@@ -505,71 +533,97 @@ namespace RaptorTCP3
                 lohe.UserId = GetUserID(emailAddress);
                 loh.Add(lohe);
                 int rows = db.SaveChanges();
-                if(rows < 1)
+                if (rows < 1)
                 {
                     Log("Failed to Add User's Logon History Record " + emailAddress);
-                }                
+                }
             }
         }
 
-        private bool LoginSuccessful(string commandParams)
+        private bool LoginSuccessful(string Cid, string commandParams)
         {
             string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
             if (command[0] == "login")
             {
-                return Login(command[1], command[2]);
+                return Login(Cid, command[1], command[2]);
             }
             return false;
         }
 
-        private bool Login(string emailAddress, string Password)
+        private bool Login(string Cid, string emailAddress, string Password)
         {
             // Does the User Exist in the Database?
-
-            SqlCommand command = new SqlCommand("SELECT UserId from Users WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int? uid = 0;
-
-            uid = (int)command.ExecuteScalar();
-
-
-            if (uid > 0)
+            using (var db = new DamoclesEntities())
             {
-                // Set the User to IsOnline
-                command = new SqlCommand("UPDATE Users SET IsOnline = '" + true + "' WHERE emailAddress = N'" + emailAddress + "' AND UserPasswordHash = '" + Password + "';");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                int r = command.ExecuteNonQuery();
-                if (r > 0) { Log("Updated User '" + emailAddress + "' to Online"); }
 
-                // Update the User's Logon history - We will Update their LoggedOffDate when their TCP Connection is closed.
-                command = new SqlCommand("INSERT INTO LogonHistory (LoggedOnDate) VALUES(getutcdate()) WHERE UserId=@UID;");
-                command.Parameters.Add("@UID", SqlDbType.Int);
-                command.Parameters["@UID"].Value = uid;
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
-                return true;
+                var uid = GetUserID(emailAddress);
+                var user = db.Users.First(u => u.UserId == uid);
+                user.IsOnline = true;
+                user.CurrentClientID = Cid;
+                int rows = db.SaveChanges();
+                UpdateLoginHistory(emailAddress);
+                if (rows == 1)
+                {
+                    Log(emailAddress + " is Logged In");
+                    return true;
+                }
+                else
+                {
+                    Log(emailAddress + " Failed to Log In");
+                    return false;
+                }
             }
-            return false;
         }
 
-        private void LogOffUser(string id)
+        private void LogOffUser(string Cid)
         {
-            // Log the user off Users and Update LogonHistory
-            if (id.Length > 5) // Ignore internal connections
+            //TODO: We need to store the User Clients IDs when they log on so we can log them off properly at the end!
+            if (Cid.Contains("-")) // Internally generated IDs do not contains hyphens.
             {
 
-                Log(id + " Logging Off");
-                SqlCommand command = new SqlCommand("UPDATE Users SET IsOnline = '" + false + "' WHERE UserId = '" + id + "';");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
-                command = new SqlCommand("UPDATE LogonHistory SET LoggedOffDate = getutcdate() WHERE UserId = '" + id + "' AND LoggedOffDate = '" + null + "';");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
+                using (var db = new DamoclesEntities())
+                {
+                    var user = db.Users.First(u => u.CurrentClientID ==  Cid);
+                    user.IsOnline = true;
+                    int rows = db.SaveChanges();
+                    string emailAddress = GetUserEmailAddressByID(Cid);
+                    UpdateLogOffHistory(emailAddress);
+                    if (rows == 1)
+                    {
+                        Log(emailAddress + " is Logged In");
+                        
+                    }
+                    else
+                    {
+                        Log(emailAddress + " Failed to Log In");
+                       
+                    }
+                }
+            }
+        }
+
+        private void UpdateLogOffHistory(string emailAddress)
+        {
+            using(var db = new DamoclesEntities())
+            {
+                var uid = GetUserID(emailAddress);
+                var loh = db.LogonHistories.First(lh => lh.LoggedOffDate == null && lh.UserId == uid);
+                loh.LoggedOffDate = DateTime.UtcNow;
+                db.SaveChanges();
+
+                var user = db.Users.First(u => u.UserId == uid);
+                user.IsOnline = false;
+                user.CurrentClientID = null;
+                db.SaveChanges();
+            }
+        }
+
+        private string GetUserEmailAddressByID(string Cid)
+        {
+            using(var db = new DamoclesEntities())
+            {
+                var user = db.Users.First(u => u.CurrentClientID == Cid && u.IsOnline == true);
+                return user.emailAddress;
             }
         }
 

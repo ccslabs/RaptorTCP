@@ -29,6 +29,24 @@
           <Property Name="RId" Type="int" />
           <Property Name="CId" Type="int" />
         </EntityType>
+        <EntityType Name="ClientIDs">
+          <Key>
+            <PropertyRef Name="UserClientID" />
+          </Key>
+          <Property Name="UserClientID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="ClientID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Clients">
+          <Key>
+            <PropertyRef Name="ClientsID" />
+          </Key>
+          <Property Name="ClientsID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientId" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="IP Address" Type="nvarchar" MaxLength="50" />
+          <Property Name="MachineName" Type="nvarchar" MaxLength="150" />
+          <Property Name="LoggedOnUserName" Type="nvarchar" MaxLength="150" />
+        </EntityType>
         <EntityType Name="ContentObjects">
           <Key>
             <PropertyRef Name="ContentObjectId" />
@@ -199,6 +217,8 @@
           <Property Name="AccountStatusId" Type="int" Nullable="false" />
           <Property Name="LicenseNumber" Type="nvarchar" MaxLength="25" Nullable="false" />
           <Property Name="emailAddress" Type="nvarchar" MaxLength="400" />
+          <Property Name="UserClientID" Type="int" />
+          <Property Name="CurrentClientID" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
           <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
@@ -257,6 +277,30 @@
             </Principal>
             <Dependent Role="ARC">
               <PropertyRef Name="RId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ClientIDs_Clients_ClientsID">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="1" />
+          <End Role="ClientIDs" Type="Self.ClientIDs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientsID" />
+            </Principal>
+            <Dependent Role="ClientIDs">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ClientIDs_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="ClientIDs" Type="Self.ClientIDs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="ClientIDs">
+              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -540,6 +584,8 @@
           <EntitySet Name="AccountStatus" EntityType="Self.AccountStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Allowed" EntityType="Self.Allowed" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ARC" EntityType="Self.ARC" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ClientIDs" EntityType="Self.ClientIDs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Clients" EntityType="Self.Clients" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ContentObjects" EntityType="Self.ContentObjects" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ContentObjectsSourceURLS" EntityType="Self.ContentObjectsSourceURLS" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Countries" EntityType="Self.Countries" Schema="dbo" store:Type="Tables" />
@@ -577,6 +623,14 @@
           <AssociationSet Name="FK_ARC_Restricted_RId" Association="Self.FK_ARC_Restricted_RId">
             <End Role="Restricted" EntitySet="Restricted" />
             <End Role="ARC" EntitySet="ARC" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClientIDs_Clients_ClientsID" Association="Self.FK_ClientIDs_Clients_ClientsID">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="ClientIDs" EntitySet="ClientIDs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClientIDs_Users_UserId" Association="Self.FK_ClientIDs_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ClientIDs" EntitySet="ClientIDs" />
           </AssociationSet>
           <AssociationSet Name="FK_ContentObjects_ARC_ARCId" Association="Self.FK_ContentObjects_ARC_ARCId">
             <End Role="ARC" EntitySet="ARC" />
@@ -925,6 +979,9 @@
           <NavigationProperty Name="State" Relationship="Self.FK_Users_States_StateId" FromRole="Users" ToRole="States" />
           <NavigationProperty Name="URLS" Relationship="Self.FK_URLS_Users_UserId" FromRole="Users" ToRole="URLS" />
           <NavigationProperty Name="URLS1" Relationship="Self.FK_URLS_UsersDiscoveredBy_UserId" FromRole="Users" ToRole="URLS" />
+          <Property Name="UserClientID" Type="Int32" />
+          <NavigationProperty Name="ClientIDs" Relationship="DamoclesModel.FK_ClientIDs_Users_UserId" FromRole="User" ToRole="ClientID" />
+          <Property Name="CurrentClientID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
           <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
@@ -1396,7 +1453,62 @@
             <End Role="URLS" EntitySet="URLS" />
             <End Role="UrlSources" EntitySet="UrlSources" />
           </AssociationSet>
+          <EntitySet Name="ClientIDs" EntityType="DamoclesModel.ClientID" />
+          <EntitySet Name="Clients" EntityType="DamoclesModel.Client" />
+          <AssociationSet Name="FK_ClientIDs_Clients_ClientsID" Association="DamoclesModel.FK_ClientIDs_Clients_ClientsID">
+            <End Role="Client" EntitySet="Clients" />
+            <End Role="ClientID" EntitySet="ClientIDs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClientIDs_Users_UserId" Association="DamoclesModel.FK_ClientIDs_Users_UserId">
+            <End Role="User" EntitySet="Users" />
+            <End Role="ClientID" EntitySet="ClientIDs" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="ClientID">
+          <Key>
+            <PropertyRef Name="UserClientID" />
+          </Key>
+          <Property Name="UserClientID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="ClientID1" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Client" Relationship="DamoclesModel.FK_ClientIDs_Clients_ClientsID" FromRole="ClientID" ToRole="Client" />
+          <NavigationProperty Name="User" Relationship="DamoclesModel.FK_ClientIDs_Users_UserId" FromRole="ClientID" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Client">
+          <Key>
+            <PropertyRef Name="ClientsID" />
+          </Key>
+          <Property Name="ClientsID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IP_Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MachineName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="LoggedOnUserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ClientIDs" Relationship="DamoclesModel.FK_ClientIDs_Clients_ClientsID" FromRole="Client" ToRole="ClientID" />
+        </EntityType>
+        <Association Name="FK_ClientIDs_Clients_ClientsID">
+          <End Type="DamoclesModel.Client" Role="Client" Multiplicity="1" />
+          <End Type="DamoclesModel.ClientID" Role="ClientID" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Client">
+              <PropertyRef Name="ClientsID" />
+            </Principal>
+            <Dependent Role="ClientID">
+              <PropertyRef Name="ClientID1" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ClientIDs_Users_UserId">
+          <End Type="DamoclesModel.User" Role="User" Multiplicity="1" />
+          <End Type="DamoclesModel.ClientID" Role="ClientID" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="ClientID">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1604,6 +1716,8 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="DamoclesModel.User">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="CurrentClientID" ColumnName="CurrentClientID" />
+                <ScalarProperty Name="UserClientID" ColumnName="UserClientID" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="Username" ColumnName="Username" />
                 <ScalarProperty Name="UserPasswordHash" ColumnName="UserPasswordHash" />
@@ -1616,6 +1730,26 @@
                 <ScalarProperty Name="AccountStatusId" ColumnName="AccountStatusId" />
                 <ScalarProperty Name="LicenseNumber" ColumnName="LicenseNumber" />
                 <ScalarProperty Name="emailAddress" ColumnName="emailAddress" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ClientIDs">
+            <EntityTypeMapping TypeName="DamoclesModel.ClientID">
+              <MappingFragment StoreEntitySet="ClientIDs">
+                <ScalarProperty Name="ClientID1" ColumnName="ClientID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="UserClientID" ColumnName="UserClientID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clients">
+            <EntityTypeMapping TypeName="DamoclesModel.Client">
+              <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="LoggedOnUserName" ColumnName="LoggedOnUserName" />
+                <ScalarProperty Name="MachineName" ColumnName="MachineName" />
+                <ScalarProperty Name="IP_Address" ColumnName="IP Address" />
+                <ScalarProperty Name="ClientId" ColumnName="ClientId" />
+                <ScalarProperty Name="ClientsID" ColumnName="ClientsID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
