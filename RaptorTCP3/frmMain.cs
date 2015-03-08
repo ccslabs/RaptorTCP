@@ -113,38 +113,41 @@ namespace RaptorTCP3
                 IsIdle = false;
         }
 
-        private int URLSCount()
+        private long URLSCount()
         {
             Log("Counting URLS");
-            SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM URLS");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int res = (int)command.ExecuteScalar();
-            Log("Number of URLS in Database: " + res.ToString("N0"));
-            return res;
+
+            using (var db = new DamoclesEntities())
+            {
+                var urls = db.URLS;
+                long result = urls.LongCount();
+                Log("Number of URLS in Database: " + result.ToString("N0"));
+                return result;
+            }
         }
 
         private void PopulateURLQueue(int numberOfUrlsToGet)
         {
             Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
 
-           
-                using (var db = new DamoclesEntities())
+            using (var db = new DamoclesEntities())
+            {
+                var urls = db.URLS;
+                for (int idx = 0; idx < numberOfUrlsToGet; idx++)
                 {
-                    var urls = db.URLS;
-                    for (int idx = 0; idx < numberOfUrlsToGet; idx++)
-                    {
-                        var result = urls.FirstOrDefault(u => u.IsInProcessingQueue == false);
-                        var urlp = result.URLPath;
-                        urlQueue.Enqueue(urlp);
-                        SetUrlToInProcessingQueue(urlp);
-                        SetLabel(lblQueueLength, urlQueue.Count().ToString("N0"));
-                        Application.DoEvents();
-                    }
+                    var result = urls.FirstOrDefault(u => u.IsInProcessingQueue == false);
+                    var urlp = result.URLPath;
+                    result.JoinedProcessingQueueDate = DateTime.UtcNow;
+                    urlQueue.Enqueue(urlp);
+                    SetUrlToInProcessingQueue(urlp);
+                    SetLabel(lblQueueLength, urlQueue.Count().ToString("N0"));
+                    Application.DoEvents();
+                    db.SaveChanges();
                 }
-                Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
+            }
+            Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
 
-             }
+        }
 
         private void UpdateUrlInQueueStatus(string url)
         {
@@ -159,7 +162,7 @@ namespace RaptorTCP3
                     if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
                 }
             }
-}
+        }
 
         private void SetUrlToInProcessingQueue(string url)
         {
@@ -174,7 +177,7 @@ namespace RaptorTCP3
                     if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
                 }
             }
-}
+        }
 
         private void SubscribeToSQLEvents()
         {
@@ -400,10 +403,6 @@ namespace RaptorTCP3
             return urlList;
         }
 
-
-
-
-
         void tcpServer_ConnectionClosed()
         {
             lblConnections.Text = alClients.Count().ToString("N0");
@@ -465,46 +464,51 @@ namespace RaptorTCP3
         private bool Register(string emailAddress, string Password)
         {
 
-            // getutcdate() is SQL servers built in utc DateTime.UtcNow command
-
-            SqlCommand command = null;
-
-            command = new SqlCommand("INSERT INTO Users Values(N'" + emailAddress +
-                           "','" + Password + "', getutcdate(), 3,2,4,1,'" + true + "'," + 2 + ",'" + GenerateTemporaryLicenseNumber(emailAddress) + "',N'" + emailAddress + "')");
-            command.CommandType = CommandType.Text;
-            command.Connection = con;
-            int res = command.ExecuteNonQuery();
-            if (res > 0)
+            using (var db = new DamoclesEntities())
             {
-                // Update - create the LogonHistory table
-                UpdateLoginHistory(emailAddress);
+                System.Data.Entity.DbSet<User> users = db.Users;
 
-                return true;
+                var eu = new User();
+                eu.Username = emailAddress;
+                eu.UserPasswordHash = Password;
+                eu.RegisteredDate = DateTime.UtcNow;
+                eu.CountryId = 3;
+                eu.StateId = 2;
+                eu.JurisidictionId = 4;
+                eu.LanguagesId = 1;
+                eu.LicenseNumber = GenerateTemporaryLicenseNumber(emailAddress);
+                eu.emailAddress = emailAddress;
+                users.Add(eu);
+
+                int rows = db.SaveChanges();
+                if (rows < 1)
+                {
+                    Log("Failed to Add user: " + emailAddress);
+                    return false;
+                }
+                else
+                {
+                    UpdateLoginHistory(emailAddress);
+                    return true;
+                }
             }
-            else
-                return false;
-
         }
 
         private void UpdateLoginHistory(string emailAddress)
         {
-            // Get UserID from the Email Address
-            // insert new record
-
-            int uid = GetUserID(emailAddress);
-            if (uid > 0)
+           
+            using (var db = new DamoclesEntities())
             {
-
-                // INSERT INTO LogonHistory VALUES(3,  getutcdate(),)
-                SqlCommand command = new SqlCommand("INSERT INTO LogonHistory (UserId, LoggedOnDate) VALUES(" + uid + ",  getutcdate())");
-                command.CommandType = CommandType.Text;
-                command.Connection = con;
-                command.ExecuteNonQuery();
-
-            }
-            else
-            {
-                Log("Error: (UpdateLoginHistory) Failed to getUuid");
+                var loh = db.LogonHistories;
+                var lohe = new LogonHistory();
+                lohe.LoggedOnDate = DateTime.UtcNow;
+                lohe.UserId = GetUserID(emailAddress);
+                loh.Add(lohe);
+                int rows = db.SaveChanges();
+                if(rows < 1)
+                {
+                    Log("Failed to Add User's Logon History Record " + emailAddress);
+                }                
             }
         }
 

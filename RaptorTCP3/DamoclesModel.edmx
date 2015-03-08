@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AccountStatus">
           <Key>
             <PropertyRef Name="Id" />
@@ -188,7 +188,7 @@
             <PropertyRef Name="UserId" />
           </Key>
           <Property Name="UserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Username" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Username" Type="nvarchar" MaxLength="400" Nullable="false" />
           <Property Name="UserPasswordHash" Type="varchar" MaxLength="128" Nullable="false" />
           <Property Name="RegisteredDate" Type="datetime" Nullable="false" />
           <Property Name="CountryId" Type="int" Nullable="false" />
@@ -197,7 +197,7 @@
           <Property Name="LanguagesId" Type="int" Nullable="false" />
           <Property Name="IsOnline" Type="bit" Nullable="false" />
           <Property Name="AccountStatusId" Type="int" Nullable="false" />
-          <Property Name="LicenseNumber" Type="nchar" MaxLength="25" Nullable="false" />
+          <Property Name="LicenseNumber" Type="nvarchar" MaxLength="25" Nullable="false" />
           <Property Name="emailAddress" Type="nvarchar" MaxLength="400" />
         </EntityType>
         <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
@@ -671,8 +671,7 @@
             <End Role="Users" EntitySet="Users" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DamoclesModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -904,7 +903,7 @@
             <PropertyRef Name="UserId" />
           </Key>
           <Property Name="UserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Username" Type="String" MaxLength="400" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="UserPasswordHash" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="RegisteredDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="CountryId" Type="Int32" Nullable="false" />
@@ -913,7 +912,7 @@
           <Property Name="LanguagesId" Type="Int32" Nullable="false" />
           <Property Name="IsOnline" Type="Boolean" Nullable="false" />
           <Property Name="AccountStatusId" Type="Int32" Nullable="false" />
-          <Property Name="LicenseNumber" Type="String" MaxLength="25" FixedLength="true" Unicode="true" Nullable="false" />
+          <Property Name="LicenseNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="emailAddress" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Alloweds" Relationship="Self.FK_Allowed_Users_UserId" FromRole="Users" ToRole="Allowed" />
           <NavigationProperty Name="Country" Relationship="Self.FK_Users_Countries_CountryId" FromRole="Users" ToRole="Countries" />
