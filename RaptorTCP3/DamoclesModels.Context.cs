@@ -28,6 +28,7 @@ namespace RaptorTCP3
         public virtual DbSet<AccountStatu> AccountStatus { get; set; }
         public virtual DbSet<Allowed> Alloweds { get; set; }
         public virtual DbSet<ARC> ARCs { get; set; }
+        public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<ContentObject> ContentObjects { get; set; }
         public virtual DbSet<ContentObjectsSourceURL> ContentObjectsSourceURLS { get; set; }
         public virtual DbSet<Country> Countries { get; set; }
@@ -37,15 +38,12 @@ namespace RaptorTCP3
         public virtual DbSet<Language> Languages { get; set; }
         public virtual DbSet<LicenseNumber> LicenseNumbers { get; set; }
         public virtual DbSet<LogonHistory> LogonHistories { get; set; }
-        public virtual DbSet<News> News { get; set; }
         public virtual DbSet<Restricted> Restricteds { get; set; }
         public virtual DbSet<RestrictionType> RestrictionTypes { get; set; }
         public virtual DbSet<Setting> Settings { get; set; }
         public virtual DbSet<State> States { get; set; }
-        public virtual DbSet<Table> Tables { get; set; }
         public virtual DbSet<URL> URLS { get; set; }
         public virtual DbSet<UrlSource> UrlSources { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Client> Clients { get; set; }
     }
 }

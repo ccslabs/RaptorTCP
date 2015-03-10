@@ -506,9 +506,10 @@ namespace RaptorTCP3
         {
             int rid = 0;
             using (var db = new DamoclesEntities())
-            {
-                System.Data.Entity.DbSet<Client> client = db.Client;
-
+            {                
+                var nclient = new Client();
+                nclient.ClientId = ClientID;
+                
                 
 
 

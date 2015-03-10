@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AccountStatus">
           <Key>
             <PropertyRef Name="Id" />
@@ -121,19 +121,6 @@
           <Property Name="LoggedOnDate" Type="datetime" Nullable="false" />
           <Property Name="LoggedOffDate" Type="datetime" />
         </EntityType>
-        <EntityType Name="News">
-          <Key>
-            <PropertyRef Name="NewsId" />
-          </Key>
-          <Property Name="NewsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="UserId" Type="int" />
-          <Property Name="CreatedOnDate" Type="timestamp" StoreGeneratedPattern="Computed" Nullable="false" />
-          <Property Name="NewsSummary" Type="nchar" MaxLength="500" />
-          <Property Name="NewsContent" Type="nvarchar(max)" />
-          <Property Name="NewsTitle" Type="nvarchar" MaxLength="50" />
-          <Property Name="NewsSource" Type="nvarchar(max)" />
-          <Property Name="Image" Type="nvarchar(max)" />
-        </EntityType>
         <EntityType Name="Restricted">
           <Key>
             <PropertyRef Name="RId" />
@@ -164,13 +151,6 @@
           <Property Name="StateId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="StateEnglishName" Type="varchar" MaxLength="250" Nullable="false" />
           <Property Name="StateLocalName" Type="varchar" MaxLength="250" Nullable="false" />
-        </EntityType>
-        <EntityType Name="Table">
-          <Key>
-            <PropertyRef Name="NewsId" />
-          </Key>
-          <Property Name="NewsId" Type="int" Nullable="false" />
-          <Property Name="NewsItemId" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="URLS">
           <Key>
@@ -417,18 +397,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_News_Users_UserId">
-          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
-          <End Role="News" Type="Self.News" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="News">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Restricted_Jurisdictions_JurisdictionId">
           <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
           <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
@@ -575,12 +543,10 @@
           <EntitySet Name="Languages" EntityType="Self.Languages" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LicenseNumbers" EntityType="Self.LicenseNumbers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LogonHistory" EntityType="Self.LogonHistory" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="News" EntityType="Self.News" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Restricted" EntityType="Self.Restricted" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="RestrictionTypes" EntityType="Self.RestrictionTypes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Settings" EntityType="Self.Settings" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="States" EntityType="Self.States" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Table" EntityType="Self.Table" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="URLS" EntityType="Self.URLS" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UrlSources" EntityType="Self.UrlSources" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
@@ -652,10 +618,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="LogonHistory" EntitySet="LogonHistory" />
           </AssociationSet>
-          <AssociationSet Name="FK_News_Users_UserId" Association="Self.FK_News_Users_UserId">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="News" EntitySet="News" />
-          </AssociationSet>
           <AssociationSet Name="FK_Restricted_Jurisdictions_JurisdictionId" Association="Self.FK_Restricted_Jurisdictions_JurisdictionId">
             <End Role="Jurisdictions" EntitySet="Jurisdictions" />
             <End Role="Restricted" EntitySet="Restricted" />
@@ -701,7 +663,8 @@
             <End Role="Users" EntitySet="Users" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DamoclesModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -735,6 +698,18 @@
           <NavigationProperty Name="Criminal" Relationship="Self.FK_ARC_Criminal_CId" FromRole="ARC" ToRole="Criminal" />
           <NavigationProperty Name="Restricted" Relationship="Self.FK_ARC_Restricted_RId" FromRole="ARC" ToRole="Restricted" />
           <NavigationProperty Name="ContentObjects" Relationship="Self.FK_ContentObjects_ARC_ARCId" FromRole="ARC" ToRole="ContentObjects" />
+        </EntityType>
+        <EntityType Name="Client">
+          <Key>
+            <PropertyRef Name="ClientsID" />
+          </Key>
+          <Property Name="ClientsID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientId" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IP_Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MachineName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="LoggedOnUserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Clients_Users_UserId" FromRole="Clients" ToRole="Users" />
         </EntityType>
         <EntityType Name="ContentObject">
           <Key>
@@ -840,20 +815,6 @@
           <Property Name="LoggedOffDate" Type="DateTime" Precision="3" />
           <NavigationProperty Name="User" Relationship="Self.FK_LogonHistory_Users_UserId" FromRole="LogonHistory" ToRole="Users" />
         </EntityType>
-        <EntityType Name="News">
-          <Key>
-            <PropertyRef Name="NewsId" />
-          </Key>
-          <Property Name="NewsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserId" Type="Int32" />
-          <Property Name="CreatedOnDate" Type="Binary" MaxLength="8" FixedLength="true" Nullable="false" annotation:StoreGeneratedPattern="Computed" />
-          <Property Name="NewsSummary" Type="String" MaxLength="500" FixedLength="true" Unicode="true" />
-          <Property Name="NewsContent" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="NewsTitle" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="NewsSource" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="Image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="User" Relationship="Self.FK_News_Users_UserId" FromRole="News" ToRole="Users" />
-        </EntityType>
         <EntityType Name="Restricted">
           <Key>
             <PropertyRef Name="RId" />
@@ -892,13 +853,6 @@
           <NavigationProperty Name="Countries" Relationship="Self.FK_Countries_States_StateId" FromRole="States" ToRole="Countries" />
           <NavigationProperty Name="Jurisdictions" Relationship="Self.FK_Jurisdictions" FromRole="States" ToRole="Jurisdictions" />
           <NavigationProperty Name="Users" Relationship="Self.FK_Users_States_StateId" FromRole="States" ToRole="Users" />
-        </EntityType>
-        <EntityType Name="Table">
-          <Key>
-            <PropertyRef Name="NewsId" />
-          </Key>
-          <Property Name="NewsId" Type="Int32" Nullable="false" />
-          <Property Name="NewsItemId" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="URL">
           <Key>
@@ -944,20 +898,19 @@
           <Property Name="AccountStatusId" Type="Int32" Nullable="false" />
           <Property Name="LicenseNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="emailAddress" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="UserClientID" Type="Int32" />
+          <Property Name="CurrentClientID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Alloweds" Relationship="Self.FK_Allowed_Users_UserId" FromRole="Users" ToRole="Allowed" />
+          <NavigationProperty Name="Clients" Relationship="Self.FK_Clients_Users_UserId" FromRole="Users" ToRole="Clients" />
           <NavigationProperty Name="Country" Relationship="Self.FK_Users_Countries_CountryId" FromRole="Users" ToRole="Countries" />
           <NavigationProperty Name="Criminals" Relationship="Self.FK_Criminal_Users_UserId" FromRole="Users" ToRole="Criminal" />
           <NavigationProperty Name="Jurisdiction" Relationship="Self.FK_Users_Jurisdictions_JurisdictionId" FromRole="Users" ToRole="Jurisdictions" />
           <NavigationProperty Name="Language" Relationship="Self.FK_Users_Languages_LanguageId" FromRole="Users" ToRole="Languages" />
           <NavigationProperty Name="LogonHistories" Relationship="Self.FK_LogonHistory_Users_UserId" FromRole="Users" ToRole="LogonHistory" />
-          <NavigationProperty Name="News" Relationship="Self.FK_News_Users_UserId" FromRole="Users" ToRole="News" />
           <NavigationProperty Name="Restricteds" Relationship="Self.FK_Restricted_Users_UserId" FromRole="Users" ToRole="Restricted" />
           <NavigationProperty Name="State" Relationship="Self.FK_Users_States_StateId" FromRole="Users" ToRole="States" />
           <NavigationProperty Name="URLS" Relationship="Self.FK_URLS_Users_UserId" FromRole="Users" ToRole="URLS" />
           <NavigationProperty Name="URLS1" Relationship="Self.FK_URLS_UsersDiscoveredBy_UserId" FromRole="Users" ToRole="URLS" />
-          <Property Name="UserClientID" Type="Int32" />
-          <Property Name="CurrentClientID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Clients" Relationship="DamoclesModel.FK_Clients_Users_UserId" FromRole="User" ToRole="Client" />
         </EntityType>
         <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
           <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
@@ -1028,6 +981,18 @@
             </Principal>
             <Dependent Role="ContentObjects">
               <PropertyRef Name="ARCId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Clients" Type="Self.Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="UserId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1199,18 +1164,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_News_Users_UserId">
-          <End Role="Users" Type="Self.User" Multiplicity="0..1" />
-          <End Role="News" Type="Self.News" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="News">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Restricted_RestrictionTypes_RestrictionId">
           <End Role="RestrictionTypes" Type="Self.RestrictionType" Multiplicity="1" />
           <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
@@ -1299,6 +1252,7 @@
           <EntitySet Name="AccountStatus" EntityType="Self.AccountStatu" />
           <EntitySet Name="Alloweds" EntityType="Self.Allowed" />
           <EntitySet Name="ARCs" EntityType="Self.ARC" />
+          <EntitySet Name="Clients" EntityType="Self.Client" />
           <EntitySet Name="ContentObjects" EntityType="Self.ContentObject" />
           <EntitySet Name="ContentObjectsSourceURLS" EntityType="Self.ContentObjectsSourceURL" />
           <EntitySet Name="Countries" EntityType="Self.Country" />
@@ -1308,12 +1262,10 @@
           <EntitySet Name="Languages" EntityType="Self.Language" />
           <EntitySet Name="LicenseNumbers" EntityType="Self.LicenseNumber" />
           <EntitySet Name="LogonHistories" EntityType="Self.LogonHistory" />
-          <EntitySet Name="News" EntityType="Self.News" />
           <EntitySet Name="Restricteds" EntityType="Self.Restricted" />
           <EntitySet Name="RestrictionTypes" EntityType="Self.RestrictionType" />
           <EntitySet Name="Settings" EntityType="Self.Setting" />
           <EntitySet Name="States" EntityType="Self.State" />
-          <EntitySet Name="Tables" EntityType="Self.Table" />
           <EntitySet Name="URLS" EntityType="Self.URL" />
           <EntitySet Name="UrlSources" EntityType="Self.UrlSource" />
           <EntitySet Name="Users" EntityType="Self.User" />
@@ -1340,6 +1292,10 @@
           <AssociationSet Name="FK_ContentObjects_ARC_ARCId" Association="Self.FK_ContentObjects_ARC_ARCId">
             <End Role="ARC" EntitySet="ARCs" />
             <End Role="ContentObjects" EntitySet="ContentObjects" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_Users_UserId" Association="Self.FK_Clients_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Clients" EntitySet="Clients" />
           </AssociationSet>
           <AssociationSet Name="FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" Association="Self.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId">
             <End Role="ContentObjects" EntitySet="ContentObjects" />
@@ -1397,10 +1353,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="LogonHistory" EntitySet="LogonHistories" />
           </AssociationSet>
-          <AssociationSet Name="FK_News_Users_UserId" Association="Self.FK_News_Users_UserId">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="News" EntitySet="News" />
-          </AssociationSet>
           <AssociationSet Name="FK_Restricted_RestrictionTypes_RestrictionId" Association="Self.FK_Restricted_RestrictionTypes_RestrictionId">
             <End Role="RestrictionTypes" EntitySet="RestrictionTypes" />
             <End Role="Restricted" EntitySet="Restricteds" />
@@ -1429,36 +1381,7 @@
             <End Role="URLS" EntitySet="URLS" />
             <End Role="UrlSources" EntitySet="UrlSources" />
           </AssociationSet>
-          <EntitySet Name="Clients" EntityType="DamoclesModel.Client" />
-          <AssociationSet Name="FK_Clients_Users_UserId" Association="DamoclesModel.FK_Clients_Users_UserId">
-            <End Role="User" EntitySet="Users" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
         </EntityContainer>
-        <EntityType Name="Client">
-          <Key>
-            <PropertyRef Name="ClientsID" />
-          </Key>
-          <Property Name="ClientsID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ClientId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="IP_Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="MachineName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
-          <Property Name="LoggedOnUserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
-          <Property Name="UserId" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="User" Relationship="DamoclesModel.FK_Clients_Users_UserId" FromRole="Client" ToRole="User" />
-        </EntityType>
-        <Association Name="FK_Clients_Users_UserId">
-          <End Type="DamoclesModel.User" Role="User" Multiplicity="1" />
-          <End Type="DamoclesModel.Client" Role="Client" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="User">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Client">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1489,6 +1412,18 @@
                 <ScalarProperty Name="AId" ColumnName="AId" />
                 <ScalarProperty Name="RId" ColumnName="RId" />
                 <ScalarProperty Name="CId" ColumnName="CId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clients">
+            <EntityTypeMapping TypeName="DamoclesModel.Client">
+              <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="ClientsID" ColumnName="ClientsID" />
+                <ScalarProperty Name="ClientId" ColumnName="ClientId" />
+                <ScalarProperty Name="IP_Address" ColumnName="IP Address" />
+                <ScalarProperty Name="MachineName" ColumnName="MachineName" />
+                <ScalarProperty Name="LoggedOnUserName" ColumnName="LoggedOnUserName" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1582,20 +1517,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="News">
-            <EntityTypeMapping TypeName="DamoclesModel.News">
-              <MappingFragment StoreEntitySet="News">
-                <ScalarProperty Name="NewsId" ColumnName="NewsId" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="CreatedOnDate" ColumnName="CreatedOnDate" />
-                <ScalarProperty Name="NewsSummary" ColumnName="NewsSummary" />
-                <ScalarProperty Name="NewsContent" ColumnName="NewsContent" />
-                <ScalarProperty Name="NewsTitle" ColumnName="NewsTitle" />
-                <ScalarProperty Name="NewsSource" ColumnName="NewsSource" />
-                <ScalarProperty Name="Image" ColumnName="Image" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Restricteds">
             <EntityTypeMapping TypeName="DamoclesModel.Restricted">
               <MappingFragment StoreEntitySet="Restricted">
@@ -1631,14 +1552,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Tables">
-            <EntityTypeMapping TypeName="DamoclesModel.Table">
-              <MappingFragment StoreEntitySet="Table">
-                <ScalarProperty Name="NewsId" ColumnName="NewsId" />
-                <ScalarProperty Name="NewsItemId" ColumnName="NewsItemId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="URLS">
             <EntityTypeMapping TypeName="DamoclesModel.URL">
               <MappingFragment StoreEntitySet="URLS">
@@ -1666,8 +1579,6 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="DamoclesModel.User">
               <MappingFragment StoreEntitySet="Users">
-                <ScalarProperty Name="CurrentClientID" ColumnName="CurrentClientID" />
-                <ScalarProperty Name="UserClientID" ColumnName="UserClientID" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="Username" ColumnName="Username" />
                 <ScalarProperty Name="UserPasswordHash" ColumnName="UserPasswordHash" />
@@ -1680,18 +1591,8 @@
                 <ScalarProperty Name="AccountStatusId" ColumnName="AccountStatusId" />
                 <ScalarProperty Name="LicenseNumber" ColumnName="LicenseNumber" />
                 <ScalarProperty Name="emailAddress" ColumnName="emailAddress" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Clients">
-            <EntityTypeMapping TypeName="DamoclesModel.Client">
-              <MappingFragment StoreEntitySet="Clients">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="LoggedOnUserName" ColumnName="LoggedOnUserName" />
-                <ScalarProperty Name="MachineName" ColumnName="MachineName" />
-                <ScalarProperty Name="IP_Address" ColumnName="IP Address" />
-                <ScalarProperty Name="ClientId" ColumnName="ClientId" />
-                <ScalarProperty Name="ClientsID" ColumnName="ClientsID" />
+                <ScalarProperty Name="UserClientID" ColumnName="UserClientID" />
+                <ScalarProperty Name="CurrentClientID" ColumnName="CurrentClientID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -17,13 +17,12 @@ namespace RaptorTCP3
         public User()
         {
             this.Alloweds = new HashSet<Allowed>();
+            this.Clients = new HashSet<Client>();
             this.Criminals = new HashSet<Criminal>();
             this.LogonHistories = new HashSet<LogonHistory>();
-            this.News = new HashSet<News>();
             this.Restricteds = new HashSet<Restricted>();
             this.URLS = new HashSet<URL>();
             this.URLS1 = new HashSet<URL>();
-            this.Clients = new HashSet<Client>();
         }
     
         public int UserId { get; set; }
@@ -42,16 +41,15 @@ namespace RaptorTCP3
         public string CurrentClientID { get; set; }
     
         public virtual ICollection<Allowed> Alloweds { get; set; }
+        public virtual ICollection<Client> Clients { get; set; }
         public virtual Country Country { get; set; }
         public virtual ICollection<Criminal> Criminals { get; set; }
         public virtual Jurisdiction Jurisdiction { get; set; }
         public virtual Language Language { get; set; }
         public virtual ICollection<LogonHistory> LogonHistories { get; set; }
-        public virtual ICollection<News> News { get; set; }
         public virtual ICollection<Restricted> Restricteds { get; set; }
         public virtual State State { get; set; }
         public virtual ICollection<URL> URLS { get; set; }
         public virtual ICollection<URL> URLS1 { get; set; }
-        public virtual ICollection<Client> Clients { get; set; }
     }
 }
