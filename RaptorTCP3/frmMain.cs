@@ -21,6 +21,7 @@ using RaptorTCP3.Methods.Utilities;
 using RaptorTCP3.Methods.Login;
 using RaptorTCP3.Methods.TCPServer;
 using RaptorTCP3.Methods.SystemURLS;
+using RaptorTCP3.Methods;
 
 namespace RaptorTCP3
 {
@@ -39,10 +40,10 @@ namespace RaptorTCP3
 
         private Task t;
 
-        NetComm.Host tcpServer = new Host(9119);
+       
 
         private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
-        
+
 
         private string ClientLicense = null;
 
@@ -69,39 +70,44 @@ namespace RaptorTCP3
             ConOut.Width = this.Width;
             ConOut.Height = 2 * this.Height / 3;
 
-            LoginMethods.LogEvent += LoginMethods_LogEvent;
+            LoginMethods.LogEvent += LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
-            systemUrls.LogEvent += systemUrls_LogEvent;
+
+            systemUrls.LogEvent += LogEvent;
             systemUrls.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
+            systemUrls.UrlsToEnqueueEvent += systemUrls_UrlsToEnqueueEvent;
+        }
+
+        #region URL Events
+        void systemUrls_UrlsToEnqueueEvent(string URL)
+        {
+            urlQueue.Enqueue(URL);
+            SetLabel(lblQueueLength, urlQueue.Count.ToString("N0"));
         }
 
         void systemUrls_UrlsCountResultEvent(long Result)
         {
-            throw new NotImplementedException();
+            Log("Total URLS: " + Result);
         }
-
-        void systemUrls_LogEvent(string Message)
-        {
-            Log(Message);
-        }
+        #endregion
 
         #region Login Events
         void LoginMethods_LoginResultEvent(bool Result, string Cid)
         {
             Log(Cid + " Is Attempting a Login");
             if (Result)
-                Reply(Cid, ClientCommands.Login.ToString(), ServerCommands.Successful.ToString(), ClientLicense);
+                Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString(), ClientLicense);
             else
-                Reply(Cid, ClientCommands.Login.ToString(), ServerCommands.Failed.ToString());
+                Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
         }
 
-        void LoginMethods_LogEvent(string Message)
+        void LogEvent(string Message)
         {
             Log(Message);
         }
         #endregion
 
-        
+
 
         #region cmsSystem Operations
 
@@ -157,60 +163,13 @@ namespace RaptorTCP3
                 IsIdle = false;
         }
 
-      
 
-        private void PopulateURLQueue(int numberOfUrlsToGet)
-        {
-            Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
 
-            using (var db = new DamoclesEntities())
-            {
-                var urls = db.URLS;
-                for (int idx = 0; idx < numberOfUrlsToGet; idx++)
-                {
-                    var result = urls.FirstOrDefault(u => u.IsInProcessingQueue == false);
-                    var urlp = result.URLPath;
-                    result.JoinedProcessingQueueDate = DateTime.UtcNow;
-                    urlQueue.Enqueue(urlp);
-                    SetUrlToInProcessingQueue(urlp);
-                    SetLabel(lblQueueLength, urlQueue.Count().ToString("N0"));
-                    Application.DoEvents();
-                    db.SaveChanges();
-                }
-            }
-            Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
 
-        }
 
-        private void UpdateUrlInQueueStatus(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                using (var db = new DamoclesEntities())
-                {
-                    var urls = db.URLS;
-                    var result = urls.FirstOrDefault(u => u.URLPath == url);
-                    result.IsInProcessingQueue = true;
-                    int rows = db.SaveChanges();
-                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
-                }
-            }
-        }
+        
 
-        private void SetUrlToInProcessingQueue(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                using (var db = new DamoclesEntities())
-                {
-                    var urls = db.URLS;
-                    var result = urls.FirstOrDefault(u => u.URLPath == url);
-                    result.IsInProcessingQueue = true;
-                    int rows = db.SaveChanges();
-                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
-                }
-            }
-        }
+
 
         private void SubscribeToSQLEvents()
         {
@@ -282,24 +241,7 @@ namespace RaptorTCP3
         #endregion
 
         #region TCP Enums
-        private enum ServerCommands
-        {
-            Successful,
-            Failed,
-            UseCache,
-            Wait,
-            Resume,
-            SendEmailAddress,
-            SetMessageSize,
-        }
-
-        private enum ClientCommands
-        {
-            Login,
-            Register,
-            Get,
-            NOP,
-        }
+       
         #endregion
 
         #region Send and Reply TCP Messages
@@ -478,7 +420,7 @@ namespace RaptorTCP3
         }
         #endregion
 
-        #region Utils.Login And Register
+        #region Login And Register
 
         private bool RegistrationSuccessful(string ID, string commandParams)
         {

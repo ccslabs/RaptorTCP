@@ -126,6 +126,7 @@
     <Compile Include="LogonHistory.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <Compile Include="Methods\Enumerations.cs" />
     <Compile Include="Methods\Login\LoginMethods.cs" />
     <Compile Include="Methods\TCPServer\TCPServer.cs" />
     <Compile Include="Methods\URLS\sUrls.cs" />
