@@ -127,7 +127,10 @@
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
     <Compile Include="Methods\Enumerations.cs" />
+    <Compile Include="Methods\Licenses\Licenses.cs" />
     <Compile Include="Methods\Login\LoginMethods.cs" />
+    <Compile Include="Methods\LogOff\LogOff.cs" />
+    <Compile Include="Methods\Registration\Registration.cs" />
     <Compile Include="Methods\SqlClient\SqlClient.cs" />
     <Compile Include="Methods\TCPServer\TCPServer.cs" />
     <Compile Include="Methods\URLS\sUrls.cs" />

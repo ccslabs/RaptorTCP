@@ -4,40 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using RaptorTCP3.Methods.Utilities;
+
 namespace RaptorTCP3.Methods.SqlClient
 {
     class SqlClient
     {
+        SystemURLS.sUrls sURLS = new SystemURLS.sUrls();
+        Seeding Seeding = new Seeding();
 
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
 
-        internal void StartSQLClient()
+        public SqlClient()
         {
-
-
             LogEvent("Starting SQL Client");
-            con.Open();
-            if (URLSCount() == 0)
+
+            Seeding.SeedUrls();
+
+            if (sURLS.urlQueue.Count() < 50)
             {
-                SeedUrls();
+                LogEvent("Populating ");
+                sURLS.PopulateURLQueue(50);
             }
-
-            if (urlQueue.Count() < 50)
-            {
-                PopulateURLQueue(50);
-            }
-        }
-
-        private void SubscribeToSQLEvents()
-        {
-            LogEvent("Subscribing to SQL Events");
-            con.Disposed += con_Disposed;
-            con.StateChange += con_StateChange;
-            con.InfoMessage += con_InfoMessage;
-            con.FireInfoMessageEventOnUserErrors = true;
-
         }
 
     }

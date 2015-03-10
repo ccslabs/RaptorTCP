@@ -11,6 +11,9 @@ namespace RaptorTCP3.Methods.Utilities
     class Seeding
     {
         private Utilities Utils = new Utilities();
+        private RaptorTCP3.Methods.Licenses.Licenses license = new Licenses.Licenses();
+        private RaptorTCP3.Methods.SystemURLS.sUrls URLS = new SystemURLS.sUrls();
+        private RaptorTCP3.Methods.Users.Users Users = new Users.Users();
 
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
@@ -21,6 +24,11 @@ namespace RaptorTCP3.Methods.Utilities
         // Notify New Progress Maximum
         public delegate void ProgressMaximumChangedEventHandler(int Progress);
         public event ProgressMaximumChangedEventHandler ProgressMaximumChangedEvent;
+
+        public Seeding()
+        {
+            SeedUrls();
+        }
 
         internal void SeedUrls()
         {
@@ -69,7 +77,7 @@ namespace RaptorTCP3.Methods.Utilities
 
             using (var db = new DamoclesEntities())
             {
-                DeleteAllURLS(db);
+                URLS.DeleteAllURLS(db);
 
                 var urls = db.URLS;
                 int idx = 0;
@@ -79,7 +87,7 @@ namespace RaptorTCP3.Methods.Utilities
                     ProgressChangedEvent(idx);
                     string newurl = Utils.DecodeUrlString(url);
 
-                    urls.Add(AddUrl(url));
+                    urls.Add(URLS.AddUrl(url));
                 }
                 db.SaveChanges();
             }
@@ -88,6 +96,64 @@ namespace RaptorTCP3.Methods.Utilities
          
             LogEvent("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
+        }
+
+        internal void SeedUsers()
+        {
+
+
+            using (var db = new DamoclesEntities())
+            {
+                Users.DeleteAllUsers(db);
+
+                var usrs = db.Users;
+                var su = new User();
+                var em = "dave@ccs-labs.com";
+                SeedAdminUser(db, usrs, su, em);
+
+                su = new User();
+                em = "system@ccs-labs.com";
+                SeedSystemUser(db, usrs, su, em);
+
+            }
+        }
+
+        private void SeedSystemUser(DamoclesEntities db, System.Data.Entity.DbSet<User> usrs, User su, string em)
+        {
+            su.emailAddress = em;
+            su.UserPasswordHash = "097dfd905dfa0e078883b7afcf7e653dde569bb1ed2ce3384d9c9ed7b85741d6e8d1b1a356318805d3c8b31b36a9916936d005d8134fb015d0392cf75cd7fa24";
+            su.RegisteredDate = DateTime.UtcNow;
+            su.CountryId = 3;
+            su.StateId = 2;
+            su.JurisidictionId = 4;
+            su.LanguagesId = 1;
+            su.IsOnline = false;
+            su.AccountStatusId = 3;
+            su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
+            su.emailAddress = em;
+            //su.UserClientID = null;
+            //su.CurrentClientID = null;
+            usrs.Add(su);
+            db.SaveChanges();
+        }
+
+        private void SeedAdminUser(DamoclesEntities db, System.Data.Entity.DbSet<User> usrs, User su, string em)
+        {
+            su.emailAddress = em;
+            su.UserPasswordHash = "097dfd905dfa0e078883b7afcf7e653dde569bb1ed2ce3384d9c9ed7b85741d6e8d1b1a356318805d3c8b31b36a9916936d005d8134fb015d0392cf75cd7fa24";
+            su.RegisteredDate = DateTime.UtcNow;
+            su.CountryId = 3;
+            su.StateId = 2;
+            su.JurisidictionId = 4;
+            su.LanguagesId = 1;
+            su.IsOnline = false;
+            su.AccountStatusId = 3;
+            su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
+            su.emailAddress = em;
+            su.UserClientID = null;
+            su.CurrentClientID = null;
+            usrs.Add(su);
+            db.SaveChanges();
         }
     }
 }

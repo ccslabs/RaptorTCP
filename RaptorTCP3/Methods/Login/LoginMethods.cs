@@ -62,7 +62,7 @@ namespace RaptorTCP3.Methods.Login
             }
         }
 
-        private void UpdateLoginHistory(string emailAddress)
+        internal void UpdateLoginHistory(string emailAddress)
         {
 
             using (var db = new DamoclesEntities())
@@ -80,4 +80,6 @@ namespace RaptorTCP3.Methods.Login
             }
         }
     }
+
+    
 }

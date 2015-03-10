@@ -82,5 +82,10 @@ namespace RaptorTCP3.Methods.Utilities
                 url = newUrl;
             return newUrl;
         }
+
+        internal string SecondsToDHMS(int Seconds)
+        {
+            return TimeSpan.FromSeconds(Seconds).ToString();
+        }
     }
 }
