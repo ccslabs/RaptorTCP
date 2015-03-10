@@ -20,7 +20,7 @@ using RaptorTCP3.Forms;
 using RaptorTCP3.Methods.Utilities;
 using RaptorTCP3.Methods.Login;
 using RaptorTCP3.Methods.TCPServer;
-using RaptorTCP3.Methods.Utilities.Seeding;
+using RaptorTCP3.Methods.SystemURLS;
 
 namespace RaptorTCP3
 {
@@ -35,18 +35,18 @@ namespace RaptorTCP3
         private LoginMethods LoginMethods = new LoginMethods();
         private Seeding Seeding = new Seeding();
         private TCPServer tcpServer = new TCPServer();
+        private sUrls systemUrls = new sUrls();
 
         private Task t;
 
         NetComm.Host tcpServer = new Host(9119);
 
-        private static string connectionString = "Server=tcp:jy4i6onk8b.database.windows.net,1433;Database=Damocles;User ID=AtarashiNoDaveGordon@jy4i6onk8b;Password=P@r1n@zK0k@b1;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;";
-        private SqlConnection con = new SqlConnection(connectionString);
-        private bool sqlWorking = false;
+        private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
+        
 
         private string ClientLicense = null;
 
-        private ObservableCollection<string> alClients = new ObservableCollection<string>();
+        private ObservableCollection<string> allUsers = new ObservableCollection<string>();
 
         private Queue<string> urlQueue = new Queue<string>();
 
@@ -71,8 +71,21 @@ namespace RaptorTCP3
 
             LoginMethods.LogEvent += LoginMethods_LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
+            systemUrls.LogEvent += systemUrls_LogEvent;
+            systemUrls.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
         }
 
+        void systemUrls_UrlsCountResultEvent(long Result)
+        {
+            throw new NotImplementedException();
+        }
+
+        void systemUrls_LogEvent(string Message)
+        {
+            Log(Message);
+        }
+
+        #region Login Events
         void LoginMethods_LoginResultEvent(bool Result, string Cid)
         {
             Log(Cid + " Is Attempting a Login");
@@ -86,6 +99,9 @@ namespace RaptorTCP3
         {
             Log(Message);
         }
+        #endregion
+
+        
 
         #region cmsSystem Operations
 
@@ -118,7 +134,7 @@ namespace RaptorTCP3
         #region Startup
         private void StartSQLClient()
         {
-            alClients.CollectionChanged += alClients_CollectionChanged;
+            allUsers.CollectionChanged += alClients_CollectionChanged;
 
             Log("Starting SQL Client");
             con.Open();
@@ -135,24 +151,13 @@ namespace RaptorTCP3
 
         void alClients_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (alClients.Count < 1)
+            if (allUsers.Count < 1)
                 IsIdle = true;
             else
                 IsIdle = false;
         }
 
-        private long URLSCount()
-        {
-            Log("Counting URLS");
-
-            using (var db = new DamoclesEntities())
-            {
-                var urls = db.URLS;
-                long result = urls.LongCount();
-                Log("Number of URLS in Database: " + result.ToString("N0"));
-                return result;
-            }
-        }
+      
 
         private void PopulateURLQueue(int numberOfUrlsToGet)
         {
@@ -328,8 +333,8 @@ namespace RaptorTCP3
             if (id.Length > 5)
             {
                 Log("Client Connecting");
-                alClients.Add(id);
-                SetLabel(lblConnections, alClients.Count.ToString("N0"));
+                allUsers.Add(id);
+                SetLabel(lblConnections, allUsers.Count.ToString("N0"));
             }
         }
 
@@ -337,8 +342,8 @@ namespace RaptorTCP3
         {
             if (id.Length > 5)
             {
-                SetLabel(lblConnections, alClients.Count.ToString("N0"));
-                alClients.Remove(id);
+                SetLabel(lblConnections, allUsers.Count.ToString("N0"));
+                allUsers.Remove(id);
                 try
                 {
                     Log("Client Disconnecting");
@@ -429,7 +434,7 @@ namespace RaptorTCP3
 
         void tcpServer_ConnectionClosed()
         {
-            lblConnections.Text = alClients.Count().ToString("N0");
+            lblConnections.Text = allUsers.Count().ToString("N0");
             Log("Connection Closed");
         }
         #endregion
@@ -588,7 +593,7 @@ namespace RaptorTCP3
         {
             Log("Utils.Logging off all clients");
 
-            foreach (string Cid in alClients)
+            foreach (string Cid in allUsers)
             {
                 LogOffUser(Cid);
             }
