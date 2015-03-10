@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using NetComm;
 using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.IO;
@@ -37,7 +36,6 @@ namespace RaptorTCP3
         private Seeding Seeding = new Seeding();
         private TCPServer tcpServer = new TCPServer();
         private sUrls systemUrls = new sUrls();
-
         private Task t;
 
        
@@ -47,7 +45,7 @@ namespace RaptorTCP3
 
         private string ClientLicense = null;
 
-        private ObservableCollection<string> allUsers = new ObservableCollection<string>();
+       
 
         private Queue<string> urlQueue = new Queue<string>();
 
@@ -76,8 +74,37 @@ namespace RaptorTCP3
             systemUrls.LogEvent += LogEvent;
             systemUrls.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
             systemUrls.UrlsToEnqueueEvent += systemUrls_UrlsToEnqueueEvent;
+
+            tcpServer.LogEvent += LogEvent;
+
+            Seeding.LogEvent += LogEvent;
+            Seeding.ProgressChangedEvent += Seeding_ProgressChangedEvent;
+            Seeding.ProgressMaximumChangedEvent += Seeding_ProgressMaximumChangedEvent;
+
+            allUsers.CollectionChanged += allUsers_CollectionChanged;
         }
 
+        void allUsers_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (allUsers.Count < 1)
+                IsIdle = true;
+            else
+                IsIdle = false;
+        }
+
+ 
+        #region Seeding Events
+        void Seeding_ProgressMaximumChangedEvent(int Max)
+        {
+            Progress.Maximum = Max;
+        }
+
+        void Seeding_ProgressChangedEvent(int Value)
+        {
+            Progress.Value = Value;
+        }
+        #endregion
+       
         #region URL Events
         void systemUrls_UrlsToEnqueueEvent(string URL)
         {
@@ -138,49 +165,9 @@ namespace RaptorTCP3
         #endregion
 
         #region Startup
-        private void StartSQLClient()
-        {
-            allUsers.CollectionChanged += alClients_CollectionChanged;
-
-            Log("Starting SQL Client");
-            con.Open();
-            if (URLSCount() == 0)
-            {
-                SeedUrls();
-            }
-
-            if (urlQueue.Count() < 50)
-            {
-                PopulateURLQueue(50);
-            }
-        }
-
-        void alClients_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (allUsers.Count < 1)
-                IsIdle = true;
-            else
-                IsIdle = false;
-        }
-
-
-
-
+       
 
         
-
-
-
-        private void SubscribeToSQLEvents()
-        {
-            Log("Subscribing to SQL Events");
-            con.Disposed += con_Disposed;
-            con.StateChange += con_StateChange;
-            con.InfoMessage += con_InfoMessage;
-            con.FireInfoMessageEventOnUserErrors = true;
-
-        }
-
         void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
             StackFrame frame = new StackFrame(8);
@@ -269,117 +256,7 @@ namespace RaptorTCP3
         }
         #endregion
 
-        #region TCP Events
-        void tcpServer_onConnection(string id)
-        {
-            if (id.Length > 5)
-            {
-                Log("Client Connecting");
-                allUsers.Add(id);
-                SetLabel(lblConnections, allUsers.Count.ToString("N0"));
-            }
-        }
-
-        void tcpServer_lostConnection(string id)
-        {
-            if (id.Length > 5)
-            {
-                SetLabel(lblConnections, allUsers.Count.ToString("N0"));
-                allUsers.Remove(id);
-                try
-                {
-                    Log("Client Disconnecting");
-                    LogOffUser(id);
-                }
-                catch (System.ObjectDisposedException de)
-                {
-                    Log("Disposed... " + de.Message);
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-
-        }
-
-        void tcpServer_errEncounter(Exception ex)
-        {
-            Log("Error: " + ex.Message);
-        }
-
-        void tcpServer_DataTransferred(string Sender, string Recipient, byte[] Data)
-        {
-            Log("Incoming Message from: " + Sender + " to " + Recipient);
-        }
-
-        void tcpServer_DataReceived(string ID, byte[] Data)
-        {
-            string[] command = GetString(Data).Split(' ');
-            switch (command[0].Trim().ToLowerInvariant())
-            {
-                case "Utils.Login":
-                   
-                    break;
-                case "register":
-                    LogID + " Registering In");
-                    if (RegistrationSuccessful(ID, GetString(Data)))
-                        Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
-                    else
-                        Reply(ID, command[0], ServerCommands.Failed.ToString());
-                    break;
-                case "get":
-                    LogID + "Getting URLS");
-                    SendUrls(ID, ServerCommands.Successful.ToString(), GetURLS());
-                    break;
-                case "nop":
-                    // if we receive this - which we shouldn't just ignore it.
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void SendUrls(string ID, string sc, string[] urlList)
-        {
-            Log("Sending URLS");
-            string strBuffer = sc + " ";
-            foreach (string url in urlList)
-            {
-                strBuffer += url + " ";
-            }
-
-            byte[] buffer = GetBytes(strBuffer);
-            tcpServer.SendBufferSize = buffer.Length;
-            string buffersize = ServerCommands.SetMessageSize.ToString() + " " + buffer.Length.ToString();
-
-            tcpServer.SendData(ID, GetBytes(buffersize));
-
-            tcpServer.SendData(ID, buffer);
-
-        }
-
-        private string[] GetURLS()
-        {
-            Log("Getting URLS to Send");
-            string[] urlList = new string[10];
-
-            for (int idx = 0; idx < 10; idx++)
-            {
-                string url = urlQueue.Dequeue().ToString();
-                urlList[idx] = url;
-                UpdateUrlInQueueStatus(url);
-            }
-
-            return urlList;
-        }
-
-        void tcpServer_ConnectionClosed()
-        {
-            lblConnections.Text = allUsers.Count().ToString("N0");
-            Log("Connection Closed");
-        }
-        #endregion
+     
 
         #region Licenses
         private string GenerateTemporaryLicenseNumber(string emailAddress)
@@ -597,70 +474,9 @@ namespace RaptorTCP3
             }
         }
 
-        /// <summary>
-        /// Converts A byte array to a string
-        /// </summary>
-        /// <param name="data">
-        /// Byte[]: The Byte Array to convert
-        /// </param>
-        /// <returns>
-        /// String: The results of the conversion
-        /// </returns>
-        private string GetString(byte[] data)
-        {
-            return Encoding.UTF8.GetString(data, 0, data.Length);
-        }
+      
 
-        /// <summary>
-        /// Converts a string to a Byte Array
-        /// </summary>
-        /// <param name="data">
-        /// String: The text to convert
-        /// </param>
-        /// <returns>
-        /// Byte[]: The result of the conversion
-        /// </returns>
-        private byte[] GetBytes(string data)
-        {
-            return Encoding.UTF8.GetBytes(data);
-        }
-
-        /// <summary>
-        /// The SHA512 Method for hashing passwords before they are stored in the Database
-        /// </summary>
-        /// <param name="Password">
-        /// string: The string representation of the password
-        /// </param>
-        /// <returns>
-        /// String: A Hexadecimal string of 128 characters which represent the password.
-        /// </returns>
-        /// <remarks>
-        /// The Client should send a Hashed Password instead of a plain text password.
-        /// </remarks>
-        private string HashPassword(string Password)
-        {
-            using (SHA512 shaM = new SHA512Managed())
-            {
-                byte[] hash = shaM.ComputeHash(GetBytes(Password));
-                return GetHex(hash);
-            }
-
-        }
-
-        /// <summary>
-        /// Converts a Byte Array to a Hexadecimal string
-        /// </summary>
-        /// <param name="hash">
-        /// Byte[]: The byte array of the password hash to convert to a Hexadecimal string
-        /// </param>
-        /// <returns>
-        /// String: The Hexadecimal string that results from the conversion. 128 characters long.
-        /// </returns>
-        private string GetHex(byte[] hash)
-        {
-            string hex = BitConverter.ToString(hash);
-            return hex.Replace("-", "");
-        }
+      
         #endregion
 
         #region SQL Utilities
@@ -709,51 +525,14 @@ namespace RaptorTCP3
 
         private void seedUrlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SeedUrls();
+            Seeding.SeedUrls();
         }
 
 
 
-        private static string DecodeUrlString(string url)
-        {
-            string newUrl;
-            while ((newUrl = Uri.UnescapeDataString(url)) != url)
-                url = newUrl;
-            return newUrl;
-        }
+       
 
-        private void SaveUrls(ArrayList alUrls)
-        {
-            Log("Seeding URLS");
-            int rows = 0;
-            this.Cursor = Cursors.WaitCursor;
-            Progress.Maximum = alUrls.Count;
-
-            using (var db = new DamoclesEntities())
-            {
-                DeleteAllURLS(db);
-
-                var urls = db.URLS;
-                int idx = 0;
-                foreach (string url in alUrls)
-                {
-                    idx++;
-                    Progress.Value = idx;
-                    string newurl = DecodeUrlString(url);
-
-
-                    urls.Add(AddUrl(url));
-
-                    Application.DoEvents();
-                }
-                db.SaveChanges();
-            }
-
-            Progress.Value = 0;
-            this.Cursor = Cursors.Default;
-            Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
-            alUrls.Clear();
-        }
+       
 
         private static void DeleteAllURLS(DamoclesEntities db)
         {
@@ -765,7 +544,7 @@ namespace RaptorTCP3
         private URL AddUrl(string url)
         {
             URL ue = new URL();
-            ue.UrlHash = HashPassword(url);
+            ue.UrlHash = Utils.HashPassword(url);
             ue.URLPath = url;
             ue.DiscoveredById = 1006;
             ue.DiscoveryDate = DateTime.UtcNow;
