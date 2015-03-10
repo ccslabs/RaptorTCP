@@ -82,6 +82,11 @@
     <Compile Include="Criminal.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <Compile Include="DamoclesDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DamoclesDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="DamoclesModels.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -96,6 +101,12 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>DamoclesModels.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmShowUsers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmShowUsers.Designer.cs">
+      <DependentUpon>frmShowUsers.cs</DependentUpon>
     </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -115,6 +126,10 @@
     <Compile Include="LogonHistory.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <Compile Include="Methods\Login\LoginMethods.cs" />
+    <Compile Include="Methods\TCPServer\TCPServer.cs" />
+    <Compile Include="Methods\Utilities\Seeding.cs" />
+    <Compile Include="Methods\Utilities\Utilities.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Restricted.cs">
@@ -138,6 +153,9 @@
     <Compile Include="User.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\frmShowUsers.resx">
+      <DependentUpon>frmShowUsers.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -154,6 +172,17 @@
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>DamoclesModels.Designer.cs</LastGenOutput>
     </EntityDeploy>
+    <None Include="DamoclesDataSet.xsc">
+      <DependentUpon>DamoclesDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="DamoclesDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DamoclesDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DamoclesDataSet.xss">
+      <DependentUpon>DamoclesDataSet.xsd</DependentUpon>
+    </None>
     <None Include="DamoclesModels.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>DamoclesModels.edmx</DependentUpon>
@@ -168,6 +197,7 @@
       <LastGenOutput>DamoclesModels.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\User.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

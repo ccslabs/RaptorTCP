@@ -16,6 +16,11 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 
+using RaptorTCP3.Forms;
+using RaptorTCP3.Methods.Utilities;
+using RaptorTCP3.Methods.Login;
+using RaptorTCP3.Methods.TCPServer;
+
 namespace RaptorTCP3
 {
     public partial class frmMain : Form
@@ -24,6 +29,9 @@ namespace RaptorTCP3
         delegate void SetLabelTextCallback(Label ctrl, string text);
         delegate void SetToolStripCallBack(string text);
         delegate void SetStatusLabelTextCallback(ToolStripStatusLabel ctrl, string text);
+
+        private Utilities Utils = new Utilities();
+        private LoginMethods LoginMethods = new LoginMethods();
 
         private Task t;
 
@@ -47,7 +55,7 @@ namespace RaptorTCP3
         public frmMain(bool ForceRegistration = false)
         {
             InitializeComponent();
-            Log("Server Starting");
+            Utils.Log("Server Starting");
             panel1.Top = 0;
             panel1.Left = 0;
             panel1.Width = this.Width;
@@ -64,7 +72,7 @@ namespace RaptorTCP3
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            Log("Exiting");
+            Utils.Log("Exiting");
             if (tcpServer.Listening)
             {
 
@@ -92,7 +100,7 @@ namespace RaptorTCP3
         {
             alClients.CollectionChanged += alClients_CollectionChanged;
 
-            Log("Starting SQL Client");
+            Utils.Log("Starting SQL Client");
             con.Open();
             if (URLSCount() == 0)
             {
@@ -115,20 +123,20 @@ namespace RaptorTCP3
 
         private long URLSCount()
         {
-            Log("Counting URLS");
+            Utils.Log("Counting URLS");
 
             using (var db = new DamoclesEntities())
             {
                 var urls = db.URLS;
                 long result = urls.LongCount();
-                Log("Number of URLS in Database: " + result.ToString("N0"));
+                Utils.Log("Number of URLS in Database: " + result.ToString("N0"));
                 return result;
             }
         }
 
         private void PopulateURLQueue(int numberOfUrlsToGet)
         {
-            Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
+            Utils.Log("Populating URL Queue, Adding " + numberOfUrlsToGet);
 
             using (var db = new DamoclesEntities())
             {
@@ -145,7 +153,7 @@ namespace RaptorTCP3
                     db.SaveChanges();
                 }
             }
-            Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
+            Utils.Log("Added  " + urlQueue.Count().ToString("N0") + "  to the Queue");
 
         }
 
@@ -159,7 +167,7 @@ namespace RaptorTCP3
                     var result = urls.FirstOrDefault(u => u.URLPath == url);
                     result.IsInProcessingQueue = true;
                     int rows = db.SaveChanges();
-                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
+                    if (rows < 1) Utils.Log("Failed to Set Url to IsInProcessingQueue = True " + url);
                 }
             }
         }
@@ -174,14 +182,14 @@ namespace RaptorTCP3
                     var result = urls.FirstOrDefault(u => u.URLPath == url);
                     result.IsInProcessingQueue = true;
                     int rows = db.SaveChanges();
-                    if (rows < 1) Log("Failed to Set Url to IsInProcessingQueue = True " + url);
+                    if (rows < 1) Utils.Log("Failed to Set Url to IsInProcessingQueue = True " + url);
                 }
             }
         }
 
         private void SubscribeToSQLEvents()
         {
-            Log("Subscribing to SQL Events");
+            Utils.Log("Subscribing to SQL Events");
             con.Disposed += con_Disposed;
             con.StateChange += con_StateChange;
             con.InfoMessage += con_InfoMessage;
@@ -197,7 +205,7 @@ namespace RaptorTCP3
             var name = method.Name;
 
             string m = e.Message;
-            Log("SQL InfoMessage (" + name + ") " + e.Message);
+            Utils.Log("SQL InfoMessage (" + name + ") " + e.Message);
         }
 
         void con_StateChange(object sender, StateChangeEventArgs e)
@@ -207,16 +215,16 @@ namespace RaptorTCP3
                 switch (con.State)
                 {
                     case ConnectionState.Broken:
-                        Log("SQL Connection Broken");
+                        Utils.Log("SQL Connection Broken");
                         con.Close();
                         con.Open();
                         break;
                     case ConnectionState.Closed:
-                        Log("SQL Connection Closed");
+                        Utils.Log("SQL Connection Closed");
                         con.Open();
                         break;
                     case ConnectionState.Open:
-                        Log("SQL Connection Open");
+                        Utils.Log("SQL Connection Open");
                         break;
                 }
             }
@@ -224,20 +232,20 @@ namespace RaptorTCP3
 
         void con_Disposed(object sender, EventArgs e)
         {
-            Log("SQL Connection Disposed");
+            Utils.Log("SQL Connection Disposed");
             sqlWorking = false;
         }
 
         private void StartServerListening()
         {
-            Log("Server is Listening");
+            Utils.Log("Server is Listening");
             tcpServer.StartConnection();
             Broadcast(ServerCommands.Resume.ToString());  // Tell any waiting Clients they can resume communications.
         }
 
         private void SubscribeToNetCommEvents()
         {
-            Log("Subscribing to NetCom Events");
+            Utils.Log("Subscribing to NetCom Events");
             tcpServer.ConnectionClosed += tcpServer_ConnectionClosed;
             tcpServer.DataReceived += tcpServer_DataReceived;
             tcpServer.DataTransferred += tcpServer_DataTransferred;
@@ -272,13 +280,13 @@ namespace RaptorTCP3
         #region Send and Reply TCP Messages
         private void Broadcast(string Message)
         {
-            Log("Broadcasting: " + Message); ;
+            Utils.Log("Broadcasting: " + Message); ;
             tcpServer.Brodcast(GetBytes(Message));
         }
 
         private void Reply(string ID, string callingCommand, string Result)
         {
-            Log("Replying to " + ID);
+            Utils.Log("Replying to " + ID);
             string cr = callingCommand + " " + Result;
             byte[] commandResult = GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
@@ -287,7 +295,7 @@ namespace RaptorTCP3
 
         private void Reply(string ID, string callingCommand, string Result, string returnedValue)
         {
-            Log("Replying to " + ID);
+            Utils.Log("Replying to " + ID);
             string cr = callingCommand + " " + Result + " " + returnedValue;
             byte[] commandResult = GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
@@ -299,7 +307,7 @@ namespace RaptorTCP3
         {
             if (id.Length > 5)
             {
-                Log("Client Connecting");
+                Utils.Log("Client Connecting");
                 alClients.Add(id);
                 SetLabel(lblConnections, alClients.Count.ToString("N0"));
             }
@@ -313,12 +321,12 @@ namespace RaptorTCP3
                 alClients.Remove(id);
                 try
                 {
-                    Log("Client Disconnecting");
+                    Utils.Log("Client Disconnecting");
                     LogOffUser(id);
                 }
                 catch (System.ObjectDisposedException de)
                 {
-                    Log("Disposed... " + de.Message);
+                    Utils.Log("Disposed... " + de.Message);
                 }
                 catch (Exception)
                 {
@@ -330,12 +338,12 @@ namespace RaptorTCP3
 
         void tcpServer_errEncounter(Exception ex)
         {
-            Log("Error: " + ex.Message);
+           Utils.Log("Error: " + ex.Message);
         }
 
         void tcpServer_DataTransferred(string Sender, string Recipient, byte[] Data)
         {
-            Log("Incoming Message from: " + Sender + " to " + Recipient);
+            Utils.Log("Incoming Message from: " + Sender + " to " + Recipient);
         }
 
         void tcpServer_DataReceived(string ID, byte[] Data)
@@ -343,22 +351,22 @@ namespace RaptorTCP3
             string[] command = GetString(Data).Split(' ');
             switch (command[0].Trim().ToLowerInvariant())
             {
-                case "login":
-                    Log(ID + " Logging In");
+                case "Utils.Login":
+                    Utils.Log(ID + " Utils.Logging In");
                     if (LoginSuccessful(ID, GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "register":
-                    Log(ID + " Registering In");
+                    Utils.Log(ID + " Registering In");
                     if (RegistrationSuccessful(ID, GetString(Data)))
                         Reply(ID, command[0], ServerCommands.Successful.ToString(), ClientLicense);
                     else
                         Reply(ID, command[0], ServerCommands.Failed.ToString());
                     break;
                 case "get":
-                    Log(ID + "Getting URLS");
+                    Utils.Log(ID + "Getting URLS");
                     SendUrls(ID, ServerCommands.Successful.ToString(), GetURLS());
                     break;
                 case "nop":
@@ -371,7 +379,7 @@ namespace RaptorTCP3
 
         private void SendUrls(string ID, string sc, string[] urlList)
         {
-            Log("Sending URLS");
+            Utils.Log("Sending URLS");
             string strBuffer = sc + " ";
             foreach (string url in urlList)
             {
@@ -390,7 +398,7 @@ namespace RaptorTCP3
 
         private string[] GetURLS()
         {
-            Log("Getting URLS to Send");
+            Utils.Log("Getting URLS to Send");
             string[] urlList = new string[10];
 
             for (int idx = 0; idx < 10; idx++)
@@ -406,7 +414,7 @@ namespace RaptorTCP3
         void tcpServer_ConnectionClosed()
         {
             lblConnections.Text = alClients.Count().ToString("N0");
-            Log("Connection Closed");
+            Utils.Log("Connection Closed");
         }
         #endregion
 
@@ -434,7 +442,7 @@ namespace RaptorTCP3
             }
             catch (SqlException sqle)
             {
-                Log("SQL ERROR: " + sqle.Message);
+                Utils.Log("SQL ERROR: " + sqle.Message);
             }
 
         }
@@ -449,7 +457,7 @@ namespace RaptorTCP3
         }
         #endregion
 
-        #region Login And Register
+        #region Utils.Login And Register
 
         private bool RegistrationSuccessful(string ID, string commandParams)
         {
@@ -474,7 +482,7 @@ namespace RaptorTCP3
                 int rows = db.SaveChanges();
                 if (rows < 1)
                 {
-                    Log("Failed to Add user: " + emailAddress);
+                    Utils.Log("Failed to Add user: " + emailAddress);
                     return false;
                 }
                 else
@@ -532,50 +540,16 @@ namespace RaptorTCP3
                 int rows = db.SaveChanges();
                 if (rows < 1)
                 {
-                    Log("Failed to Add User's Logon History Record " + emailAddress);
+                    Utils.Log("Failed to Add User's Utils.Logon History Record " + emailAddress);
                 }
             }
         }
 
-        private bool LoginSuccessful(string Cid, string commandParams)
-        {
-            string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
-            if (command[0] == "login")
-            {
-                return Login(Cid, command[1], command[2]);
-            }
-            return false;
-        }
-
-        private bool Login(string Cid, string emailAddress, string Password)
-        {
-            // Does the User Exist in the Database?
-            using (var db = new DamoclesEntities())
-            {
-
-                var uid = GetUserID(emailAddress);
-                var user = db.Users.First(u => u.UserId == uid);
-                user.IsOnline = true;   // Set the User to Online
-                //user.CurrentClientID = Cid;
-                int rows = db.SaveChanges();
-                UpdateLoginHistory(emailAddress); // Add the User's Logon History
-                AddClient(Cid, emailAddress);   // Add the User's Client for this logon
-                if (rows == 1)
-                {
-                    Log(emailAddress + " is Logged In");
-                    return true;
-                }
-                else
-                {
-                    Log(emailAddress + " Failed to Log In");
-                    return false;
-                }
-            }
-        }
+      
 
         private void LogOffUser(string Cid)
         {
-            //TODO: We need to store the User Clients IDs when they log on so we can log them off properly at the end!
+            //TODO: We need to store the User Clients IDs when they Utils.Log on so we can Utils.Log them off properly at the end!
             if (Cid.Contains("-")) // Internally generated IDs do not contains hyphens.
             {
 
@@ -588,12 +562,12 @@ namespace RaptorTCP3
                     UpdateLogOffHistory(emailAddress);
                     if (rows == 1)
                     {
-                        Log(emailAddress + " is Logged In");
+                        Utils.Log(emailAddress + " is Utils.Logged In");
 
                     }
                     else
                     {
-                        Log(emailAddress + " Failed to Log In");
+                        Utils.Log(emailAddress + " Failed to Utils.Log In");
 
                     }
                 }
@@ -627,14 +601,14 @@ namespace RaptorTCP3
 
         private void LogOffAllUsers()
         {
-            Log("Logging off all clients");
+            Utils.Log("Utils.Logging off all clients");
 
             foreach (string Cid in alClients)
             {
                 LogOffUser(Cid);
             }
 
-            Log("All users have been Logged Off");
+            Utils.Log("All users have been Logged Off");
 
         }
         #endregion
@@ -643,7 +617,7 @@ namespace RaptorTCP3
 
         private void DisconnectAll()
         {
-            Log("Disconnecting all Clients");
+            Utils.Log("Disconnecting all Clients");
             Parallel.ForEach(tcpServer.Users, ClientID =>
             {
                 tcpServer.DisconnectUser(ClientID.ToString());
@@ -663,37 +637,7 @@ namespace RaptorTCP3
             }
         }
 
-        /// <summary>
-        /// Logs the activities of both the TCP Server AND the SQL sub-system.
-        /// </summary>
-        /// <param name="message">
-        /// String: Any message that needs to be displayed.
-        /// </param>
-        private void Log(string message)
-        {
-            string[] parts = message.Split(' ');
-            if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() == "client")
-            { }
-            else if (parts[0].ToLowerInvariant().Trim() == "client")
-            { }
-            else
-            {
-                if (!ConOut.IsDisposed)
-                {
-                    if (this.ConOut.InvokeRequired)
-                    {
-                        SetTextCallback d = new SetTextCallback(Log);
-                        this.Invoke(d, new object[] { message });
-                    }
-                    else
-                    {
-                        ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
-                        ConOut.Focus();
-                    }
-                }
-                UpdateStatusMessage(message);
-            }
-        }
+       
 
         private void UpdateStatusMessage(string message)
         {
@@ -808,7 +752,7 @@ namespace RaptorTCP3
 
         private void StartUp()
         {
-            Log("Application Loaded");
+            Utils.Log("Application Loaded");
             // Subscribe to NetComm Events
             SubscribeToNetCommEvents();
             SubscribeToSQLEvents();
@@ -819,8 +763,8 @@ namespace RaptorTCP3
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Log("Application Closing");
-            LogOffAllUsers();
+            Utils.Log("Application Closing");
+            Utils.LogOffAllUsers();
             Broadcast(ServerCommands.UseCache.ToString());
             t.Dispose();
             t.Wait();
@@ -836,43 +780,7 @@ namespace RaptorTCP3
             SeedUrls();
         }
 
-        private void SeedUrls()
-        {
-            // Load URLS from file
-            FileStream fs = null;
-            StreamReader sr = null;
-            ArrayList alUrls = new ArrayList();
-
-            try
-            {
-                fs = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "bookmarks_3_6_15.html"), FileMode.Open, FileAccess.Read, FileShare.None);
-                sr = new StreamReader(fs);
-                this.Cursor = Cursors.WaitCursor;
-                while (!sr.EndOfStream)
-                {
-                    string line = sr.ReadLine().Replace("\t", "").Trim();
-                    if (line.StartsWith("http://") || line.StartsWith("https://"))
-                    {
-                        string[] parts = line.Split(' ');
-                        string url = parts[0].Replace("\"", "").Trim();
-                        if (!alUrls.Contains(url)) alUrls.Add(url);
-                    }
-                    Application.DoEvents();
-                }
-                this.Cursor = Cursors.Default;
-                sr.Close();
-                fs.Close();
-
-
-                SaveUrls(alUrls);
-            }
-            catch (Exception ex)
-            {
-                Log("Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
-                if (sr != null) sr.Close();
-                if (fs != null) fs.Close();
-            }
-        }
+        
 
         private static string DecodeUrlString(string url)
         {
@@ -884,7 +792,7 @@ namespace RaptorTCP3
 
         private void SaveUrls(ArrayList alUrls)
         {
-            Log("Seeding URLS");
+            Utils.Log("Seeding URLS");
             int rows = 0;
             this.Cursor = Cursors.WaitCursor;
             Progress.Maximum = alUrls.Count;
@@ -911,7 +819,7 @@ namespace RaptorTCP3
 
             Progress.Value = 0;
             this.Cursor = Cursors.Default;
-            Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
+            Utils.Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
         }
 
@@ -1027,6 +935,17 @@ namespace RaptorTCP3
             var all = from c in db.Users select c;
             db.Users.RemoveRange(all);
             db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Show all the Registered users
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void showUsersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmShowUsers showUsers = new frmShowUsers();
+            showUsers.Show();
         }
 
     }
