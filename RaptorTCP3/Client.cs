@@ -15,11 +15,11 @@ namespace RaptorTCP3
     public partial class Client
     {
         public int ClientsID { get; set; }
-        public string ClientId { get; set; }
         public string IP_Address { get; set; }
         public string MachineName { get; set; }
         public string LoggedOnUserName { get; set; }
         public int UserId { get; set; }
+        public string RaptorClientID { get; set; }
     
         public virtual User User { get; set; }
     }

@@ -506,21 +506,16 @@ namespace RaptorTCP3
         {
             int rid = 0;
             using (var db = new DamoclesEntities())
-            {                
-                var nclient = new Client();
-                nclient.ClientId = ClientID;
+            {
+                var c = db.Clients;
+                var nclient = new Client();                
+                nclient.RaptorClientID = ClientID;
+                nclient.UserId = GetUserID(emailAddress);
+                c.Add(nclient);
+                db.SaveChanges();
+                rid = nclient.ClientsID;
                 
-                
-
-
-
-                //rid = client.ClientsID; // Newly saved Client RowID
-
-                //int uid = GetUserID(emailAddress); // The User associated with this Email Address and ClientID
-
-
-                //db.SaveChanges();
-                return 1;
+                return rid;
             }
         }
 
@@ -560,10 +555,11 @@ namespace RaptorTCP3
 
                 var uid = GetUserID(emailAddress);
                 var user = db.Users.First(u => u.UserId == uid);
-                user.IsOnline = true;
+                user.IsOnline = true;   // Set the User to Online
                 //user.CurrentClientID = Cid;
                 int rows = db.SaveChanges();
-                UpdateLoginHistory(emailAddress);
+                UpdateLoginHistory(emailAddress); // Add the User's Logon History
+                AddClient(Cid, emailAddress);   // Add the User's Client for this logon
                 if (rows == 1)
                 {
                     Log(emailAddress + " is Logged In");
@@ -585,21 +581,21 @@ namespace RaptorTCP3
 
                 using (var db = new DamoclesEntities())
                 {
-                    //var user = db.Users.First(u => u.CurrentClientID == Cid);
-                    //user.IsOnline = true;
-                    //int rows = db.SaveChanges();
-                    //string emailAddress = GetUserEmailAddressByID(Cid);
-                    //UpdateLogOffHistory(emailAddress);
-                    //if (rows == 1)
-                    //{
-                    //    Log(emailAddress + " is Logged In");
+                    var user = db.Users.First(u => u.CurrentClientID  == Cid);
+                    user.IsOnline = false;
+                    int rows = db.SaveChanges();
+                    string emailAddress = GetUserEmailAddressByID(Cid);
+                    UpdateLogOffHistory(emailAddress);
+                    if (rows == 1)
+                    {
+                        Log(emailAddress + " is Logged In");
 
-                    //}
-                    //else
-                    //{
-                    //    Log(emailAddress + " Failed to Log In");
+                    }
+                    else
+                    {
+                        Log(emailAddress + " Failed to Log In");
 
-                    //}
+                    }
                 }
             }
         }

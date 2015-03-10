@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AccountStatus">
           <Key>
             <PropertyRef Name="Id" />
@@ -34,11 +34,11 @@
             <PropertyRef Name="ClientsID" />
           </Key>
           <Property Name="ClientsID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="ClientId" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="RaptorClientID" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="IP Address" Type="nvarchar" MaxLength="50" />
           <Property Name="MachineName" Type="nvarchar" MaxLength="150" />
           <Property Name="LoggedOnUserName" Type="nvarchar" MaxLength="150" />
-          <Property Name="UserId" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="ContentObjects">
           <Key>
@@ -663,8 +663,7 @@
             <End Role="Users" EntitySet="Users" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DamoclesModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -704,12 +703,12 @@
             <PropertyRef Name="ClientsID" />
           </Key>
           <Property Name="ClientsID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ClientId" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="IP_Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="MachineName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
           <Property Name="LoggedOnUserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
           <Property Name="UserId" Type="Int32" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Self.FK_Clients_Users_UserId" FromRole="Clients" ToRole="Users" />
+          <Property Name="RaptorClientID" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="ContentObject">
           <Key>
@@ -1418,8 +1417,8 @@
           <EntitySetMapping Name="Clients">
             <EntityTypeMapping TypeName="DamoclesModel.Client">
               <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="RaptorClientID" ColumnName="RaptorClientID" />
                 <ScalarProperty Name="ClientsID" ColumnName="ClientsID" />
-                <ScalarProperty Name="ClientId" ColumnName="ClientId" />
                 <ScalarProperty Name="IP_Address" ColumnName="IP Address" />
                 <ScalarProperty Name="MachineName" ColumnName="MachineName" />
                 <ScalarProperty Name="LoggedOnUserName" ColumnName="LoggedOnUserName" />
