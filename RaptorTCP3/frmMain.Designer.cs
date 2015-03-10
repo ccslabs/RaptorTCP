@@ -45,6 +45,8 @@
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblIdleTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblQueueLength = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.lblConnections = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.ConOut = new System.Windows.Forms.RichTextBox();
@@ -65,8 +67,6 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timerOneSecond = new System.Windows.Forms.Timer(this.components);
-            this.lblQueueLength = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.cmsSystem.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -216,6 +216,24 @@
             this.panel1.Size = new System.Drawing.Size(1122, 179);
             this.panel1.TabIndex = 4;
             // 
+            // lblQueueLength
+            // 
+            this.lblQueueLength.AutoSize = true;
+            this.lblQueueLength.Location = new System.Drawing.Point(396, 9);
+            this.lblQueueLength.Name = "lblQueueLength";
+            this.lblQueueLength.Size = new System.Drawing.Size(13, 13);
+            this.lblQueueLength.TabIndex = 3;
+            this.lblQueueLength.Text = "0";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(312, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(78, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Queue Length:";
+            // 
             // lblConnections
             // 
             this.lblConnections.AutoSize = true;
@@ -293,20 +311,20 @@
             this.fullResetToolStripMenuItem,
             this.seedUrlsToolStripMenuItem});
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.resetToolStripMenuItem.Text = "Reset";
-            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
             // 
             // fullResetToolStripMenuItem
             // 
             this.fullResetToolStripMenuItem.Name = "fullResetToolStripMenuItem";
-            this.fullResetToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.fullResetToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.fullResetToolStripMenuItem.Text = "Full Reset";
+            this.fullResetToolStripMenuItem.Click += new System.EventHandler(this.fullResetToolStripMenuItem_Click);
             // 
             // seedUrlsToolStripMenuItem
             // 
             this.seedUrlsToolStripMenuItem.Name = "seedUrlsToolStripMenuItem";
-            this.seedUrlsToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.seedUrlsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.seedUrlsToolStripMenuItem.Text = "Seed Urls";
             this.seedUrlsToolStripMenuItem.Click += new System.EventHandler(this.seedUrlsToolStripMenuItem_Click);
             // 
@@ -377,24 +395,6 @@
             this.timerOneSecond.Enabled = true;
             this.timerOneSecond.Interval = 1000;
             this.timerOneSecond.Tick += new System.EventHandler(this.timerOneSecond_Tick);
-            // 
-            // lblQueueLength
-            // 
-            this.lblQueueLength.AutoSize = true;
-            this.lblQueueLength.Location = new System.Drawing.Point(396, 9);
-            this.lblQueueLength.Name = "lblQueueLength";
-            this.lblQueueLength.Size = new System.Drawing.Size(13, 13);
-            this.lblQueueLength.TabIndex = 3;
-            this.lblQueueLength.Text = "0";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(312, 9);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(78, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Queue Length:";
             // 
             // frmMain
             // 

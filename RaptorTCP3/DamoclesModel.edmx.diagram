@@ -54,10 +54,8 @@
         <AssociationConnector Association="DamoclesModel.FK_URLS_UsersDiscoveredBy_UserId" ManuallyRouted="false" />
         <AssociationConnector Association="DamoclesModel.FK_UrlSources_SourceURLS_UrlId" ManuallyRouted="false" />
         <AssociationConnector Association="DamoclesModel.FK_UrlSources_URLS_UrlId" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="DamoclesModel.ClientID" Width="1.5" PointX="9.875" PointY="17.375" />
-        <EntityTypeShape EntityType="DamoclesModel.Client" Width="1.5" PointX="12.375" PointY="17.375" />
-        <AssociationConnector Association="DamoclesModel.FK_ClientIDs_Clients_ClientsID" />
-        <AssociationConnector Association="DamoclesModel.FK_ClientIDs_Users_UserId" />
+        <EntityTypeShape EntityType="DamoclesModel.Client" Width="1.5" PointX="9.75" PointY="17.375" />
+        <AssociationConnector Association="DamoclesModel.FK_Clients_Users_UserId" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

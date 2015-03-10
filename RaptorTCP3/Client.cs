@@ -14,17 +14,13 @@ namespace RaptorTCP3
     
     public partial class Client
     {
-        public Client()
-        {
-            this.ClientIDs = new HashSet<ClientID>();
-        }
-    
         public int ClientsID { get; set; }
         public string ClientId { get; set; }
         public string IP_Address { get; set; }
         public string MachineName { get; set; }
         public string LoggedOnUserName { get; set; }
+        public int UserId { get; set; }
     
-        public virtual ICollection<ClientID> ClientIDs { get; set; }
+        public virtual User User { get; set; }
     }
 }

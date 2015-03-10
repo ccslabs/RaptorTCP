@@ -507,18 +507,19 @@ namespace RaptorTCP3
             int rid = 0;
             using (var db = new DamoclesEntities())
             {
-                var client = new Client();
-                client.ClientId = ClientID;
-                db.SaveChanges();
-                rid = client.ClientsID; // Newly saved Client RowID
+                System.Data.Entity.DbSet<Client> client = db.Client;
 
-                int uid = GetUserID(emailAddress); // The User associated with this Email Address and ClientID
+                
 
-                var cids = new ClientID();
-                cids.UserID = uid;
-                cids.ClientID1 = rid;
-                db.SaveChanges();
-                return cids.UserClientID;
+
+
+                //rid = client.ClientsID; // Newly saved Client RowID
+
+                //int uid = GetUserID(emailAddress); // The User associated with this Email Address and ClientID
+
+
+                //db.SaveChanges();
+                return 1;
             }
         }
 
@@ -559,7 +560,7 @@ namespace RaptorTCP3
                 var uid = GetUserID(emailAddress);
                 var user = db.Users.First(u => u.UserId == uid);
                 user.IsOnline = true;
-                user.CurrentClientID = Cid;
+                //user.CurrentClientID = Cid;
                 int rows = db.SaveChanges();
                 UpdateLoginHistory(emailAddress);
                 if (rows == 1)
@@ -583,21 +584,21 @@ namespace RaptorTCP3
 
                 using (var db = new DamoclesEntities())
                 {
-                    var user = db.Users.First(u => u.CurrentClientID == Cid);
-                    user.IsOnline = true;
-                    int rows = db.SaveChanges();
-                    string emailAddress = GetUserEmailAddressByID(Cid);
-                    UpdateLogOffHistory(emailAddress);
-                    if (rows == 1)
-                    {
-                        Log(emailAddress + " is Logged In");
+                    //var user = db.Users.First(u => u.CurrentClientID == Cid);
+                    //user.IsOnline = true;
+                    //int rows = db.SaveChanges();
+                    //string emailAddress = GetUserEmailAddressByID(Cid);
+                    //UpdateLogOffHistory(emailAddress);
+                    //if (rows == 1)
+                    //{
+                    //    Log(emailAddress + " is Logged In");
 
-                    }
-                    else
-                    {
-                        Log(emailAddress + " Failed to Log In");
+                    //}
+                    //else
+                    //{
+                    //    Log(emailAddress + " Failed to Log In");
 
-                    }
+                    //}
                 }
             }
         }
@@ -830,13 +831,7 @@ namespace RaptorTCP3
         #endregion
 
         #region Menu Events
-        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Delete ALL Database Data - 
-
-            // Seed the Database Again
-            SeedUrls();
-        }
+       
         #endregion
 
         private void seedUrlsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -899,9 +894,7 @@ namespace RaptorTCP3
 
             using (var db = new DamoclesEntities())
             {
-                var all = from c in db.URLS select c;
-                db.URLS.RemoveRange(all);
-                db.SaveChanges();
+                DeleteAllURLS(db);
 
                 var urls = db.URLS;
                 int idx = 0;
@@ -923,6 +916,13 @@ namespace RaptorTCP3
             this.Cursor = Cursors.Default;
             Log("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
+        }
+
+        private static void DeleteAllURLS(DamoclesEntities db)
+        {
+            var all = from c in db.URLS select c;
+            db.URLS.RemoveRange(all);
+            db.SaveChanges();
         }
 
         private URL AddUrl(string url)
@@ -959,6 +959,77 @@ namespace RaptorTCP3
         private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void fullResetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeedUsers();
+            SeedUrls();
+        }
+
+        private void SeedUsers()
+        {
+           
+
+            using(var db = new DamoclesEntities())
+            {
+                DeleteAllUsers(db);
+               
+                var usrs = db.Users;
+                var su = new User();
+                var em = "dave@ccs-labs.com";
+                SeedAdminUser(db, usrs, su, em);
+
+                su = new User();
+                em = "system@ccs-labs.com";
+                SeedSystemUser(db, usrs, su, em);
+
+            }
+        }
+
+        private void SeedSystemUser(DamoclesEntities db, System.Data.Entity.DbSet<User> usrs, User su, string em)
+        {
+            su.emailAddress = em;
+            su.UserPasswordHash = "097dfd905dfa0e078883b7afcf7e653dde569bb1ed2ce3384d9c9ed7b85741d6e8d1b1a356318805d3c8b31b36a9916936d005d8134fb015d0392cf75cd7fa24";
+            su.RegisteredDate = DateTime.UtcNow;
+            su.CountryId = 3;
+            su.StateId = 2;
+            su.JurisidictionId = 4;
+            su.LanguagesId = 1;
+            su.IsOnline = false;
+            su.AccountStatusId = 3;
+            su.LicenseNumber = GenerateTemporaryLicenseNumber(em);
+            su.emailAddress = em;
+            //su.UserClientID = null;
+            //su.CurrentClientID = null;
+            usrs.Add(su);
+            db.SaveChanges();
+        }
+
+        private void SeedAdminUser(DamoclesEntities db, System.Data.Entity.DbSet<User> usrs, User su, string em)
+        {
+            su.emailAddress = em;
+            su.UserPasswordHash = "097dfd905dfa0e078883b7afcf7e653dde569bb1ed2ce3384d9c9ed7b85741d6e8d1b1a356318805d3c8b31b36a9916936d005d8134fb015d0392cf75cd7fa24";
+            su.RegisteredDate = DateTime.UtcNow;
+            su.CountryId = 3;
+            su.StateId = 2;
+            su.JurisidictionId = 4;
+            su.LanguagesId = 1;
+            su.IsOnline = false;
+            su.AccountStatusId = 3;
+            su.LicenseNumber = GenerateTemporaryLicenseNumber(em);
+            su.emailAddress = em;
+            su.UserClientID = null;
+            su.CurrentClientID = null;
+            usrs.Add(su);
+            db.SaveChanges();
+        }
+
+        private static void DeleteAllUsers(DamoclesEntities db)
+        {
+            var all = from c in db.Users select c;
+            db.Users.RemoveRange(all);
+            db.SaveChanges();
         }
 
     }

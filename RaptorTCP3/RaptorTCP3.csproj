@@ -67,9 +67,6 @@
     <Compile Include="Client.cs">
       <DependentUpon>DamoclesModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="ClientID.cs">
-      <DependentUpon>DamoclesModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="ContentObject.cs">
       <DependentUpon>DamoclesModel.tt</DependentUpon>
     </Compile>
