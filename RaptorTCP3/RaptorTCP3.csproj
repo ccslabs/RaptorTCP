@@ -128,6 +128,7 @@
     </Compile>
     <Compile Include="Methods\Login\LoginMethods.cs" />
     <Compile Include="Methods\TCPServer\TCPServer.cs" />
+    <Compile Include="Methods\Users\Users.cs" />
     <Compile Include="Methods\Utilities\Seeding.cs" />
     <Compile Include="Methods\Utilities\Utilities.cs" />
     <Compile Include="Program.cs" />
