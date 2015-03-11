@@ -49,7 +49,7 @@ namespace RaptorTCP3.Methods.SystemURLS
         {
             if (UrlsToProcessCount() > 0)
             {
-              if(MoreUrlsLeftToProcessEvent != null)  MoreUrlsLeftToProcessEvent();
+                if (MoreUrlsLeftToProcessEvent != null) MoreUrlsLeftToProcessEvent();
                 timerMonitor.Stop();
             }
         }
@@ -70,7 +70,7 @@ namespace RaptorTCP3.Methods.SystemURLS
         internal long UrlsToProcessCount()
         {
             if (LogEvent != null) LogEvent("Counting URLS that still need to be processed");
-            long result  = -1;
+            long result = -1;
             using (var db = new DamoclesEntities())
             {
                 var urls = db.URLS;
@@ -87,9 +87,9 @@ namespace RaptorTCP3.Methods.SystemURLS
                     if (NoUrlsLeftToProcessEvent != null) NoUrlsLeftToProcessEvent();
                     StartURLMonitor();
                 }
-                
+
                 return result;
-            }           
+            }
         }
 
         internal void PopulateURLQueue(long numberOfUrlsToGet)
@@ -100,7 +100,7 @@ namespace RaptorTCP3.Methods.SystemURLS
             {
                 if (toprocess < numberOfUrlsToGet) numberOfUrlsToGet = toprocess;
                 if (LogEvent != null) LogEvent("Populating URL Queue, Adding " + numberOfUrlsToGet);
-                if (ProgressMaximumChangedEvent != null)  ProgressMaximumChangedEvent(int.Parse(numberOfUrlsToGet.ToString()));
+                if (ProgressMaximumChangedEvent != null) ProgressMaximumChangedEvent(int.Parse(numberOfUrlsToGet.ToString()));
 
                 using (var db = new DamoclesEntities())
                 {
@@ -117,6 +117,8 @@ namespace RaptorTCP3.Methods.SystemURLS
                     }
                 }
                 if (ProgressMaximumChangedEvent != null && ProgressChangedEvent != null) ProgressChangedEvent(0);
+                if (LogEvent != null) LogEvent("Populating URL Queue Completed ");
+                if (MoreUrlsLeftToProcessEvent != null) MoreUrlsLeftToProcessEvent(); // Tell the main program it can start sending URLS again
             }
             else
             {
@@ -144,14 +146,14 @@ namespace RaptorTCP3.Methods.SystemURLS
 
         private void SetUrlToInProcessingQueue(string url)
         {
-           
+
             UpdateUrlInQueueStatus(url);
         }
 
         internal void UpdateUrlInQueueStatus(string url)
         {
-            if (LogEvent != null) LogEvent("Setting URL to InProcessingQueue");
-            
+           
+
             if (!string.IsNullOrEmpty(url))
             {
                 using (var db = new DamoclesEntities())
@@ -160,9 +162,9 @@ namespace RaptorTCP3.Methods.SystemURLS
                     var result = urls.FirstOrDefault(u => u.URLPath == url);
                     result.IsInProcessingQueue = true;
                     int rows = db.SaveChanges();
-                    if (rows < 1) if (LogEvent != null) LogEvent("Failed to Set Url to IsInProcessingQueue = True " + url);
-                        else
-                            if (LogEvent != null) LogEvent("URL Status Now InProcessingQueue ");
+                    if (rows < 1)
+                        LogEvent("Failed to Set Url to IsInProcessingQueue = True " + url);
+                   
                 }
             }
         }
