@@ -27,6 +27,12 @@ namespace RaptorTCP3.Methods.Utilities
         public delegate void ProgressMaximumChangedEventHandler(int Progress);
         public event ProgressMaximumChangedEventHandler ProgressMaximumChangedEvent;
 
+
+        public delegate void BroadcastWaitEventHandler();
+        public event BroadcastWaitEventHandler BroadcastWaitEvent;
+        public delegate void BroadcastResumeEventHandler();
+        public event BroadcastResumeEventHandler BroadcastResumeEvent;
+
         public Seeding()
         {
 
@@ -34,7 +40,8 @@ namespace RaptorTCP3.Methods.Utilities
 
         internal void SeedUrls()
         {
-           if(LogEvent != null) LogEvent("Loading URL Seed Data");
+            if (BroadcastWaitEvent != null) BroadcastWaitEvent();
+            if(LogEvent != null) LogEvent("Loading URL Seed Data");
             // Load URLS from file
             FileStream fs = null;
             StreamReader sr = null;
@@ -101,6 +108,7 @@ namespace RaptorTCP3.Methods.Utilities
 
             if (LogEvent != null) LogEvent("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
+            if (BroadcastResumeEvent != null) BroadcastResumeEvent();
         }
 
         internal void SeedUsers()

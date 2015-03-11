@@ -44,7 +44,10 @@
             this.lblRuntime = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblIdleTime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.ConOut = new System.Windows.Forms.RichTextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblWaitStatus = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.lblQueueLength = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.lblConnections = new System.Windows.Forms.Label();
@@ -69,9 +72,7 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timerOneSecond = new System.Windows.Forms.Timer(this.components);
-            this.lblWaitStatus = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.ConOut = new System.Windows.Forms.RichTextBox();
+            this.showUrlsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsSystem.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -208,6 +209,22 @@
             this.lblIdleTime.Size = new System.Drawing.Size(49, 17);
             this.lblIdleTime.Text = "00:00:00";
             // 
+            // ConOut
+            // 
+            this.ConOut.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ConOut.BackColor = System.Drawing.Color.Black;
+            this.ConOut.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ConOut.ForeColor = System.Drawing.Color.Green;
+            this.ConOut.Location = new System.Drawing.Point(0, 185);
+            this.ConOut.Name = "ConOut";
+            this.ConOut.ReadOnly = true;
+            this.ConOut.ShowSelectionMargin = true;
+            this.ConOut.Size = new System.Drawing.Size(1122, 217);
+            this.ConOut.TabIndex = 5;
+            this.ConOut.Text = "";
+            // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Black;
@@ -222,6 +239,23 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1122, 179);
             this.panel1.TabIndex = 4;
+            // 
+            // lblWaitStatus
+            // 
+            this.lblWaitStatus.AutoSize = true;
+            this.lblWaitStatus.Location = new System.Drawing.Point(87, 82);
+            this.lblWaitStatus.Name = "lblWaitStatus";
+            this.lblWaitStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblWaitStatus.TabIndex = 5;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(16, 82);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(65, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Wait Status:";
             // 
             // lblQueueLength
             // 
@@ -301,22 +335,23 @@
             // dataToolStripMenuItem
             // 
             this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showUsersToolStripMenuItem});
+            this.showUsersToolStripMenuItem,
+            this.showUrlsToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
-            this.dataToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+            this.dataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.dataToolStripMenuItem.Text = "Data";
             // 
             // showUsersToolStripMenuItem
             // 
             this.showUsersToolStripMenuItem.Name = "showUsersToolStripMenuItem";
-            this.showUsersToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.showUsersToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.showUsersToolStripMenuItem.Text = "Show Users";
             this.showUsersToolStripMenuItem.Click += new System.EventHandler(this.showUsersToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(99, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // resetToolStripMenuItem
             // 
@@ -324,7 +359,7 @@
             this.fullResetToolStripMenuItem,
             this.seedUrlsToolStripMenuItem});
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.resetToolStripMenuItem.Text = "Reset";
             // 
             // fullResetToolStripMenuItem
@@ -409,38 +444,12 @@
             this.timerOneSecond.Interval = 1000;
             this.timerOneSecond.Tick += new System.EventHandler(this.timerOneSecond_Tick);
             // 
-            // lblWaitStatus
+            // showUrlsToolStripMenuItem
             // 
-            this.lblWaitStatus.AutoSize = true;
-            this.lblWaitStatus.Location = new System.Drawing.Point(87, 82);
-            this.lblWaitStatus.Name = "lblWaitStatus";
-            this.lblWaitStatus.Size = new System.Drawing.Size(0, 13);
-            this.lblWaitStatus.TabIndex = 5;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(16, 82);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(65, 13);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "Wait Status:";
-            // 
-            // ConOut
-            // 
-            this.ConOut.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ConOut.BackColor = System.Drawing.Color.Black;
-            this.ConOut.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ConOut.ForeColor = System.Drawing.Color.Green;
-            this.ConOut.Location = new System.Drawing.Point(0, 185);
-            this.ConOut.Name = "ConOut";
-            this.ConOut.ReadOnly = true;
-            this.ConOut.ShowSelectionMargin = true;
-            this.ConOut.Size = new System.Drawing.Size(1122, 217);
-            this.ConOut.TabIndex = 5;
-            this.ConOut.Text = "";
+            this.showUrlsToolStripMenuItem.Name = "showUrlsToolStripMenuItem";
+            this.showUrlsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.showUrlsToolStripMenuItem.Text = "Show Urls";
+            this.showUrlsToolStripMenuItem.Click += new System.EventHandler(this.showUrlsToolStripMenuItem_Click);
             // 
             // frmMain
             // 
@@ -520,6 +529,7 @@
         private System.Windows.Forms.Label lblWaitStatus;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.RichTextBox ConOut;
+        private System.Windows.Forms.ToolStripMenuItem showUrlsToolStripMenuItem;
     }
 }
 

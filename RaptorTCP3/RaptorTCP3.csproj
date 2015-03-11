@@ -102,6 +102,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DamoclesModels.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Forms\frmShowUrls.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmShowUrls.Designer.cs">
+      <DependentUpon>frmShowUrls.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\frmShowUsers.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,6 +166,9 @@
     <Compile Include="User.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\frmShowUrls.resx">
+      <DependentUpon>frmShowUrls.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmShowUsers.resx">
       <DependentUpon>frmShowUsers.cs</DependentUpon>
     </EmbeddedResource>

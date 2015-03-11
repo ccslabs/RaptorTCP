@@ -36,17 +36,17 @@ namespace RaptorTCP3
 
         delegate void SetToolStripProgressMaximumCallBack(int value);
         delegate void SetToolStripProgressValueCallBack(int value);
-        
 
 
-        private Utilities Utils = new Utilities();
-        private LoginMethods LoginMethods = new LoginMethods();
-        private LogOff Logoff = new LogOff();
-        private Seeding Seeding = new Seeding();
-        private TCPServer tcpServer = new TCPServer();
-        private sUrls URLS = new sUrls();
-        private Users Users = new Users();
-        private SqlClient DatabaseClient = new SqlClient();
+
+        private Utilities Utils;
+        private LoginMethods LoginMethods;
+        private LogOff Logoff;
+        private Seeding Seeding;
+        private TCPServer tcpServer;
+        private sUrls URLS;
+        private Users Users;
+        private SqlClient DatabaseClient;
 
         private Task t;
 
@@ -73,55 +73,87 @@ namespace RaptorTCP3
             ConOut.Top = this.Height / 3;
             ConOut.Width = this.Width;
             ConOut.Height = (2 * this.Height / 3) - 50;
-
-           
         }
 
         private void StartUp()
         {
+            Log("Instantiating");
+            Log("\tUtilities");
+            Utils = new Utilities();
+            Log("\tLogin Methods");
+            LoginMethods = new LoginMethods();
+            Log("\tLogOff Methods");
+            Logoff = new LogOff();
+            Log("\tSeeding Class");
+            Seeding = new Seeding();
+            Log("\tThe TCP Server");
+            tcpServer = new TCPServer();
+            Log("\tUsers Class");
+            Users = new Users();
+            Log("\tURLS Class");
+            URLS = new sUrls();
+            Log("\tDatabase Client [obsolete?]");
+            DatabaseClient = new SqlClient();
+
             Log("Subscribing to User Events");
-            Users.LogEvent += LogEvent;
             Users.UserCountEvent += Users_UserCountEvent;
 
             Log("Subscribing to Login Events");
-            LoginMethods.LogEvent += LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
 
             Log("Subscribing to URL Events");
-            URLS.LogEvent += LogEvent;
             URLS.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
             URLS.NoUrlsLeftToProcessEvent += URLS_NoUrlsLeftToProcessEvent;
             URLS.MoreUrlsLeftToProcessEvent += URLS_MoreUrlsLeftToProcessEvent;
-            URLS.ProgressChangedEvent += ProgressChangedEvent;
-            URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
 
             Log("Subscribing to TCP  Server Events");
-            tcpServer.LogEvent += LogEvent;
             tcpServer.tcpConnectionClosedEvent += tcpServer_tcpConnectionClosedEvent;
             tcpServer.tcpLostConnectionEvent += tcpServer_tcpLostConnectionEvent;
             tcpServer.tcpConnectionEvent += tcpServer_tcpConnectionEvent;
 
             Log("Subscribing to Seeding Events");
-            Seeding.LogEvent += LogEvent;
-            Seeding.ProgressChangedEvent += ProgressChangedEvent;
-            Seeding.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
+
 
             Log("Subscribing to Database Client Events");
             DatabaseClient.LogEvent += LogEvent;
+
+            Log("Subscribing to Globally Shared Events");
+            Log("\t Logging");
+            Seeding.LogEvent += LogEvent;
+            tcpServer.LogEvent += LogEvent;
+            URLS.LogEvent += LogEvent;
+            LoginMethods.LogEvent += LogEvent;
+            Users.LogEvent += LogEvent;
+            Log("\t Progress Changed");
+            Seeding.ProgressChangedEvent += ProgressChangedEvent;
+            Seeding.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
+            URLS.ProgressChangedEvent += ProgressChangedEvent;
+            URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
+            Log("\t Broadcast Messages");
+            Seeding.BroadcastResumeEvent += BroadcastResumeEvent;
+            Seeding.BroadcastWaitEvent += BroadcastWaitEvent;
+
+
             Log("Application Loaded");
             Log("Populating URL Queue");
             URLS.PopulateURLQueue(50);
 
         }
 
-       
 
-       
+
+
+
+
 
         #region tcpServer Events
 
         void tcpServer_tcpConnectionEvent(string id)
         {
+            if (IsInWaitMode)
+                tcpServer.SendWait(id);
+            else
+                tcpServer.SendResume(id);
             Users.AddUserToAllUsers(id);
         }
 
@@ -135,7 +167,6 @@ namespace RaptorTCP3
         void tcpServer_tcpConnectionClosedEvent()
         {
             lblConnections.Text = Users.allUsers.Count().ToString("N0");
-
         }
 
         #endregion
@@ -187,7 +218,7 @@ namespace RaptorTCP3
                 tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
         }
 
-       
+
         #endregion
 
         #region cmsSystem Operations
@@ -258,7 +289,19 @@ namespace RaptorTCP3
 
         #region Global Shared Events
 
-         void ProgressMaximumChangedEvent(int Max)
+        void BroadcastWaitEvent()
+        {
+            IsInWaitMode = true;
+            tcpServer.SendWait();
+        }
+
+        void BroadcastResumeEvent()
+        {
+            IsInWaitMode = false;
+            tcpServer.SendResume();
+        }
+
+        void ProgressMaximumChangedEvent(int Max)
         {
             if (toolStripContainer1.InvokeRequired)
             {
@@ -272,7 +315,7 @@ namespace RaptorTCP3
             }
         }
 
-        void  ProgressChangedEvent(int Value)
+        void ProgressChangedEvent(int Value)
         {
             if (toolStripContainer1.InvokeRequired)
             {
@@ -286,7 +329,7 @@ namespace RaptorTCP3
             }
         }
 
-       void LogEvent(string Message)
+        void LogEvent(string Message)
         {
             Log(Message);
         }
@@ -301,7 +344,7 @@ namespace RaptorTCP3
             t.Start();
         }
 
-      
+
 
         private void frmMain_SizeChanged(object sender, EventArgs e)
         {
@@ -413,9 +456,15 @@ namespace RaptorTCP3
             Application.DoEvents();
         }
 
+        private void showUrlsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmShowUrls ShowUrls = new frmShowUrls();
+            ShowUrls.Show();
+        }
 
 
-       
+
+
 
     }
 }

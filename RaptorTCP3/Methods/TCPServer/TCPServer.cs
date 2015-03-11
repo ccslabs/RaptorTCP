@@ -213,5 +213,17 @@ namespace RaptorTCP3.Methods.TCPServer
         }
 
         public bool Listening { get; set; }
+
+        internal void SendWait(string id)
+        {
+            if (LogEvent != null) LogEvent(id + " Told to Wait");
+            tcpServer.SendData(id, Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Wait.ToString()));
+        }
+
+        internal void SendResume(string id)
+        {
+            if (LogEvent != null) LogEvent(id + " Told to Resume");
+            tcpServer.SendData(id, Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Resume.ToString()));
+        }
     }
 }
