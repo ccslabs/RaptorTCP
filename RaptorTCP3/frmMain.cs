@@ -256,33 +256,7 @@ namespace RaptorTCP3
             }
         }
 
-        void ProgressMaximumChangedEvent(long Max)
-        {
-            if (toolStripContainer1.InvokeRequired)
-            {
-                SetToolStripProgressMaximumCallBack d = new SetToolStripProgressMaximumCallBack(ProgressMaximumChangedEvent);
-                this.Invoke(d, new object[] { Max });
-            }
-            else
-            {
-                Progress.Maximum = int.Parse(Max.ToString());
-            }
-        }
-
-        void ProgressChangedEvent(long Value)
-        {
-            if (toolStripContainer1.InvokeRequired)
-            {
-                SetToolStripProgressValueCallBack d = new SetToolStripProgressValueCallBack(ProgressChangedEvent);
-                this.Invoke(d, new object[] { Value });
-            }
-            else
-            {
-                Progress.Maximum = int.Parse(Value.ToString());
-            }
-        }
-
-        void LogEvent(string Message)
+       void LogEvent(string Message)
         {
             Log(Message);
         }

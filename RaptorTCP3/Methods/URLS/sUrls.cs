@@ -30,10 +30,10 @@ namespace RaptorTCP3.Methods.SystemURLS
         public event MoreUrlsLeftToProcessEventHandler MoreUrlsLeftToProcessEvent;
 
         // Notify Progress Changed
-        public delegate void ProgressChangedEventHandler(long Progress);
+        public delegate void ProgressChangedEventHandler(int Progress);
         public event ProgressChangedEventHandler ProgressChangedEvent;
         // Notify New Progress Maximum
-        public delegate void ProgressMaximumChangedEventHandler(long Progress);
+        public delegate void ProgressMaximumChangedEventHandler(int Progress);
         public event ProgressMaximumChangedEventHandler ProgressMaximumChangedEvent;
 
 
@@ -100,7 +100,7 @@ namespace RaptorTCP3.Methods.SystemURLS
             {
                 if (toprocess < numberOfUrlsToGet) numberOfUrlsToGet = toprocess;
                 if (LogEvent != null) LogEvent("Populating URL Queue, Adding " + numberOfUrlsToGet);
-                if (ProgressMaximumChangedEvent != null)  ProgressMaximumChangedEvent(numberOfUrlsToGet);
+                if (ProgressMaximumChangedEvent != null)  ProgressMaximumChangedEvent(int.Parse(numberOfUrlsToGet.ToString()));
 
                 using (var db = new DamoclesEntities())
                 {
