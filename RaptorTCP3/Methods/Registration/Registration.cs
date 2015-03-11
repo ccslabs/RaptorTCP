@@ -16,7 +16,7 @@ namespace RaptorTCP3.Methods.Registration
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
 
-        private bool RegistrationSuccessful(string ID, string commandParams)
+        internal bool RegistrationSuccessful(string ID, string commandParams)
         {
             string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
             if (command[0] == "register")
@@ -28,7 +28,7 @@ namespace RaptorTCP3.Methods.Registration
 
         private bool Register(string ClientID, string emailAddress, string Password)
         {
-            LogEvent("Registering User");
+           if(LogEvent != null)LogEvent("Registering User");
             using (var db = new DamoclesEntities())
             {
                 System.Data.Entity.DbSet<User> users = db.Users;
@@ -39,7 +39,7 @@ namespace RaptorTCP3.Methods.Registration
                 int rows = db.SaveChanges();
                 if (rows < 1)
                 {
-                    LogEvent("Failed to Add user: " + emailAddress);
+                   if(LogEvent != null)LogEvent("Failed to Add user: " + emailAddress);
                     return false;
                 }
                 else

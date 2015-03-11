@@ -22,52 +22,53 @@ namespace RaptorTCP3.Methods.TCPServer
         public event tcpConnectionClosedEventHandler tcpConnectionClosedEvent;
         public delegate void tcpLostConnectionEventHandler(string id);
         public event tcpLostConnectionEventHandler tcpLostConnectionEvent;
-        public delegate void tcpSetLabelEventHandler(string lblName, string text);
-        public event tcpSetLabelEventHandler tcpSetLabelEvent;
+
 
         NetComm.Host tcpServer = new Host(9119);
 
         Utilities.Utilities Utils = new Utilities.Utilities();
         Users.Users Users = new Users.Users();
         private RaptorTCP3.Methods.SystemURLS.sUrls URLS = new SystemURLS.sUrls();
+        RaptorTCP3.Methods.Registration.Registration Registration = new Registration.Registration();
 
         public TCPServer()
         {
-            tcpServer.ConnectionClosed +=tcpServer_ConnectionClosed;
-            tcpServer.DataReceived +=tcpServer_DataReceived;
-            tcpServer.DataTransferred +=tcpServer_DataTransferred;
-            tcpServer.errEncounter +=tcpServer_errEncounter;
-            tcpServer.lostConnection +=tcpServer_lostConnection;
-            tcpServer.onConnection +=tcpServer_onConnection;
+            tcpServer.ConnectionClosed += tcpServer_ConnectionClosed;
+            tcpServer.DataReceived += tcpServer_DataReceived;
+            tcpServer.DataTransferred += tcpServer_DataTransferred;
+            tcpServer.errEncounter += tcpServer_errEncounter;
+            tcpServer.lostConnection += tcpServer_lostConnection;
+            tcpServer.onConnection += tcpServer_onConnection;
             StartServerListening();
         }
 
 
         internal void StartServerListening()
-        {          
+        {
             tcpServer.StartConnection();
-            LogEvent("Server is Listening");
+            Listening = true;
+            if (LogEvent != null) LogEvent("Server is Listening");
             Broadcast(RaptorTCP3.Methods.Enumerations.ServerCommands.Resume.ToString());  // Tell any waiting Clients they can resume communications.
         }
 
         internal void Broadcast(string Message)
         {
-            LogEvent("Broadcasting: " + Message); ;
-            tcpServer.Brodcast(Utils.GetBytes(Message));
+            if (LogEvent != null) LogEvent("Broadcasting: " + Message);
+            if (Users.allUsers.Count() > 0) tcpServer.Brodcast(Utils.GetBytes(Message));
         }
 
-        private void Reply(string ID, string callingCommand, string Result)
+        internal void Reply(string ID, string callingCommand, string Result)
         {
-            LogEvent("Replying to " + ID);
+            if (LogEvent != null) LogEvent("Replying to " + ID);
             string cr = callingCommand + " " + Result;
             byte[] commandResult = Utils.GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
 
         }
 
-        private void Reply(string ID, string callingCommand, string Result, string returnedValue)
+        internal void Reply(string ID, string callingCommand, string Result, string returnedValue)
         {
-            LogEvent("Replying to " + ID);
+            if (LogEvent != null) LogEvent("Replying to " + ID);
             string cr = callingCommand + " " + Result + " " + returnedValue;
             byte[] commandResult = Utils.GetBytes(cr);
             tcpServer.SendData(ID, commandResult);
@@ -76,11 +77,11 @@ namespace RaptorTCP3.Methods.TCPServer
 
         void tcpServer_onConnection(string id)
         {
-            if (id.Contains("-")) 
+            if (id.Contains("-"))
             {
-                LogEvent("Client Connecting");
+                if (LogEvent != null) LogEvent("Client Connecting");
                 Users.allUsers.Add(id);
-               
+
             }
         }
 
@@ -88,34 +89,34 @@ namespace RaptorTCP3.Methods.TCPServer
         {
             if (id.Length > 5)
             {
-             
-               Users.allUsers.Remove(id);
+
+                Users.allUsers.Remove(id);
                 try
                 {
-                    LogEvent("Client Disconnecting");
+                    if (LogEvent != null) LogEvent("Client Disconnecting");
                     tcpLostConnectionEvent(id);
-                    
+
                 }
                 catch (System.ObjectDisposedException de)
                 {
-                    LogEvent("Disposed... " + de.Message);
+                    if (LogEvent != null) LogEvent("Disposed... " + de.Message);
                 }
                 catch (Exception)
                 {
 
                 }
             }
-            
+
         }
 
         void tcpServer_errEncounter(Exception ex)
         {
-            LogEvent("Error: " + ex.Message);
+            if (LogEvent != null) LogEvent("Error: " + ex.Message);
         }
 
         void tcpServer_DataTransferred(string Sender, string Recipient, byte[] Data)
         {
-            LogEvent("Incoming Message from: " + Sender + " to " + Recipient);
+            if (LogEvent != null) LogEvent("Incoming Message from: " + Sender + " to " + Recipient);
         }
 
         void tcpServer_DataReceived(string ID, byte[] Data)
@@ -124,11 +125,11 @@ namespace RaptorTCP3.Methods.TCPServer
             switch (command[0].Trim().ToLowerInvariant())
             {
                 case "Utils.Login":
-                   
+
                     break;
                 case "register":
                     LogEvent(ID + " Registering In");
-                    if (RegistrationSuccessful(ID, Utils.GetString(Data)))
+                    if (Registration.RegistrationSuccessful(ID, Utils.GetString(Data)))
                         Reply(ID, command[0], RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString());
                     else
                         Reply(ID, command[0], RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
@@ -145,9 +146,21 @@ namespace RaptorTCP3.Methods.TCPServer
             }
         }
 
+        internal void SendWait()
+        {
+            if (Users.allUsers.Count() > 0)
+                tcpServer.Brodcast(Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Wait.ToString()));
+        }
+
+        internal void SendResume()
+        {
+            if (Users.allUsers.Count() > 0)
+                tcpServer.Brodcast(Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Resume.ToString()));
+        }
+
         private void SendUrls(string ID, string sc, string[] urlList)
         {
-            LogEvent("Sending URLS");
+            if (LogEvent != null) LogEvent("Sending URLS");
             string strBuffer = sc + " ";
             foreach (string url in urlList)
             {
@@ -164,7 +177,7 @@ namespace RaptorTCP3.Methods.TCPServer
 
         private string[] GetURLS()
         {
-            LogEvent("Getting URLS to Send");
+            if (LogEvent != null) LogEvent("Getting URLS to Send");
             string[] urlList = new string[10];
 
             for (int idx = 0; idx < 10; idx++)
@@ -179,18 +192,21 @@ namespace RaptorTCP3.Methods.TCPServer
 
         void tcpServer_ConnectionClosed()
         {
-            lblConnections.Text = Users.allUsers.Count().ToString("N0");
-            LogEvent("Connection Closed");
+
+            if (LogEvent != null) LogEvent("Connection Closed");
+            Listening = false;
             tcpConnectionClosedEvent();
         }
 
-        private void DisconnectAll()
+        internal void DisconnectAll()
         {
-            LogEvent("Disconnecting all Clients");
+            if (LogEvent != null) LogEvent("Disconnecting all Clients");
             Parallel.ForEach(tcpServer.Users, ClientID =>
             {
                 tcpServer.DisconnectUser(ClientID.ToString());
             });
         }
+
+        public bool Listening { get; set; }
     }
 }

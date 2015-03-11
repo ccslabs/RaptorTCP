@@ -39,20 +39,21 @@ namespace RaptorTCP3
         private LogOff Logoff = new LogOff();
         private Seeding Seeding = new Seeding();
         private TCPServer tcpServer = new TCPServer();
-        private sUrls systemUrls = new sUrls();
+        private sUrls URLS = new sUrls();
         private Users Users = new Users();
         private SqlClient DatabaseClient = new SqlClient();
-        
+
         private Task t;
 
         private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
-        
+
         private string ClientLicense = null;
 
         private int SecondsPastSinceBoot;
         private int SecondsIdle;
 
         private bool IsIdle = true;
+        private bool IsInWaitMode = false;
 
         public frmMain(bool ForceRegistration = false)
         {
@@ -71,13 +72,13 @@ namespace RaptorTCP3
             LoginMethods.LogEvent += LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
 
-            systemUrls.LogEvent += LogEvent;
-            systemUrls.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
-            systemUrls.UrlsToEnqueueEvent += systemUrls_UrlsToEnqueueEvent;
+            URLS.LogEvent += LogEvent;
+            URLS.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
+            URLS.NoUrlsLeftToProcessEvent += URLS_NoUrlsLeftToProcessEvent;
+            URLS.MoreUrlsLeftToProcessEvent += URLS_MoreUrlsLeftToProcessEvent;
 
             tcpServer.LogEvent += LogEvent;
             tcpServer.tcpConnectionClosedEvent += tcpServer_tcpConnectionClosedEvent;
-            tcpServer.tcpSetLabelEvent += tcpServer_tcpSetLabelEvent;
             tcpServer.tcpLostConnectionEvent += tcpServer_tcpLostConnectionEvent;
 
             Seeding.LogEvent += LogEvent;
@@ -87,24 +88,22 @@ namespace RaptorTCP3
             DatabaseClient.LogEvent += LogEvent;
         }
 
+        #region tcpServer Events
         void tcpServer_tcpLostConnectionEvent(string id)
         {
-           Logoff.LogOffUser(id);
+            Logoff.LogOffUser(id);
         }
 
-        void tcpServer_tcpSetLabelEvent(string lblName, string text)
-        {         
-            SetLabel(((Label)Controls[lblName]), text);
-        }
+
 
         void tcpServer_tcpConnectionClosedEvent()
         {
-            throw new NotImplementedException();
+            lblConnections.Text = Users.allUsers.Count().ToString("N0");
+
         }
 
-        
+        #endregion
 
- 
         #region Seeding Events
         void Seeding_ProgressMaximumChangedEvent(int Max)
         {
@@ -116,12 +115,26 @@ namespace RaptorTCP3
             Progress.Value = Value;
         }
         #endregion
-       
+
         #region URL Events
         void systemUrls_UrlsToEnqueueEvent(string URL)
         {
-            urlQueue.Enqueue(URL);
-            SetLabel(lblQueueLength, urlQueue.Count.ToString("N0"));
+            URLS.urlQueue.Enqueue(URL);
+            SetLabel(lblQueueLength, URLS.urlQueue.Count.ToString("N0"));
+        }
+
+        void URLS_MoreUrlsLeftToProcessEvent()
+        {
+            IsInWaitMode = false;
+            SetLabel(lblWaitStatus, "Resumed");
+            tcpServer.SendResume();
+        }
+
+        void URLS_NoUrlsLeftToProcessEvent()
+        {
+            IsInWaitMode = true;
+            SetLabel(lblWaitStatus, "Waiting");
+            tcpServer.SendWait(); // Tell all Connected clients to wait!
         }
 
         void systemUrls_UrlsCountResultEvent(long Result)
@@ -135,9 +148,9 @@ namespace RaptorTCP3
         {
             Log(Cid + " Is Attempting a Login");
             if (Result)
-                Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString(), ClientLicense);
+                tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString(), ClientLicense);
             else
-                Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
+                tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
         }
 
         void LogEvent(string Message)
@@ -145,8 +158,6 @@ namespace RaptorTCP3
             Log(Message);
         }
         #endregion
-
-
 
         #region cmsSystem Operations
 
@@ -157,34 +168,18 @@ namespace RaptorTCP3
             if (tcpServer.Listening)
             {
 
-                Broadcast(ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
-                DisconnectAll();
-                tcpServer.CloseConnection();
-
+                tcpServer.Broadcast(RaptorTCP3.Methods.Enumerations.ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
+                tcpServer.DisconnectAll();
             }
 
-            if (con.State != ConnectionState.Closed)
-            {
-                while (sqlWorking)
-                {
-                    System.Threading.Thread.Sleep(2000);
-                }
-                con.Close();
-            }
 
             Application.Exit();
         }
         #endregion
 
-       
-
-        
-      
-     
-
         #region Utilities
 
-        
+
 
         private void SetLabel(Label lbl, string message)
         {
@@ -227,8 +222,6 @@ namespace RaptorTCP3
 
         #endregion
 
-       
-
         #region Form Events
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -240,13 +233,13 @@ namespace RaptorTCP3
         private void StartUp()
         {
             Log("Application Loaded");
-           
+
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Log("Application Closing");
-           Logoff.LogOffAllUsers();
+            Logoff.LogOffAllUsers();
             tcpServer.Broadcast(RaptorTCP3.Methods.Enumerations.ServerCommands.UseCache.ToString());
             t.Dispose();
             t.Wait();
@@ -254,29 +247,10 @@ namespace RaptorTCP3
         #endregion
 
         #region Menu Events
-
-        #endregion
-
         private void seedUrlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Seeding.SeedUrls();
         }
-
-
-        private void timerOneSecond_Tick(object sender, EventArgs e)
-        {
-            SecondsPastSinceBoot++;
-
-            if (IsIdle)
-                SecondsIdle++;
-            else
-                SecondsIdle = 0;
-
-
-            UpdateToolStripStatusLabel(lblRuntime, Utils.SecondsToDHMS(SecondsPastSinceBoot).ToString());
-            UpdateToolStripStatusLabel(lblIdleTime, Utils.SecondsToDHMS(SecondsIdle).ToString());
-        }
-
         private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -299,6 +273,23 @@ namespace RaptorTCP3
             showUsers.Show();
         }
 
+        #endregion
+
+        private void timerOneSecond_Tick(object sender, EventArgs e)
+        {
+            SecondsPastSinceBoot++;
+
+            if (IsIdle)
+                SecondsIdle++;
+            else
+                SecondsIdle = 0;
+
+
+            UpdateToolStripStatusLabel(lblRuntime, Utils.SecondsToDHMS(SecondsPastSinceBoot).ToString());
+            UpdateToolStripStatusLabel(lblIdleTime, Utils.SecondsToDHMS(SecondsIdle).ToString());
+        }
+
+        private string LastLogMessage = "";
 
         /// <summary>
         /// Logs the activities of both the TCP Server AND the SQL sub-system.
@@ -308,28 +299,35 @@ namespace RaptorTCP3
         /// </param>
         internal void Log(string message)
         {
-            string[] parts = message.Split(' ');
-            if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() == "client")
-            { }
-            else if (parts[0].ToLowerInvariant().Trim() == "client")
+            if (LastLogMessage == message) // Only show a log message if it is not an exact repeat of the previous log message.
             { }
             else
             {
-                if (!ConOut.IsDisposed)
+                string[] parts = message.Split(' ');
+                if (parts[0].Length < 10 && parts[1].ToLowerInvariant().Trim() == "client")
+                { }
+                else if (parts[0].ToLowerInvariant().Trim() == "client")
+                { }
+                else
                 {
-                    if (this.ConOut.InvokeRequired)
+                    if (!ConOut.IsDisposed)
                     {
-                        SetTextCallback d = new SetTextCallback(Log);
-                        this.Invoke(d, new object[] { message });
+                        if (this.ConOut.InvokeRequired)
+                        {
+                            SetTextCallback d = new SetTextCallback(Log);
+                            this.Invoke(d, new object[] { message });
+                        }
+                        else
+                        {
+                            ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                            ConOut.Focus();
+                        }
                     }
-                    else
-                    {
-                        ConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
-                        ConOut.Focus();
-                    }
+
                 }
-                UpdateStatusMessage(message);
+                LastLogMessage = message;
             }
+            UpdateStatusMessage(message);
         }
 
     }

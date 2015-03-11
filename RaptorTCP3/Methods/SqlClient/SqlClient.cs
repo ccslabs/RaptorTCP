@@ -19,13 +19,13 @@ namespace RaptorTCP3.Methods.SqlClient
 
         public SqlClient()
         {
-            LogEvent("Starting SQL Client");
+           if(LogEvent != null)LogEvent("Starting SQL Client");
 
             Seeding.SeedUrls();
 
             if (sURLS.urlQueue.Count() < 50)
             {
-                LogEvent("Populating ");
+               if(LogEvent != null)LogEvent("Populating ");
                 sURLS.PopulateURLQueue(50);
             }
         }

@@ -14,7 +14,7 @@ namespace RaptorTCP3.Methods.Licenses
 
         internal string GenerateTemporaryLicenseNumber(string emailAddress)
         {
-            LogEvent("Generating Temporary License Number");
+           if(LogEvent != null) LogEvent("Generating Temporary License Number");
             string lNumberType = "t"; // temporary
             string lNumberAuthorisedFromYear = DateTime.UtcNow.Year.ToString();
             string lNumberCountryStateLanguageIDS = "zzz";
@@ -34,7 +34,7 @@ namespace RaptorTCP3.Methods.Licenses
                newlicense.LicenseNumber1 = ln;
                lnumber.Add(newlicense);
                db.SaveChanges();
-               LogEvent("Saved License Number");
+              if(LogEvent != null) LogEvent("Saved License Number");
            }
         }
 

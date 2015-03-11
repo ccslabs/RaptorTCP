@@ -26,11 +26,29 @@ namespace RaptorTCP3.Methods.Users
 
         void allUsers_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                    if (LogEvent != null) LogEvent("New User Joined");
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:                    
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                    if (LogEvent != null) LogEvent("User Removed");
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    break;
+                default:
+                    break;
+            }
             UserCountEvent(allUsers.Count);
         }
 
         internal int GetUserID(string emailAddress)
         {
+            if (LogEvent != null) LogEvent("Getting User ID from Email");
             using (var db = new DamoclesEntities())
             {
                 var user = db.Users.First(u => u.emailAddress == emailAddress);
@@ -40,6 +58,7 @@ namespace RaptorTCP3.Methods.Users
 
         internal string GetUserEmailAddressByID(string Cid)
         {
+            if (LogEvent != null) LogEvent("Getting User Email from ID");
             using (var db = new DamoclesEntities())
             {
                 var user = db.Users.First(u => u.CurrentClientID == Cid && u.IsOnline == true);
@@ -49,6 +68,7 @@ namespace RaptorTCP3.Methods.Users
 
         internal User CreateUser(string ClientID, string emailAddress, string Password)
         {
+            if (LogEvent != null) LogEvent("Creating New User");
             var eu = new User();
             eu.Username = emailAddress;
             eu.UserPasswordHash = Password;
@@ -64,8 +84,9 @@ namespace RaptorTCP3.Methods.Users
             return eu;
         }
 
-        internal static void DeleteAllUsers(DamoclesEntities db)
+        internal  void DeleteAllUsers(DamoclesEntities db)
         {
+           if(LogEvent != null) LogEvent("Deleting All Users.");
             var all = from c in db.Users select c;
             db.Users.RemoveRange(all);
             db.SaveChanges();

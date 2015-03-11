@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using RaptorTCP3.Methods.Users;
+
 namespace RaptorTCP3.Methods.Utilities
 {
     class Seeding
@@ -41,7 +43,7 @@ namespace RaptorTCP3.Methods.Utilities
             {
                 fs = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "bookmarks_3_6_15.html"), FileMode.Open, FileAccess.Read, FileShare.None);
                 sr = new StreamReader(fs);
-                
+
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine().Replace("\t", "").Trim();
@@ -51,9 +53,9 @@ namespace RaptorTCP3.Methods.Utilities
                         string url = parts[0].Replace("\"", "").Trim();
                         if (!alUrls.Contains(url)) alUrls.Add(url);
                     }
-                 
+
                 }
-              
+
                 sr.Close();
                 fs.Close();
 
@@ -62,7 +64,7 @@ namespace RaptorTCP3.Methods.Utilities
             }
             catch (Exception ex)
             {
-                LogEvent("Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
+               if(LogEvent != null)LogEvent("Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
                 if (sr != null) sr.Close();
                 if (fs != null) fs.Close();
             }
@@ -70,7 +72,7 @@ namespace RaptorTCP3.Methods.Utilities
 
         private void SaveUrls(ArrayList alUrls)
         {
-            LogEvent("Seeding URLS");
+           if(LogEvent != null)LogEvent("Seeding URLS");
             int rows = 0;
 
             ProgressMaximumChangedEvent(alUrls.Count);
@@ -93,15 +95,13 @@ namespace RaptorTCP3.Methods.Utilities
             }
 
             ProgressChangedEvent(0);
-         
-            LogEvent("Seeded URLS Table with " + rows.ToString("N0") + " rows");
+
+           if(LogEvent != null)LogEvent("Seeded URLS Table with " + rows.ToString("N0") + " rows");
             alUrls.Clear();
         }
 
         internal void SeedUsers()
         {
-
-
             using (var db = new DamoclesEntities())
             {
                 Users.DeleteAllUsers(db);
