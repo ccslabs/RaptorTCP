@@ -22,6 +22,8 @@ namespace RaptorTCP3.Methods.TCPServer
         public event tcpConnectionClosedEventHandler tcpConnectionClosedEvent;
         public delegate void tcpLostConnectionEventHandler(string id);
         public event tcpLostConnectionEventHandler tcpLostConnectionEvent;
+        public delegate void tcpConnectionEventHandler(string id);
+        public event tcpConnectionEventHandler tcpConnectionEvent;
 
 
         NetComm.Host tcpServer = new Host(9119);
@@ -80,8 +82,8 @@ namespace RaptorTCP3.Methods.TCPServer
             if (id.Contains("-"))
             {
                 if (LogEvent != null) LogEvent("Client Connecting");
-                Users.allUsers.Add(id);
-
+               // Users.allUsers.Add(id); Changed to an Event!
+                tcpConnectionEvent(id);
             }
         }
 

@@ -40,7 +40,7 @@ namespace RaptorTCP3.Methods.SystemURLS
         public sUrls()
         {
             timerMonitor.AutoReset = true;
-            timerMonitor.Interval = 5000; // Check each 5 Seconds
+            timerMonitor.Interval = 30000; // Check each 30 Seconds
             timerMonitor.Elapsed += timerMonitor_Elapsed;
 
         }

@@ -43,7 +43,7 @@ namespace RaptorTCP3.Methods.Users
                 default:
                     break;
             }
-            UserCountEvent(allUsers.Count);
+          if(UserCountEvent != null)  UserCountEvent(allUsers.Count);
         }
 
         internal int GetUserID(string emailAddress)
@@ -90,6 +90,16 @@ namespace RaptorTCP3.Methods.Users
             var all = from c in db.Users select c;
             db.Users.RemoveRange(all);
             db.SaveChanges();
+        }
+
+        internal void AddUserToAllUsers(string Cid)
+        {
+            if (allUsers.Contains("Cid"))
+                LogEvent(Cid + " User Rejoined");
+            else
+            {
+                allUsers.Add(Cid);
+            }
         }
     }
 }

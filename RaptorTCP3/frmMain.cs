@@ -79,6 +79,10 @@ namespace RaptorTCP3
 
         private void StartUp()
         {
+            Log("Subscribing to User Events");
+            Users.LogEvent += LogEvent;
+            Users.UserCountEvent += Users_UserCountEvent;
+
             Log("Subscribing to Login Events");
             LoginMethods.LogEvent += LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
@@ -95,6 +99,7 @@ namespace RaptorTCP3
             tcpServer.LogEvent += LogEvent;
             tcpServer.tcpConnectionClosedEvent += tcpServer_tcpConnectionClosedEvent;
             tcpServer.tcpLostConnectionEvent += tcpServer_tcpLostConnectionEvent;
+            tcpServer.tcpConnectionEvent += tcpServer_tcpConnectionEvent;
 
             Log("Subscribing to Seeding Events");
             Seeding.LogEvent += LogEvent;
@@ -109,7 +114,17 @@ namespace RaptorTCP3
 
         }
 
+       
+
+       
+
         #region tcpServer Events
+
+        void tcpServer_tcpConnectionEvent(string id)
+        {
+            Users.AddUserToAllUsers(id);
+        }
+
         void tcpServer_tcpLostConnectionEvent(string id)
         {
             Logoff.LogOffUser(id);
@@ -124,7 +139,16 @@ namespace RaptorTCP3
         }
 
         #endregion
-      
+
+        #region User Events
+
+        void Users_UserCountEvent(int NumberOfUsers)
+        {
+            SetLabel(lblConnections, NumberOfUsers.ToString("N0"));
+        }
+
+        #endregion
+
         #region URL Events
         void systemUrls_UrlsToEnqueueEvent(string URL)
         {
