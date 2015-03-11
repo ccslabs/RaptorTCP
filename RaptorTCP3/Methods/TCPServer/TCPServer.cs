@@ -121,21 +121,22 @@ namespace RaptorTCP3.Methods.TCPServer
 
         void tcpServer_DataReceived(string ID, byte[] Data)
         {
+            if (LogEvent != null) LogEvent(ID + " Sent Data");
             string[] command = Utils.GetString(Data).Split(' ');
             switch (command[0].Trim().ToLowerInvariant())
             {
-                case "Utils.Login":
-
+                case "login":
+                    if (LogEvent != null) LogEvent(ID + " Attempting Login");
                     break;
                 case "register":
-                    LogEvent(ID + " Registering In");
+                    if (LogEvent != null) LogEvent(ID + " Attempting Registration");
                     if (Registration.RegistrationSuccessful(ID, Utils.GetString(Data)))
                         Reply(ID, command[0], RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString());
                     else
                         Reply(ID, command[0], RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
                     break;
                 case "get":
-                    LogEvent(ID + "Getting URLS");
+                    if (LogEvent != null) LogEvent(ID + " Wants More URLS");
                     SendUrls(ID, RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString(), GetURLS());
                     break;
                 case "nop":
@@ -148,19 +149,21 @@ namespace RaptorTCP3.Methods.TCPServer
 
         internal void SendWait()
         {
+            if (LogEvent != null) LogEvent("Broadcasting Wait");
             if (Users.allUsers.Count() > 0)
                 tcpServer.Brodcast(Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Wait.ToString()));
         }
 
         internal void SendResume()
         {
+            if (LogEvent != null) LogEvent("Broadcasting Resume");
             if (Users.allUsers.Count() > 0)
                 tcpServer.Brodcast(Utils.GetBytes(RaptorTCP3.Methods.Enumerations.ServerCommands.Resume.ToString()));
         }
 
         private void SendUrls(string ID, string sc, string[] urlList)
         {
-            if (LogEvent != null) LogEvent("Sending URLS");
+            if (LogEvent != null) LogEvent(ID + " Being Sent URLS");
             string strBuffer = sc + " ";
             foreach (string url in urlList)
             {

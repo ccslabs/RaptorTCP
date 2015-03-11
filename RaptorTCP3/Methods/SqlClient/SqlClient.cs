@@ -21,11 +21,9 @@ namespace RaptorTCP3.Methods.SqlClient
         {
            if(LogEvent != null)LogEvent("Starting SQL Client");
 
-            Seeding.SeedUrls();
-
             if (sURLS.urlQueue.Count() < 50)
             {
-               if(LogEvent != null)LogEvent("Populating ");
+               if(LogEvent != null)LogEvent("Populating URL QUEUE");
                 sURLS.PopulateURLQueue(50);
             }
         }

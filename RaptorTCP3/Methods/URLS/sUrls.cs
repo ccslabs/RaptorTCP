@@ -29,6 +29,13 @@ namespace RaptorTCP3.Methods.SystemURLS
         public delegate void MoreUrlsLeftToProcessEventHandler();
         public event MoreUrlsLeftToProcessEventHandler MoreUrlsLeftToProcessEvent;
 
+        // Notify Progress Changed
+        public delegate void ProgressChangedEventHandler(long Progress);
+        public event ProgressChangedEventHandler ProgressChangedEvent;
+        // Notify New Progress Maximum
+        public delegate void ProgressMaximumChangedEventHandler(long Progress);
+        public event ProgressMaximumChangedEventHandler ProgressMaximumChangedEvent;
+
 
         public sUrls()
         {
@@ -36,18 +43,13 @@ namespace RaptorTCP3.Methods.SystemURLS
             timerMonitor.Interval = 5000; // Check each 5 Seconds
             timerMonitor.Elapsed += timerMonitor_Elapsed;
 
-
-            if (urlQueue.Count() < 50)
-            {
-                PopulateURLQueue(50);
-            }
         }
 
         void timerMonitor_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (UrlsToProcessCount() > 0)
             {
-                MoreUrlsLeftToProcessEvent();
+              if(MoreUrlsLeftToProcessEvent != null)  MoreUrlsLeftToProcessEvent();
                 timerMonitor.Stop();
             }
         }
@@ -77,10 +79,13 @@ namespace RaptorTCP3.Methods.SystemURLS
                 {
                     if (MoreUrlsLeftToProcessEvent != null) MoreUrlsLeftToProcessEvent();
                     if (LogEvent != null) LogEvent("Number of URLS To Process in Database: " + result.ToString("N0"));
+                    StopURLMonitor();
                 }
                 else
                 {
+                    if (LogEvent != null) LogEvent("NO URLS Left to be processed");
                     if (NoUrlsLeftToProcessEvent != null) NoUrlsLeftToProcessEvent();
+                    StartURLMonitor();
                 }
                 
                 return result;
@@ -89,11 +94,13 @@ namespace RaptorTCP3.Methods.SystemURLS
 
         internal void PopulateURLQueue(long numberOfUrlsToGet)
         {
+            StopURLMonitor();
             long toprocess = UrlsToProcessCount();
             if (toprocess > 0)
             {
                 if (toprocess < numberOfUrlsToGet) numberOfUrlsToGet = toprocess;
                 if (LogEvent != null) LogEvent("Populating URL Queue, Adding " + numberOfUrlsToGet);
+                if (ProgressMaximumChangedEvent != null)  ProgressMaximumChangedEvent(numberOfUrlsToGet);
 
                 using (var db = new DamoclesEntities())
                 {
@@ -104,11 +111,12 @@ namespace RaptorTCP3.Methods.SystemURLS
                         var urlp = result.URLPath;
                         result.JoinedProcessingQueueDate = DateTime.UtcNow;
                         urlQueue.Enqueue(urlp);
-
+                        if (ProgressMaximumChangedEvent != null && ProgressChangedEvent != null) ProgressChangedEvent(idx);
                         SetUrlToInProcessingQueue(urlp);
                         db.SaveChanges();
                     }
                 }
+                if (ProgressMaximumChangedEvent != null && ProgressChangedEvent != null) ProgressChangedEvent(0);
             }
             else
             {
@@ -116,23 +124,34 @@ namespace RaptorTCP3.Methods.SystemURLS
                 // Manually Adding more URLS
                 // Returning URLS that have been in the processing queue for a shorter than normal period of time to be returned to the processing queue
                 // This event should not be fired in normal operations but can occur during debugging.
+                if (LogEvent != null) LogEvent("Failed to Populate URL Queue - there are no URLS left to Process");
                 if (NoUrlsLeftToProcessEvent != null) NoUrlsLeftToProcessEvent();
                 StartURLMonitor();
             }
         }
 
+        private void StopURLMonitor()
+        {
+            if (LogEvent != null) LogEvent("Stopping URL Monitor");
+            timerMonitor.Stop();
+        }
+
         private void StartURLMonitor()
         {
+            if (LogEvent != null) LogEvent("Starting URL Monitor");
             timerMonitor.Start();
         }
 
         private void SetUrlToInProcessingQueue(string url)
         {
+           
             UpdateUrlInQueueStatus(url);
         }
 
         internal void UpdateUrlInQueueStatus(string url)
         {
+            if (LogEvent != null) LogEvent("Setting URL to InProcessingQueue");
+            
             if (!string.IsNullOrEmpty(url))
             {
                 using (var db = new DamoclesEntities())

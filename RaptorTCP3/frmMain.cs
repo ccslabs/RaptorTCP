@@ -34,6 +34,11 @@ namespace RaptorTCP3
         delegate void SetToolStripCallBack(string text);
         delegate void SetStatusLabelTextCallback(ToolStripStatusLabel ctrl, string text);
 
+        delegate void SetToolStripProgressMaximumCallBack(int value);
+        delegate void SetToolStripProgressValueCallBack(int value);
+        
+
+
         private Utilities Utils = new Utilities();
         private LoginMethods LoginMethods = new LoginMethods();
         private LogOff Logoff = new LogOff();
@@ -67,25 +72,41 @@ namespace RaptorTCP3
             ConOut.Left = 0;
             ConOut.Top = this.Height / 3;
             ConOut.Width = this.Width;
-            ConOut.Height = 2 * this.Height / 3;
+            ConOut.Height = (2 * this.Height / 3) - 50;
 
+           
+        }
+
+        private void StartUp()
+        {
+            Log("Subscribing to Login Events");
             LoginMethods.LogEvent += LogEvent;
             LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
 
+            Log("Subscribing to URL Events");
             URLS.LogEvent += LogEvent;
             URLS.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
             URLS.NoUrlsLeftToProcessEvent += URLS_NoUrlsLeftToProcessEvent;
             URLS.MoreUrlsLeftToProcessEvent += URLS_MoreUrlsLeftToProcessEvent;
+            URLS.ProgressChangedEvent += ProgressChangedEvent;
+            URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
 
+            Log("Subscribing to TCP  Server Events");
             tcpServer.LogEvent += LogEvent;
             tcpServer.tcpConnectionClosedEvent += tcpServer_tcpConnectionClosedEvent;
             tcpServer.tcpLostConnectionEvent += tcpServer_tcpLostConnectionEvent;
 
+            Log("Subscribing to Seeding Events");
             Seeding.LogEvent += LogEvent;
-            Seeding.ProgressChangedEvent += Seeding_ProgressChangedEvent;
-            Seeding.ProgressMaximumChangedEvent += Seeding_ProgressMaximumChangedEvent;
+            Seeding.ProgressChangedEvent += ProgressChangedEvent;
+            Seeding.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
 
+            Log("Subscribing to Database Client Events");
             DatabaseClient.LogEvent += LogEvent;
+            Log("Application Loaded");
+            Log("Populating URL Queue");
+            URLS.PopulateURLQueue(50);
+
         }
 
         #region tcpServer Events
@@ -103,19 +124,7 @@ namespace RaptorTCP3
         }
 
         #endregion
-
-        #region Seeding Events
-        void Seeding_ProgressMaximumChangedEvent(int Max)
-        {
-            Progress.Maximum = Max;
-        }
-
-        void Seeding_ProgressChangedEvent(int Value)
-        {
-            Progress.Value = Value;
-        }
-        #endregion
-
+      
         #region URL Events
         void systemUrls_UrlsToEnqueueEvent(string URL)
         {
@@ -153,10 +162,7 @@ namespace RaptorTCP3
                 tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
         }
 
-        void LogEvent(string Message)
-        {
-            Log(Message);
-        }
+       
         #endregion
 
         #region cmsSystem Operations
@@ -222,6 +228,67 @@ namespace RaptorTCP3
 
         #endregion
 
+        #region Global Shared Events
+
+         void ProgressMaximumChangedEvent(int Max)
+        {
+            if (toolStripContainer1.InvokeRequired)
+            {
+                SetToolStripProgressMaximumCallBack d = new SetToolStripProgressMaximumCallBack(ProgressMaximumChangedEvent);
+                this.Invoke(d, new object[] { Max });
+            }
+            else
+            {
+                Progress.Maximum = int.Parse(Max.ToString());
+            }
+        }
+
+        void  ProgressChangedEvent(int Value)
+        {
+            if (toolStripContainer1.InvokeRequired)
+            {
+                SetToolStripProgressValueCallBack d = new SetToolStripProgressValueCallBack(ProgressChangedEvent);
+                this.Invoke(d, new object[] { Value });
+            }
+            else
+            {
+                Progress.Maximum = int.Parse(Value.ToString());
+            }
+        }
+
+        void ProgressMaximumChangedEvent(long Max)
+        {
+            if (toolStripContainer1.InvokeRequired)
+            {
+                SetToolStripProgressMaximumCallBack d = new SetToolStripProgressMaximumCallBack(ProgressMaximumChangedEvent);
+                this.Invoke(d, new object[] { Max });
+            }
+            else
+            {
+                Progress.Maximum = int.Parse(Max.ToString());
+            }
+        }
+
+        void ProgressChangedEvent(long Value)
+        {
+            if (toolStripContainer1.InvokeRequired)
+            {
+                SetToolStripProgressValueCallBack d = new SetToolStripProgressValueCallBack(ProgressChangedEvent);
+                this.Invoke(d, new object[] { Value });
+            }
+            else
+            {
+                Progress.Maximum = int.Parse(Value.ToString());
+            }
+        }
+
+        void LogEvent(string Message)
+        {
+            Log(Message);
+        }
+
+        #endregion
+
         #region Form Events
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -230,10 +297,19 @@ namespace RaptorTCP3
             t.Start();
         }
 
-        private void StartUp()
-        {
-            Log("Application Loaded");
+      
 
+        private void frmMain_SizeChanged(object sender, EventArgs e)
+        {
+            panel1.Top = 0;
+            panel1.Left = 0;
+            panel1.Width = this.Width;
+            panel1.Height = this.Height / 3;
+
+            ConOut.Left = 0;
+            ConOut.Top = this.Height / 3;
+            ConOut.Width = this.Width;
+            ConOut.Height = (2 * this.Height / 3) - 50;
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -328,7 +404,12 @@ namespace RaptorTCP3
                 LastLogMessage = message;
             }
             UpdateStatusMessage(message);
+            Application.DoEvents();
         }
+
+
+
+       
 
     }
 }

@@ -49,7 +49,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.lblConnections = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.ConOut = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,6 +71,7 @@
             this.timerOneSecond = new System.Windows.Forms.Timer(this.components);
             this.lblWaitStatus = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.ConOut = new System.Windows.Forms.RichTextBox();
             this.cmsSystem.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -133,8 +133,8 @@
             // 
             // toolStripContainer1.ContentPanel
             // 
-            this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.ConOut);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
             this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1122, 427);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
@@ -258,22 +258,6 @@
             this.label1.Size = new System.Drawing.Size(69, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Connections:";
-            // 
-            // ConOut
-            // 
-            this.ConOut.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ConOut.BackColor = System.Drawing.Color.Black;
-            this.ConOut.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ConOut.ForeColor = System.Drawing.Color.Lime;
-            this.ConOut.Location = new System.Drawing.Point(0, 183);
-            this.ConOut.Name = "ConOut";
-            this.ConOut.ReadOnly = true;
-            this.ConOut.ShowSelectionMargin = true;
-            this.ConOut.Size = new System.Drawing.Size(1122, 179);
-            this.ConOut.TabIndex = 3;
-            this.ConOut.Text = "";
             // 
             // menuStrip1
             // 
@@ -442,6 +426,22 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Wait Status:";
             // 
+            // ConOut
+            // 
+            this.ConOut.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ConOut.BackColor = System.Drawing.Color.Black;
+            this.ConOut.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ConOut.ForeColor = System.Drawing.Color.Green;
+            this.ConOut.Location = new System.Drawing.Point(0, 185);
+            this.ConOut.Name = "ConOut";
+            this.ConOut.ReadOnly = true;
+            this.ConOut.ShowSelectionMargin = true;
+            this.ConOut.Size = new System.Drawing.Size(1122, 217);
+            this.ConOut.TabIndex = 5;
+            this.ConOut.Text = "";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -456,6 +456,7 @@
             this.Name = "frmMain";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
+            this.SizeChanged += new System.EventHandler(this.frmMain_SizeChanged);
             this.cmsSystem.ResumeLayout(false);
             this.toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.BottomToolStripPanel.PerformLayout();
@@ -488,7 +489,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lblConnections;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.RichTextBox ConOut;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem1;
@@ -519,6 +519,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Label lblWaitStatus;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.RichTextBox ConOut;
     }
 }
 

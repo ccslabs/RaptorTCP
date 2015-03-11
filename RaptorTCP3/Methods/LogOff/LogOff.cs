@@ -16,6 +16,7 @@ namespace RaptorTCP3.Methods.LogOff
 
         internal void LogOffUser(string Cid)
         {
+            if (LogEvent != null) LogEvent(Cid + " Is Being Logged Off");
             //TODO: We need to store the User Clients IDs when they Utils.Log on so we can Utils.Log them off properly at the end!
             if (Cid.Contains("-")) // Internally generated IDs do not contains hyphens.
             {
@@ -43,6 +44,7 @@ namespace RaptorTCP3.Methods.LogOff
 
         private void UpdateLogOffHistory(string emailAddress)
         {
+            if (LogEvent != null) LogEvent("Updating Users LogOff History");
             using (var db = new DamoclesEntities())
             {
                 var uid = Users.GetUserID(emailAddress);
@@ -59,7 +61,7 @@ namespace RaptorTCP3.Methods.LogOff
 
         internal void LogOffAllUsers()
         {
-
+            if (LogEvent != null) LogEvent("Logging Off ALL Users");
             foreach (string Cid in Users.allUsers)
             {
                 LogOffUser(Cid);

@@ -21,6 +21,7 @@ namespace RaptorTCP3.Methods.Login
 
         private void Login(string Cid, string emailAddress, string Password)
         {
+            if (LogEvent != null) LogEvent(Cid + " Is Loging in");
             // Does the User Exist in the Database?
             using (var db = new DamoclesEntities())
             {
@@ -47,6 +48,7 @@ namespace RaptorTCP3.Methods.Login
 
         private int AddClient(string ClientID, string emailAddress)
         {
+            if (LogEvent != null) LogEvent(ClientID + " Is Being Added in");
             int rid = 0;
             using (var db = new DamoclesEntities())
             {
@@ -64,7 +66,7 @@ namespace RaptorTCP3.Methods.Login
 
         internal void UpdateLoginHistory(string emailAddress)
         {
-
+            if (LogEvent != null) LogEvent("User's Logon History is being Created.");
             using (var db = new DamoclesEntities())
             {
                 var loh = db.LogonHistories;

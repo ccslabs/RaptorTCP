@@ -18,6 +18,7 @@ namespace RaptorTCP3.Methods.Registration
 
         internal bool RegistrationSuccessful(string ID, string commandParams)
         {
+            if (LogEvent != null) LogEvent(ID + " Registration was Successful");
             string[] command = commandParams.Trim().ToLowerInvariant().Split(' ');
             if (command[0] == "register")
             {
