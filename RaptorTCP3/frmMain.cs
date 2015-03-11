@@ -136,6 +136,7 @@ namespace RaptorTCP3
         {
             IsInWaitMode = false;
             SetLabel(lblWaitStatus, "Resumed");
+            SetLabel(lblQueueLength, URLS.urlQueue.Count.ToString("N0"));
             tcpServer.SendResume();
         }
 
@@ -197,6 +198,7 @@ namespace RaptorTCP3
             else
             {
                 lbl.Text = message;
+                Application.DoEvents();
             }
         }
 
@@ -210,6 +212,7 @@ namespace RaptorTCP3
             else
             {
                 lblStatus.Text = message;
+                Application.DoEvents();
             }
         }
 
@@ -223,6 +226,7 @@ namespace RaptorTCP3
             else
             {
                 lbl.Text = message;
+                Application.DoEvents();
             }
         }
 
@@ -240,6 +244,7 @@ namespace RaptorTCP3
             else
             {
                 Progress.Maximum = int.Parse(Max.ToString());
+                Application.DoEvents();
             }
         }
 
@@ -253,6 +258,7 @@ namespace RaptorTCP3
             else
             {
                 Progress.Maximum = int.Parse(Value.ToString());
+                Application.DoEvents();
             }
         }
 
@@ -337,6 +343,8 @@ namespace RaptorTCP3
 
             UpdateToolStripStatusLabel(lblRuntime, Utils.SecondsToDHMS(SecondsPastSinceBoot).ToString());
             UpdateToolStripStatusLabel(lblIdleTime, Utils.SecondsToDHMS(SecondsIdle).ToString());
+
+            Application.DoEvents();
         }
 
         private string LastLogMessage = "";
