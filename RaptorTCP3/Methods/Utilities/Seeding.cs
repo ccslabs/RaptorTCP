@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using RaptorTCP3.Methods.Users;
 
 namespace RaptorTCP3.Methods.Utilities
 {
     class Seeding
     {
         private Utilities Utils = new Utilities();
-        private RaptorTCP3.Methods.Licenses.Licenses license = new Licenses.Licenses();
-        private RaptorTCP3.Methods.SystemURLS.sUrls URLS = new SystemURLS.sUrls();
-        private RaptorTCP3.Methods.Users.Users Users = new Users.Users();
+
 
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
@@ -33,6 +26,12 @@ namespace RaptorTCP3.Methods.Utilities
         public delegate void BroadcastResumeEventHandler();
         public event BroadcastResumeEventHandler BroadcastResumeEvent;
 
+        public delegate void DeleteAllUrlsEventHandler(DamoclesEntities db);
+        public event DeleteAllUrlsEventHandler DeleteAllUrlsEvent;
+        public delegate void AddUrlEventHandler(string urlPath);
+        public event AddUrlEventHandler AddUrlEvent;
+
+
         public Seeding()
         {
 
@@ -41,7 +40,7 @@ namespace RaptorTCP3.Methods.Utilities
         internal void SeedUrls()
         {
             if (BroadcastWaitEvent != null) BroadcastWaitEvent();
-            if(LogEvent != null) LogEvent("Loading URL Seed Data");
+            if (LogEvent != null) LogEvent("Loading URL Seed Data");
             // Load URLS from file
             FileStream fs = null;
             StreamReader sr = null;
@@ -70,10 +69,11 @@ namespace RaptorTCP3.Methods.Utilities
 
 
                 SaveUrls(alUrls);
+                BroadcastResumeEvent();
             }
             catch (Exception ex)
             {
-                if (LogEvent != null) LogEvent("Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
+                if (LogEvent != null) LogEvent("FATAL Error Loading Seed Urls (seedUrlsToolStripMenuItem_Click) " + ex.Message);
                 if (sr != null) sr.Close();
                 if (fs != null) fs.Close();
             }
@@ -81,34 +81,19 @@ namespace RaptorTCP3.Methods.Utilities
 
         private void SaveUrls(ArrayList alUrls)
         {
-            if (LogEvent != null) LogEvent("Saving Seed URLS");
-            int rows = 0;
-            ProgressMaximumChangedEvent(alUrls.Count);
-
             using (var db = new DamoclesEntities())
             {
-                URLS.DeleteAllURLS(db);
+                DeleteAllUrlsEvent(db);
+            }
+            foreach (string url in alUrls)
+            {
 
-                var urls = db.URLS;
-                int idx = 0;
-                foreach (string url in alUrls)
-                {
-                    idx++;
-                    ProgressChangedEvent(idx);
-                    string newurl = Utils.DecodeUrlString(url);
+                string newurl = Utils.DecodeUrlString(url);
 
-                    urls.Add(URLS.AddUrl(url));
-                }
-                
-                db.SaveChanges();
-                if (LogEvent != null) LogEvent("Seed URLS Saved");
+                AddUrlEvent(newurl);
             }
 
-            ProgressChangedEvent(0);
 
-            if (LogEvent != null) LogEvent("Seeded URLS Table with " + rows.ToString("N0") + " rows");
-            alUrls.Clear();
-            if (BroadcastResumeEvent != null) BroadcastResumeEvent();
         }
 
         internal void SeedUsers()
@@ -116,7 +101,7 @@ namespace RaptorTCP3.Methods.Utilities
             if (LogEvent != null) LogEvent("Seeding Users");
             using (var db = new DamoclesEntities())
             {
-                Users.DeleteAllUsers(db);
+                //  Users.DeleteAllUsers(db);
 
                 var usrs = db.Users;
                 var su = new User();
@@ -142,7 +127,7 @@ namespace RaptorTCP3.Methods.Utilities
             su.LanguagesId = 1;
             su.IsOnline = false;
             su.AccountStatusId = 3;
-            su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
+            //  su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
             su.emailAddress = em;
             //su.UserClientID = null;
             //su.CurrentClientID = null;
@@ -162,7 +147,7 @@ namespace RaptorTCP3.Methods.Utilities
             su.LanguagesId = 1;
             su.IsOnline = false;
             su.AccountStatusId = 3;
-            su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
+            //   su.LicenseNumber = license.GenerateTemporaryLicenseNumber(em);
             su.emailAddress = em;
             su.UserClientID = null;
             su.CurrentClientID = null;

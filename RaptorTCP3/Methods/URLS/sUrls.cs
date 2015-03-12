@@ -42,6 +42,7 @@ namespace RaptorTCP3.Methods.SystemURLS
             timerMonitor.AutoReset = true;
             timerMonitor.Interval = 30000; // Check each 30 Seconds
             timerMonitor.Elapsed += timerMonitor_Elapsed;
+            timerMonitor.Stop(); // Make sure it is not running.
 
         }
 
@@ -152,7 +153,7 @@ namespace RaptorTCP3.Methods.SystemURLS
 
         internal void UpdateUrlInQueueStatus(string url)
         {
-           
+
 
             if (!string.IsNullOrEmpty(url))
             {
@@ -164,7 +165,7 @@ namespace RaptorTCP3.Methods.SystemURLS
                     int rows = db.SaveChanges();
                     if (rows < 1)
                         LogEvent("Failed to Set Url to IsInProcessingQueue = True " + url);
-                   
+
                 }
             }
         }
@@ -187,6 +188,27 @@ namespace RaptorTCP3.Methods.SystemURLS
             ue.DiscoveryDate = DateTime.UtcNow;
             ue.IsInProcessingQueue = false;
             return ue;
+        }
+
+        internal void SaveUrl(string URL)
+        {
+            using (var db = new DamoclesEntities())
+            {
+                var urls = db.URLS;
+                string newurl = Utils.DecodeUrlString(URL);
+
+                //TODO: ADD NEW EVENT ADD URL
+                AddUrl(URL);
+                int row = db.SaveChanges();
+                if (row > 1)
+                {
+                    if (LogEvent != null) LogEvent("Saved URL To Database " + URL);
+                }
+                else
+                {
+                    if (LogEvent != null) LogEvent("Failed to Save URL To Database " + URL);
+                }
+            }
         }
     }
 }

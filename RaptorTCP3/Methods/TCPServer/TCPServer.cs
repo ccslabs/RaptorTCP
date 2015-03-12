@@ -29,6 +29,7 @@ namespace RaptorTCP3.Methods.TCPServer
         NetComm.Host tcpServer = new Host(9119);
 
         Utilities.Utilities Utils = new Utilities.Utilities();
+
         Users.Users Users = new Users.Users();
         private RaptorTCP3.Methods.SystemURLS.sUrls URLS = new SystemURLS.sUrls();
         RaptorTCP3.Methods.Registration.Registration Registration = new Registration.Registration();
@@ -82,7 +83,7 @@ namespace RaptorTCP3.Methods.TCPServer
             if (id.Contains("-"))
             {
                 if (LogEvent != null) LogEvent("Client Connecting");
-               // Users.allUsers.Add(id); Changed to an Event!
+                // Users.allUsers.Add(id); Changed to an Event!
                 tcpConnectionEvent(id);
             }
         }

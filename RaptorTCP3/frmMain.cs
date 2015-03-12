@@ -112,7 +112,8 @@ namespace RaptorTCP3
             tcpServer.tcpConnectionEvent += tcpServer_tcpConnectionEvent;
 
             Log("Subscribing to Seeding Events");
-
+            Seeding.AddUrlEvent += Seeding_AddUrlEvent;
+            Seeding.DeleteAllUrlsEvent += Seeding_DeleteAllUrlsEvent;
 
             Log("Subscribing to Database Client Events");
             DatabaseClient.LogEvent += LogEvent;
@@ -136,7 +137,7 @@ namespace RaptorTCP3
 
             Log("Application Loaded");
             Log("Populating URL Queue");
-            URLS.PopulateURLQueue(50);
+          //  URLS.PopulateURLQueue(50);
 
         }
 
@@ -144,7 +145,18 @@ namespace RaptorTCP3
 
 
 
+        #region Seeding Events
 
+        void Seeding_DeleteAllUrlsEvent(DamoclesEntities db)
+        {
+            URLS.DeleteAllURLS(db);
+        }
+
+        void Seeding_AddUrlEvent(string urlPath)
+        {
+            URLS.AddUrl(urlPath);
+        }
+        #endregion
 
         #region tcpServer Events
 
