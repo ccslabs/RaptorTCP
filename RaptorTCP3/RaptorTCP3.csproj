@@ -228,12 +228,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="NetComm\NetComm\NetComm.vbproj">
-      <Project>{c59ceb78-9a49-4222-86a0-5ad229212ef3}</Project>
-      <Name>NetComm</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Data\Countries.txt" />
     <Content Include="SqlScripts\dbo.AccountStatus.data.sql" />
     <Content Include="SqlScripts\dbo.AccountStatus.sql" />
