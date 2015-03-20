@@ -134,12 +134,9 @@ namespace RaptorTCP3
             Seeding.BroadcastResumeEvent += BroadcastResumeEvent;
             Seeding.BroadcastWaitEvent += BroadcastWaitEvent;
 
-
             Log("Application Loaded");
-            Log("Populating URL Queue");
-          //  URLS.PopulateURLQueue(50);
-
-        }
+           
+          }
 
 
 
@@ -293,8 +290,8 @@ namespace RaptorTCP3
             else
             {
                 lbl.Text = message;
-                Application.DoEvents();
             }
+            Application.DoEvents();
         }
 
         #endregion
@@ -423,7 +420,7 @@ namespace RaptorTCP3
             UpdateToolStripStatusLabel(lblRuntime, Utils.SecondsToDHMS(SecondsPastSinceBoot).ToString());
             UpdateToolStripStatusLabel(lblIdleTime, Utils.SecondsToDHMS(SecondsIdle).ToString());
 
-            Application.DoEvents();
+           
         }
 
         private string LastLogMessage = "";
