@@ -8,6 +8,9 @@ using RaptorTCP3.Methods.Utilities;
 using System.Windows.Forms;
 using RaptorTCP3.Methods.Users;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
+
 namespace RaptorTCP3.Methods.TCPServer
 {
     //class TCPServer
