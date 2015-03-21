@@ -10,6 +10,7 @@ using RaptorTCP3.Methods.Users;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.ComponentModel;
 
 namespace RaptorTCP3.Methods.TCPServer
 {
@@ -225,8 +226,20 @@ namespace RaptorTCP3.Methods.TCPServer
     //    }
     //}
 
-    class TCPServerWCF
+    class TCPRemotingServiceHost
     {
+        public static delegate void LogEventHandler(string Message);
+        public static event LogEventHandler LogEvent;
 
+        static void StartTCPServer()
+        {
+            TCPRemotingService.TCPRemotingService TCPServer = new TCPRemotingService.TCPRemotingService();
+            TcpChannel channel = new TcpChannel(9119);
+            ChannelServices.RegisterChannel(channel, true);
+            RemotingConfiguration.RegisterWellKnownServiceType(typeof(TCPRemotingService.TCPRemotingService), "TCPServer", WellKnownObjectMode.SingleCall);
+            LogEvent("TCPServer Host has started");
+        }
     }
+
+
 }
