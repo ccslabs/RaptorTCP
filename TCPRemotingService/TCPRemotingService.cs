@@ -5,23 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-
 namespace TCPRemotingService
 {
     public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService.ITCPRemotingService
     {
-        RaptorTCP3.Methods.Login.LoginMethods login = new RaptorTCP3.Methods.Login.LoginMethods();
+        ITCPRemotingService.Methods.Login.LoginMethods login = new ITCPRemotingService.Methods.Login.LoginMethods();
 
         public bool Login(string EmailAddress, string Password)
         {
             login.LogEvent += login_LogEvent;
             login.LoginResultEvent += login_LoginResultEvent;
-            
+
         }
 
         void login_LoginResultEvent(bool Result)
         {
-                throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         void login_LogEvent(string Message)

@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-
-namespace RaptorTCP3.Methods.Login
+namespace ITCPRemotingService.Methods.Login
 {
     class LoginMethods
     {
@@ -29,7 +28,7 @@ namespace RaptorTCP3.Methods.Login
                 var uid = User.GetUserID(emailAddress);
                 var user = db.Users.First(u => u.UserId == uid);
                 user.IsOnline = true;   // Set the User to Online
-                
+
                 int rows = db.SaveChanges();
                 UpdateLoginHistory(emailAddress); // Add the User's Logon History
 
@@ -83,5 +82,5 @@ namespace RaptorTCP3.Methods.Login
         }
     }
 
-    
+
 }

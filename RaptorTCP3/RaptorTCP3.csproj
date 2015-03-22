@@ -139,7 +139,6 @@
     <Compile Include="Methods\Registration\Registration.cs" />
     <Compile Include="Methods\TCPServer\TCPRemotingServiceHost.cs" />
     <Compile Include="Methods\URLS\sUrls.cs" />
-    <Compile Include="Methods\Users\Users.cs" />
     <Compile Include="Methods\Utilities\Seeding.cs" />
     <Compile Include="Methods\Utilities\Utilities.cs" />
     <Compile Include="Program.cs" />
