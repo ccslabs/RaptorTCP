@@ -17,12 +17,10 @@ using System.Diagnostics;
 
 using RaptorTCP3.Forms;
 using RaptorTCP3.Methods.Utilities;
-using RaptorTCP3.Methods.Login;
-using RaptorTCP3.Methods.LogOff;
 using RaptorTCP3.Methods.TCPServer;
 using RaptorTCP3.Methods.SystemURLS;
 using RaptorTCP3.Methods;
-using RaptorTCP3.Methods.Users;
+
 
 namespace RaptorTCP3
 {
@@ -36,20 +34,14 @@ namespace RaptorTCP3
         delegate void SetToolStripProgressMaximumCallBack(int value);
         delegate void SetToolStripProgressValueCallBack(int value);
 
-
-
-        private Utilities Utils;
-        private LoginMethods LoginMethods;
-        private LogOff Logoff;
+        private Utilities Utils;     
         private Seeding Seeding;
 
         private sUrls URLS;
-        private Users Users;
         private TCPRemotingServiceHost tcpServer = new TCPRemotingServiceHost();
         private Task t;
 
         private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
-
 
         private int SecondsPastSinceBoot;
         private int SecondsIdle;
@@ -78,21 +70,15 @@ namespace RaptorTCP3
             Log("\tUtilities");
             Utils = new Utilities();
            
-            Log("\tLogOff Methods");
-            Logoff = new LogOff();
+          
             Log("\tSeeding Class");
             Seeding = new Seeding();
             Log("\tThe TCP Server");
             tcpServer.StartTCPServer();
-            Log("\tUsers Class");
-            Users = new Users();
+           
             Log("\tURLS Class");
             URLS = new sUrls();
            
-
-            Log("Subscribing to User Events");
-            Users.UserCountEvent += Users_UserCountEvent;
-
             Log("Subscribing to Seeding Events");
             Seeding.AddUrlEvent += Seeding_AddUrlEvent;
             Seeding.DeleteAllUrlsEvent += Seeding_DeleteAllUrlsEvent;
@@ -102,8 +88,6 @@ namespace RaptorTCP3
             Seeding.LogEvent += LogEvent;
             tcpServer.LogEvent += LogEvent;
             URLS.LogEvent += LogEvent;
-            LoginMethods.LogEvent += LogEvent;
-            Users.LogEvent += LogEvent;
             Log("\t Progress Changed");
 
             URLS.ProgressChangedEvent += ProgressChangedEvent;
@@ -114,11 +98,7 @@ namespace RaptorTCP3
             Log("Application Loaded");
 
         }
-
-
-
-
-
+        
         #region Seeding Events
 
         void Seeding_DeleteAllUrlsEvent(DamoclesEntities db)
@@ -266,7 +246,7 @@ namespace RaptorTCP3
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Log("Application Closing");
-            Logoff.LogOffAllUsers();
+         //   Logoff.LogOffAllUsers();
             t.Dispose();
             t.Wait();
         }

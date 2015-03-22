@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ITCPRemotingService.Registration
+using TCPRemotingService.Users;
+using TCPRemotingService.Login;
+
+namespace TCPRemotingService.Registration
 {
-    class Registration
+    public class Registration
     {
-        private Users.Users users = new Users.Users();
-
-
+        private Users.Users Users = new Users.Users();
+        private Login.LoginMethods login = new LoginMethods();
 
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
@@ -35,6 +37,7 @@ namespace ITCPRemotingService.Registration
                 System.Data.Entity.DbSet<User> users = db.Users;
 
                 var eu = Users.CreateUser(ClientID, emailAddress, Password);
+
                 users.Add(eu);
 
                 int rows = db.SaveChanges();
@@ -45,7 +48,7 @@ namespace ITCPRemotingService.Registration
                 }
                 else
                 {
-                    Login.UpdateLoginHistory(emailAddress);
+                    login.UpdateLoginHistory(emailAddress);
                     return true;
                 }
             }

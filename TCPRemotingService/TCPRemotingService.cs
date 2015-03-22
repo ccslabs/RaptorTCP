@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TCPRemotingService
 {
-    public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService.ITCPRemotingService
+    public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService
     {
 
         public delegate void LogEventHandler(string Message);

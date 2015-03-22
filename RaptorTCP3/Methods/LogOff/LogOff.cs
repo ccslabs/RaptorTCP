@@ -4,17 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaptorTCP3.Methods.LogOff
+using TCPRemotingService.Users;
+
+namespace TCPRemotingService.Methods.LogOff
 {
-    class LogOff
+   public class LogOff
     {
 
-        private Users.Users Users = new Users.Users();
+       private Users.Users Users = new Users.Users();
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
 
-        internal void LogOffUser(string Cid)
+        public void LogOffUser(string Cid)
         {
             if (LogEvent != null) LogEvent(Cid + " Is Being Logged Off");
             //TODO: We need to store the User Clients IDs when they Utils.Log on so we can Utils.Log them off properly at the end!

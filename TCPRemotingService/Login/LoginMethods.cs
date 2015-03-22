@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ITCPRemotingService.Users;
+using TCPRemotingService.Users;
 
-namespace ITCPRemotingService.Login
+namespace TCPRemotingService.Login
 {
-    class LoginMethods
+    public class LoginMethods
     {
         // Returns the result of the Attempted Login
         public delegate void LoginResultEventHandler(bool Result);
@@ -19,7 +19,7 @@ namespace ITCPRemotingService.Login
 
         Users.Users User = new Users.Users();
 
-        internal void Login(string emailAddress, string Password)
+        public void Login(string emailAddress, string Password)
         {
             if (LogEvent != null) LogEvent(emailAddress + " Is Logging in");
             // Does the User Exist in the Database?
@@ -64,7 +64,7 @@ namespace ITCPRemotingService.Login
             }
         }
 
-        internal void UpdateLoginHistory(string emailAddress)
+        public void UpdateLoginHistory(string emailAddress)
         {
             if (LogEvent != null) LogEvent("User's Logon History is being Created.");
             using (var db = new DamoclesEntities())

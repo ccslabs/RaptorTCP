@@ -99,6 +99,7 @@
     <Compile Include="LicenseNumber.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
+    <Compile Include="Licenses\Licenses.cs" />
     <Compile Include="Login\LoginMethods.cs" />
     <Compile Include="LogonHistory.cs">
       <DependentUpon>DamoclesModels.tt</DependentUpon>

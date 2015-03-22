@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ITCPRemotingService.Users
+using TCPRemotingService.Licenses;
+
+namespace TCPRemotingService.Users
 {
-    class Users
+    public class Users
     {
-        public ITCPRemotingService.Licenses.Licenses license = new Licenses.Licenses();
+        private Licenses.Licenses license = new Licenses.Licenses();
 
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
@@ -17,9 +19,9 @@ namespace ITCPRemotingService.Users
         public delegate void UserCountEventHandler(int NumberOfUsers);
         public event UserCountEventHandler UserCountEvent;
 
-        internal ObservableCollection<string> allUsers = new ObservableCollection<string>();
+        public ObservableCollection<string> allUsers = new ObservableCollection<string>();
 
-        internal Users()
+        public Users()
         {
             allUsers.CollectionChanged += allUsers_CollectionChanged;
         }
@@ -31,7 +33,7 @@ namespace ITCPRemotingService.Users
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
                     if (LogEvent != null) LogEvent("New User Joined");
                     break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:                    
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
                     break;
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
                     if (LogEvent != null) LogEvent("User Removed");
@@ -43,10 +45,10 @@ namespace ITCPRemotingService.Users
                 default:
                     break;
             }
-          if(UserCountEvent != null)  UserCountEvent(allUsers.Count);
+            if (UserCountEvent != null) UserCountEvent(allUsers.Count);
         }
 
-        internal int GetUserID(string emailAddress)
+        public int GetUserID(string emailAddress)
         {
             if (LogEvent != null) LogEvent("Getting User ID from Email");
             using (var db = new DamoclesEntities())
@@ -56,7 +58,7 @@ namespace ITCPRemotingService.Users
             }
         }
 
-        internal string GetUserEmailAddressByID(string Cid)
+        public string GetUserEmailAddressByID(string Cid)
         {
             if (LogEvent != null) LogEvent("Getting User Email from ID");
             using (var db = new DamoclesEntities())
@@ -66,7 +68,7 @@ namespace ITCPRemotingService.Users
             }
         }
 
-        internal User CreateUser(string ClientID, string emailAddress, string Password)
+        public User CreateUser(string ClientID, string emailAddress, string Password)
         {
             if (LogEvent != null) LogEvent("Creating New User");
             var eu = new User();
@@ -84,15 +86,15 @@ namespace ITCPRemotingService.Users
             return eu;
         }
 
-        internal  void DeleteAllUsers(DamoclesEntities db)
+        public void DeleteAllUsers(DamoclesEntities db)
         {
-           if(LogEvent != null) LogEvent("Deleting All Users.");
+            if (LogEvent != null) LogEvent("Deleting All Users.");
             var all = from c in db.Users select c;
             db.Users.RemoveRange(all);
             db.SaveChanges();
         }
 
-        internal void AddUserToAllUsers(string Cid)
+        public void AddUserToAllUsers(string Cid)
         {
             if (allUsers.Contains("Cid"))
                 LogEvent(Cid + " User Rejoined");
