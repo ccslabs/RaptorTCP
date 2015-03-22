@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ITCPRemotingService.Users;
 
-namespace ITCPRemotingService.Methods.Login
+namespace ITCPRemotingService.Login
 {
     class LoginMethods
     {
@@ -20,7 +21,7 @@ namespace ITCPRemotingService.Methods.Login
 
         internal void Login(string emailAddress, string Password)
         {
-            if (LogEvent != null) LogEvent(emailAddress + " Is Loging in");
+            if (LogEvent != null) LogEvent(emailAddress + " Is Logging in");
             // Does the User Exist in the Database?
             using (var db = new DamoclesEntities())
             {

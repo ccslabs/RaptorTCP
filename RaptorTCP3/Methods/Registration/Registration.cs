@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaptorTCP3.Methods.Registration
+namespace ITCPRemotingService.Registration
 {
     class Registration
     {
-        private RaptorTCP3.Methods.Users.Users Users = new Users.Users();
-        private RaptorTCP3.Methods.Login.LoginMethods Login = new Login.LoginMethods();
+        private Users.Users users = new Users.Users();
+
 
 
         // Informs the main program that a log message is ready
@@ -29,7 +29,7 @@ namespace RaptorTCP3.Methods.Registration
 
         private bool Register(string ClientID, string emailAddress, string Password)
         {
-           if(LogEvent != null)LogEvent("Registering User");
+            if (LogEvent != null) LogEvent("Registering User");
             using (var db = new DamoclesEntities())
             {
                 System.Data.Entity.DbSet<User> users = db.Users;
@@ -40,7 +40,7 @@ namespace RaptorTCP3.Methods.Registration
                 int rows = db.SaveChanges();
                 if (rows < 1)
                 {
-                   if(LogEvent != null)LogEvent("Failed to Add user: " + emailAddress);
+                    if (LogEvent != null) LogEvent("Failed to Add user: " + emailAddress);
                     return false;
                 }
                 else

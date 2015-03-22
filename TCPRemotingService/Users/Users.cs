@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaptorTCP3.Methods.Users
+namespace ITCPRemotingService.Users
 {
     class Users
     {
-        public RaptorTCP3.Methods.Licenses.Licenses license = new Licenses.Licenses();
+        public ITCPRemotingService.Licenses.Licenses license = new Licenses.Licenses();
 
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
@@ -19,7 +19,7 @@ namespace RaptorTCP3.Methods.Users
 
         internal ObservableCollection<string> allUsers = new ObservableCollection<string>();
 
-        public Users()
+        internal Users()
         {
             allUsers.CollectionChanged += allUsers_CollectionChanged;
         }
