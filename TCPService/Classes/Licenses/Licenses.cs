@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaptorTCP3.Methods.Licenses
+namespace TCPService.Classes.Licenses
 {
     class Licenses
     {

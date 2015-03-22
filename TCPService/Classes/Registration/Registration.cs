@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using TCPRemotingService.Users;
-using TCPRemotingService.Login;
+using TCPService.Classes.Users;
+using TCPService.Classes.Login;
 
-namespace TCPRemotingService.Registration
+namespace TCPService.Registration
 {
     public class Registration
     {
-        private Users.Users Users = new Users.Users();
-        private Login.LoginMethods login = new LoginMethods();
+        private Users Users = new Users();
+        private LoginMethods login = new LoginMethods();
 
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);

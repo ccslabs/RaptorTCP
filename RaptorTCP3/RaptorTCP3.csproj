@@ -43,9 +43,9 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -134,11 +134,7 @@
       <DependentUpon>DamoclesModels.tt</DependentUpon>
     </Compile>
     <Compile Include="Methods\Enumerations.cs" />
-    <Compile Include="Methods\Licenses\Licenses.cs" />
-    <Compile Include="Methods\LogOff\LogOff.cs" />
-    <Compile Include="Methods\Registration\Registration.cs" />
     <Compile Include="Methods\TCPServer\TCPRemotingServiceHost.cs" />
-    <Compile Include="Methods\URLS\sUrls.cs" />
     <Compile Include="Methods\Utilities\Seeding.cs" />
     <Compile Include="Methods\Utilities\Utilities.cs" />
     <Compile Include="Program.cs" />
@@ -254,9 +250,9 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TCPRemotingService\TCPRemotingService.csproj">
-      <Project>{6fed39b1-461b-4140-8444-a1c701f5f623}</Project>
-      <Name>TCPRemotingService</Name>
+    <ProjectReference Include="..\TCPService\TCPService.csproj">
+      <Project>{734d52ef-e3cb-41ff-938a-f3d4836d91ae}</Project>
+      <Name>TCPService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

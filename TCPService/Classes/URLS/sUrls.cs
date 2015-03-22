@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaptorTCP3.Methods.SystemURLS
+using TCPService.Classes;
+
+namespace TCPService.Classes.URLS.SystemURLS
 {
     class sUrls
     {
-        private RaptorTCP3.Methods.Utilities.Utilities Utils = new Utilities.Utilities();
+        private Utilities.Utilities Utils = new Utilities.Utilities();
         private System.Timers.Timer timerMonitor = new System.Timers.Timer();
 
         internal Queue<string> urlQueue = new Queue<string>();

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace TCPRemotingService
 {
-    public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService
+    public class TCPService :  ITCPService
     {
 
         public delegate void LogEventHandler(string Message);
@@ -122,12 +124,18 @@ namespace TCPRemotingService
         }
     }
 
-    public interface ITCPRemotingService
+    [ServiceContract]
+    public interface ITCPService
     {
+        [OperationContract]
         bool Login(string EmailAddress, string Password); // Client Logging in
+        [OperationContract]
         bool Register(string EmailAddress, string Password); // Client Registering
+        [OperationContract]
         string[] TakeUrls(); // Client wants some URLS to process
+        [OperationContract]
         bool GiveUrls(string[] UrlList); // Client Sending us URls it has processed
+        [OperationContract]
         bool Hello(); // Hello to see if the WebService is online.
 
     }

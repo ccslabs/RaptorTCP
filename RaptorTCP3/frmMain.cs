@@ -18,7 +18,6 @@ using System.Diagnostics;
 using RaptorTCP3.Forms;
 using RaptorTCP3.Methods.Utilities;
 using RaptorTCP3.Methods.TCPServer;
-using RaptorTCP3.Methods.SystemURLS;
 using RaptorTCP3.Methods;
 
 
@@ -34,11 +33,9 @@ namespace RaptorTCP3
         delegate void SetToolStripProgressMaximumCallBack(int value);
         delegate void SetToolStripProgressValueCallBack(int value);
 
-        private Utilities Utils;     
+        private Utilities Utils;
         private Seeding Seeding;
 
-        private sUrls URLS;
-        private TCPRemotingServiceHost tcpServer = new TCPRemotingServiceHost();
         private Task t;
 
         private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
@@ -69,13 +66,11 @@ namespace RaptorTCP3
             Log("Instantiating");
             Log("\tUtilities");
             Utils = new Utilities();
-          
+
             Log("\tSeeding Class");
             Seeding = new Seeding();
-           
-            Log("\tURLS Class");
-            URLS = new sUrls();
-           
+
+
             Log("Subscribing to Seeding Events");
             Seeding.AddUrlEvent += Seeding_AddUrlEvent;
             Seeding.DeleteAllUrlsEvent += Seeding_DeleteAllUrlsEvent;
@@ -83,31 +78,25 @@ namespace RaptorTCP3
             Log("Subscribing to Globally Shared Events");
             Log("\t Logging");
             Seeding.LogEvent += LogEvent;
-            tcpServer.LogEvent += LogEvent;
-            URLS.LogEvent += LogEvent;
-            Log("\t Progress Changed");
 
-            URLS.ProgressChangedEvent += ProgressChangedEvent;
-            URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
             // Log("\t Broadcast Messages");
 
             Log("Starting The TCP Server");
-            tcpServer.StartTCPServer();
 
             Log("Application Loaded");
 
         }
-        
+
         #region Seeding Events
 
         void Seeding_DeleteAllUrlsEvent(DamoclesEntities db)
         {
-            URLS.DeleteAllURLS(db);
+            //  URLS.DeleteAllURLS(db);
         }
 
         void Seeding_AddUrlEvent(string urlPath)
         {
-            URLS.AddUrl(urlPath);
+            //  URLS.AddUrl(urlPath);
         }
         #endregion
 
@@ -245,7 +234,7 @@ namespace RaptorTCP3
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Log("Application Closing");
-         //   Logoff.LogOffAllUsers();
+            //   Logoff.LogOffAllUsers();
             t.Dispose();
             t.Wait();
         }

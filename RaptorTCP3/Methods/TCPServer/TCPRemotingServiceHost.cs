@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using RaptorTCP3.Methods.Utilities;
-using System.Windows.Forms;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
-using System.ComponentModel;
+using System.ServiceModel;
+using TCPService;
+using System.ServiceModel.Description;
 
 namespace RaptorTCP3.Methods.TCPServer
 {
@@ -225,18 +222,43 @@ namespace RaptorTCP3.Methods.TCPServer
     //    }
     //}
 
-    class TCPRemotingServiceHost
+    class TCPServiceHost
     {
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
 
         public void StartTCPServer()
         {
-            TCPRemotingService.TCPRemotingService TCPServer = new TCPRemotingService.TCPRemotingService();
-            TcpChannel channel = new TcpChannel(9119);
-            ChannelServices.RegisterChannel(channel, false);
-            RemotingConfiguration.RegisterWellKnownServiceType(typeof(TCPRemotingService.TCPRemotingService), "TCPServer", WellKnownObjectMode.Singleton);
-           if(LogEvent != null) LogEvent("TCPServer Host has started");
+            // Step 1 Create a URI to serve as the base address.
+            Uri baseAddress = new Uri("http://localhost:9119/TCPServer/");
+
+            // Step 2 Create a ServiceHost instance
+            ServiceHost selfHost = new ServiceHost(typeof(TCPService.TCPService), baseAddress);
+
+            try
+            {
+                // Step 3 Add a service endpoint.
+                selfHost.AddServiceEndpoint(typeof(TCPService.ITCPService), new WSHttpBinding(), "TCPServer");
+
+                // Step 4 Enable metadata exchange.
+                ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
+                smb.HttpGetEnabled = true;
+                selfHost.Description.Behaviors.Add(smb);
+
+                // Step 5 Start the service.
+                selfHost.Open();
+                if (LogEvent != null) LogEvent("TCPServer Host has started");
+
+                // Close the ServiceHostBase to shutdown the service.
+                selfHost.Close();
+            }
+            catch (CommunicationException ce)
+            {
+                if (LogEvent != null) LogEvent("An exception occurred: " + ce.Message);
+                selfHost.Abort();
+                if (LogEvent != null) LogEvent("TCPServer Host has Aborted");
+            }
+
         }
     }
 

@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using TCPRemotingService.Users;
+using TCPService.Classes.Users;
 
-namespace TCPRemotingService.Methods.LogOff
+namespace TCPService.Classes.LogOff
 {
    public class LogOff
     {
 
-       private Users.Users Users = new Users.Users();
+       private Users.Users User = new Users.Users();
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
@@ -28,7 +28,8 @@ namespace TCPRemotingService.Methods.LogOff
                     var user = db.Users.First(u => u.CurrentClientID  == Cid);
                     user.IsOnline = false;
                     int rows = db.SaveChanges();
-                    string emailAddress = Users.GetUserEmailAddressByID(Cid);
+                    string emailAddress = User.GetUserEmailAddressByID(Cid);
+                    
                     UpdateLogOffHistory(emailAddress);
                     if (rows == 1)
                     {
@@ -49,14 +50,15 @@ namespace TCPRemotingService.Methods.LogOff
             if (LogEvent != null) LogEvent("Updating Users LogOff History");
             using (var db = new DamoclesEntities())
             {
-                var uid = Users.GetUserID(emailAddress);
+                var uid = User.GetUserID(emailAddress);
                 var loh = db.LogonHistories.First(lh => lh.LoggedOffDate == null && lh.UserId == uid);
                 loh.LoggedOffDate = DateTime.UtcNow;
                 db.SaveChanges();
 
-                var user = db.Users.First(u => u.UserId == uid);
-                user.IsOnline = false;
-                user.CurrentClientID = null;
+                
+                var us = db.Users.First(u => u.UserId == uid);
+                us.IsOnline = false;
+                us.CurrentClientID = null;
                 db.SaveChanges();
             }
         }
@@ -64,7 +66,7 @@ namespace TCPRemotingService.Methods.LogOff
         internal void LogOffAllUsers()
         {
             if (LogEvent != null) LogEvent("Logging Off ALL Users");
-            foreach (string Cid in Users.allUsers)
+            foreach (string Cid in User.allUsers)
             {
                 LogOffUser(Cid);
             }
