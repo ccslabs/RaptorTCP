@@ -254,10 +254,6 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCPRemotingService\ITCPRemotingService.csproj">
-      <Project>{820aa0d1-8e66-4a3c-a0f5-cf68ca051471}</Project>
-      <Name>ITCPRemotingService</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TCPRemotingService\TCPRemotingService.csproj">
       <Project>{6fed39b1-461b-4140-8444-a1c701f5f623}</Project>
       <Name>TCPRemotingService</Name>

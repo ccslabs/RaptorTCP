@@ -99,7 +99,7 @@ namespace TCPRemotingService
             }
         }
 
-       
+
 
         public bool Register(string EmailAddress, string Password)
         {
@@ -120,6 +120,16 @@ namespace TCPRemotingService
         {
             return true;
         }
+    }
+
+    public interface ITCPRemotingService
+    {
+        bool Login(string EmailAddress, string Password); // Client Logging in
+        bool Register(string EmailAddress, string Password); // Client Registering
+        string[] TakeUrls(); // Client wants some URLS to process
+        bool GiveUrls(string[] UrlList); // Client Sending us URls it has processed
+        bool Hello(); // Hello to see if the WebService is online.
+
     }
 
 }

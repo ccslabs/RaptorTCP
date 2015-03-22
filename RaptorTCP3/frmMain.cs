@@ -69,12 +69,9 @@ namespace RaptorTCP3
             Log("Instantiating");
             Log("\tUtilities");
             Utils = new Utilities();
-           
           
             Log("\tSeeding Class");
             Seeding = new Seeding();
-            Log("\tThe TCP Server");
-            tcpServer.StartTCPServer();
            
             Log("\tURLS Class");
             URLS = new sUrls();
@@ -94,6 +91,8 @@ namespace RaptorTCP3
             URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
             // Log("\t Broadcast Messages");
 
+            Log("Starting The TCP Server");
+            tcpServer.StartTCPServer();
 
             Log("Application Loaded");
 

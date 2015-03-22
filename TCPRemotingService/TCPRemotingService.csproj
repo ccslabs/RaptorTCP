@@ -133,12 +133,6 @@
     <Compile Include="Users\Users.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCPRemotingService\ITCPRemotingService.csproj">
-      <Project>{820aa0d1-8e66-4a3c-a0f5-cf68ca051471}</Project>
-      <Name>ITCPRemotingService</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EntityDeploy Include="DamoclesModels.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>DamoclesModels.Designer.cs</LastGenOutput>
