@@ -13,13 +13,7 @@ namespace RaptorTCP3.Methods.Utilities
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
         public event LogEventHandler LogEvent;
-        // Notify Progress Changed
-        public delegate void ProgressChangedEventHandler(int Progress);
-        public event ProgressChangedEventHandler ProgressChangedEvent;
-        // Notify New Progress Maximum
-        public delegate void ProgressMaximumChangedEventHandler(int Progress);
-        public event ProgressMaximumChangedEventHandler ProgressMaximumChangedEvent;
-
+       
 
         public delegate void BroadcastWaitEventHandler();
         public event BroadcastWaitEventHandler BroadcastWaitEvent;

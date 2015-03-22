@@ -43,22 +43,21 @@ namespace RaptorTCP3
         private LoginMethods LoginMethods;
         private LogOff Logoff;
         private Seeding Seeding;
-        private TCPServer tcpServer;
+
         private sUrls URLS;
         private Users Users;
         private SqlClient DatabaseClient;
-
+        private TCPRemotingServiceHost tcpServer = new TCPRemotingServiceHost();
         private Task t;
 
         private static string connectionString = Properties.Settings.Default.DamoclesConnectionString;
 
-        private string ClientLicense = null;
 
         private int SecondsPastSinceBoot;
         private int SecondsIdle;
 
         private bool IsIdle = true;
-        private bool IsInWaitMode = false;
+       
 
         public frmMain(bool ForceRegistration = false)
         {
@@ -87,7 +86,7 @@ namespace RaptorTCP3
             Log("\tSeeding Class");
             Seeding = new Seeding();
             Log("\tThe TCP Server");
-            tcpServer = new TCPServer();
+            tcpServer.StartTCPServer();
             Log("\tUsers Class");
             Users = new Users();
             Log("\tURLS Class");
@@ -98,18 +97,13 @@ namespace RaptorTCP3
             Log("Subscribing to User Events");
             Users.UserCountEvent += Users_UserCountEvent;
 
-            Log("Subscribing to Login Events");
-            LoginMethods.LoginResultEvent += LoginMethods_LoginResultEvent;
+            //  Log("Subscribing to Login Events");
 
-            Log("Subscribing to URL Events");
-            URLS.UrlsCountResultEvent += systemUrls_UrlsCountResultEvent;
-            URLS.NoUrlsLeftToProcessEvent += URLS_NoUrlsLeftToProcessEvent;
-            URLS.MoreUrlsLeftToProcessEvent += URLS_MoreUrlsLeftToProcessEvent;
+            //   Log("Subscribing to URL Events");
 
-            Log("Subscribing to TCP  Server Events");
-            tcpServer.tcpConnectionClosedEvent += tcpServer_tcpConnectionClosedEvent;
-            tcpServer.tcpLostConnectionEvent += tcpServer_tcpLostConnectionEvent;
-            tcpServer.tcpConnectionEvent += tcpServer_tcpConnectionEvent;
+
+            //  Log("Subscribing to TCP  Server Events");
+
 
             Log("Subscribing to Seeding Events");
             Seeding.AddUrlEvent += Seeding_AddUrlEvent;
@@ -126,17 +120,15 @@ namespace RaptorTCP3
             LoginMethods.LogEvent += LogEvent;
             Users.LogEvent += LogEvent;
             Log("\t Progress Changed");
-            Seeding.ProgressChangedEvent += ProgressChangedEvent;
-            Seeding.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
+          
             URLS.ProgressChangedEvent += ProgressChangedEvent;
             URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
-            Log("\t Broadcast Messages");
-            Seeding.BroadcastResumeEvent += BroadcastResumeEvent;
-            Seeding.BroadcastWaitEvent += BroadcastWaitEvent;
+            // Log("\t Broadcast Messages");
+
 
             Log("Application Loaded");
-           
-          }
+
+        }
 
 
 
@@ -155,31 +147,6 @@ namespace RaptorTCP3
         }
         #endregion
 
-        #region tcpServer Events
-
-        void tcpServer_tcpConnectionEvent(string id)
-        {
-            if (IsInWaitMode)
-                tcpServer.SendWait(id);
-            else
-                tcpServer.SendResume(id);
-            Users.AddUserToAllUsers(id);
-        }
-
-        void tcpServer_tcpLostConnectionEvent(string id)
-        {
-            Logoff.LogOffUser(id);
-        }
-
-
-
-        void tcpServer_tcpConnectionClosedEvent()
-        {
-            lblConnections.Text = Users.allUsers.Count().ToString("N0");
-        }
-
-        #endregion
-
         #region User Events
 
         void Users_UserCountEvent(int NumberOfUsers)
@@ -189,46 +156,6 @@ namespace RaptorTCP3
 
         #endregion
 
-        #region URL Events
-        void systemUrls_UrlsToEnqueueEvent(string URL)
-        {
-            URLS.urlQueue.Enqueue(URL);
-            SetLabel(lblQueueLength, URLS.urlQueue.Count.ToString("N0"));
-        }
-
-        void URLS_MoreUrlsLeftToProcessEvent()
-        {
-            IsInWaitMode = false;
-            SetLabel(lblWaitStatus, "Resumed");
-            SetLabel(lblQueueLength, URLS.urlQueue.Count.ToString("N0"));
-            tcpServer.SendResume();
-        }
-
-        void URLS_NoUrlsLeftToProcessEvent()
-        {
-            IsInWaitMode = true;
-            SetLabel(lblWaitStatus, "Waiting");
-            tcpServer.SendWait(); // Tell all Connected clients to wait!
-        }
-
-        void systemUrls_UrlsCountResultEvent(long Result)
-        {
-            Log("Total URLS: " + Result);
-        }
-        #endregion
-
-        #region Login Events
-        void LoginMethods_LoginResultEvent(bool Result, string Cid)
-        {
-            Log(Cid + " Is Attempting a Login");
-            if (Result)
-                tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Successful.ToString(), ClientLicense);
-            else
-                tcpServer.Reply(Cid, RaptorTCP3.Methods.Enumerations.ClientCommands.Login.ToString(), RaptorTCP3.Methods.Enumerations.ServerCommands.Failed.ToString());
-        }
-
-
-        #endregion
 
         #region cmsSystem Operations
 
@@ -236,13 +163,6 @@ namespace RaptorTCP3
         {
 
             Log("Exiting");
-            if (tcpServer.Listening)
-            {
-
-                tcpServer.Broadcast(RaptorTCP3.Methods.Enumerations.ServerCommands.Wait.ToString()); // Tell all the Clients to wait till I return
-                tcpServer.DisconnectAll();
-            }
-
 
             Application.Exit();
         }
@@ -298,17 +218,7 @@ namespace RaptorTCP3
 
         #region Global Shared Events
 
-        void BroadcastWaitEvent()
-        {
-            IsInWaitMode = true;
-            tcpServer.SendWait();
-        }
 
-        void BroadcastResumeEvent()
-        {
-            IsInWaitMode = false;
-            tcpServer.SendResume();
-        }
 
         void ProgressMaximumChangedEvent(int Max)
         {
@@ -372,7 +282,6 @@ namespace RaptorTCP3
         {
             Log("Application Closing");
             Logoff.LogOffAllUsers();
-            tcpServer.Broadcast(RaptorTCP3.Methods.Enumerations.ServerCommands.UseCache.ToString());
             t.Dispose();
             t.Wait();
         }
@@ -420,7 +329,7 @@ namespace RaptorTCP3
             UpdateToolStripStatusLabel(lblRuntime, Utils.SecondsToDHMS(SecondsPastSinceBoot).ToString());
             UpdateToolStripStatusLabel(lblIdleTime, Utils.SecondsToDHMS(SecondsIdle).ToString());
 
-           
+
         }
 
         private string LastLogMessage = "";
