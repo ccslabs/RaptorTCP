@@ -4,15 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace TCPRemotingService
 {
     public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService.ITCPRemotingService
     {
-
+        RaptorTCP3.Methods.Login.LoginMethods login = new RaptorTCP3.Methods.Login.LoginMethods();
 
         public bool Login(string EmailAddress, string Password)
         {
-            // Log the User In
+            login.LogEvent += login_LogEvent;
+            login.LoginResultEvent += login_LoginResultEvent;
+            
+        }
+
+        void login_LoginResultEvent(bool Result)
+        {
+                throw new NotImplementedException();
+        }
+
+        void login_LogEvent(string Message)
+        {
+            throw new NotImplementedException();
         }
 
         public bool Register(string EmailAddress, string Password)

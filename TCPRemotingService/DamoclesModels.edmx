@@ -1,0 +1,1655 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="DamoclesModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="AccountStatus">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StatusName" Type="nchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Allowed">
+          <Key>
+            <PropertyRef Name="AId" />
+          </Key>
+          <Property Name="AId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Uid" Type="int" Nullable="false" />
+          <Property Name="JurisidctionId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ARC">
+          <Key>
+            <PropertyRef Name="ARCId" />
+          </Key>
+          <Property Name="ARCId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AId" Type="int" />
+          <Property Name="RId" Type="int" />
+          <Property Name="CId" Type="int" />
+        </EntityType>
+        <EntityType Name="Clients">
+          <Key>
+            <PropertyRef Name="ClientsID" />
+          </Key>
+          <Property Name="ClientsID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="RaptorClientID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="IP Address" Type="nvarchar" MaxLength="50" />
+          <Property Name="MachineName" Type="nvarchar" MaxLength="150" />
+          <Property Name="LoggedOnUserName" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="ContentObjects">
+          <Key>
+            <PropertyRef Name="ContentObjectId" />
+          </Key>
+          <Property Name="ContentObjectId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ContentPath" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ARCId" Type="int" />
+          <Property Name="ContentObjectExtension" Type="nvarchar" MaxLength="50" />
+          <Property Name="ContentObjectHash" Type="varchar" MaxLength="128" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContentObjectsSourceURLS">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="URLHash" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="ContentObjectId" Type="int" Nullable="false" />
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Countries">
+          <Key>
+            <PropertyRef Name="CountryId" />
+          </Key>
+          <Property Name="CountryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CountryNameEnglish" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="CountryNameLocal" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="CountryTimeZone" Type="int" Nullable="false" />
+          <Property Name="StatesId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CrimeTypes">
+          <Key>
+            <PropertyRef Name="CrimeId" />
+          </Key>
+          <Property Name="CrimeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CrimeName" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="CId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Criminal">
+          <Key>
+            <PropertyRef Name="CId" />
+          </Key>
+          <Property Name="CId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UId" Type="int" Nullable="false" />
+          <Property Name="CrimeId" Type="int" Nullable="false" />
+          <Property Name="JurisidictionId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Jurisdictions">
+          <Key>
+            <PropertyRef Name="JurisdictionId" />
+          </Key>
+          <Property Name="JurisdictionId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="JurisdictionName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="CountryId" Type="int" Nullable="false" />
+          <Property Name="StateId" Type="int" Nullable="false" />
+          <Property Name="LanguageId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Languages">
+          <Key>
+            <PropertyRef Name="LanguageId" />
+          </Key>
+          <Property Name="LanguageId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LanguageEnglishName" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="LanguageLocalName" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="TranslationAvailable" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="LicenseNumbers">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LicenseNumber" Type="nchar" MaxLength="10" Nullable="false" />
+          <Property Name="emailAddress" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="LogonHistory">
+          <Key>
+            <PropertyRef Name="LogonHistoryId" />
+          </Key>
+          <Property Name="LogonHistoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="LoggedOnDate" Type="datetime" Nullable="false" />
+          <Property Name="LoggedOffDate" Type="datetime" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Damocles.dbo.RaptorTCPServerIP' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="RaptorTCPServerIP">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="IPAddress" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IPAddress" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Restricted">
+          <Key>
+            <PropertyRef Name="RId" />
+          </Key>
+          <Property Name="RId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UId" Type="int" Nullable="false" />
+          <Property Name="RestrictedToId" Type="int" Nullable="false" />
+          <Property Name="JurisdictionId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RestrictionTypes">
+          <Key>
+            <PropertyRef Name="RestrictionId" />
+          </Key>
+          <Property Name="RestrictionId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Restriction Reason" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Settings">
+          <Key>
+            <PropertyRef Name="SettingsId" />
+          </Key>
+          <Property Name="SettingsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NumberOfNewsItemsToDisplay" Type="int" />
+        </EntityType>
+        <EntityType Name="States">
+          <Key>
+            <PropertyRef Name="StateId" />
+          </Key>
+          <Property Name="StateId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StateEnglishName" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="StateLocalName" Type="varchar" MaxLength="250" Nullable="false" />
+        </EntityType>
+        <EntityType Name="URLS">
+          <Key>
+            <PropertyRef Name="UrlId" />
+          </Key>
+          <Property Name="UrlId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UrlHash" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="URLPath" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="DiscoveryDate" Type="datetime" Nullable="false" />
+          <Property Name="DiscoveredById" Type="int" Nullable="false" />
+          <Property Name="ProcessedDate" Type="datetime" />
+          <Property Name="ProcessedById" Type="int" />
+          <Property Name="IsInProcessingQueue" Type="bit" Nullable="false" />
+          <Property Name="JoinedProcessingQueueDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="UrlSources">
+          <Key>
+            <PropertyRef Name="UrlSourcesId" />
+          </Key>
+          <Property Name="UrlSourcesId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="URLId" Type="int" Nullable="false" />
+          <Property Name="URLSourceId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Username" Type="nvarchar" MaxLength="400" Nullable="false" />
+          <Property Name="UserPasswordHash" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="RegisteredDate" Type="datetime" Nullable="false" />
+          <Property Name="CountryId" Type="int" Nullable="false" />
+          <Property Name="StateId" Type="int" Nullable="false" />
+          <Property Name="JurisidictionId" Type="int" Nullable="false" />
+          <Property Name="LanguagesId" Type="int" Nullable="false" />
+          <Property Name="IsOnline" Type="bit" Nullable="false" />
+          <Property Name="AccountStatusId" Type="int" Nullable="false" />
+          <Property Name="LicenseNumber" Type="nvarchar" MaxLength="25" Nullable="false" />
+          <Property Name="emailAddress" Type="nvarchar" MaxLength="400" />
+          <Property Name="UserClientID" Type="int" />
+          <Property Name="CurrentClientID" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Allowed">
+              <PropertyRef Name="JurisidctionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Allowed_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Allowed">
+              <PropertyRef Name="Uid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Allowed_AId">
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Allowed">
+              <PropertyRef Name="AId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="AId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Criminal_CId">
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Criminal">
+              <PropertyRef Name="CId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="CId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Restricted_RId">
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Restricted">
+              <PropertyRef Name="RId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="RId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Clients" Type="Self.Clients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ContentObjects_ARC_ARCId">
+          <End Role="ARC" Type="Self.ARC" Multiplicity="0..1" />
+          <End Role="ContentObjects" Type="Self.ContentObjects" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ARC">
+              <PropertyRef Name="ARCId" />
+            </Principal>
+            <Dependent Role="ContentObjects">
+              <PropertyRef Name="ARCId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId">
+          <End Role="ContentObjects" Type="Self.ContentObjects" Multiplicity="1" />
+          <End Role="ContentObjectsSourceURLS" Type="Self.ContentObjectsSourceURLS" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContentObjects">
+              <PropertyRef Name="ContentObjectId" />
+            </Principal>
+            <Dependent Role="ContentObjectsSourceURLS">
+              <PropertyRef Name="ContentObjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Countries_States_StateId">
+          <End Role="States" Type="Self.States" Multiplicity="1" />
+          <End Role="Countries" Type="Self.Countries" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Countries">
+              <PropertyRef Name="StatesId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CrimeTypes_Criminal_CId">
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="1" />
+          <End Role="CrimeTypes" Type="Self.CrimeTypes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Criminal">
+              <PropertyRef Name="CId" />
+            </Principal>
+            <Dependent Role="CrimeTypes">
+              <PropertyRef Name="CId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal">
+          <End Role="CrimeTypes" Type="Self.CrimeTypes" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CrimeTypes">
+              <PropertyRef Name="CrimeId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="CrimeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="JurisidictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="UId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions">
+          <End Role="States" Type="Self.States" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="StateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions_Countries_CountryId">
+          <End Role="Countries" Type="Self.Countries" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Countries">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions_Languages_LanguageId">
+          <End Role="Languages" Type="Self.Languages" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Languages">
+              <PropertyRef Name="LanguageId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="LanguageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogonHistory_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="LogonHistory" Type="Self.LogonHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="LogonHistory">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="JurisdictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_RestrictionTypes_RestrictionId">
+          <End Role="RestrictionTypes" Type="Self.RestrictionTypes" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RestrictionTypes">
+              <PropertyRef Name="RestrictionId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="RestrictedToId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="UId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_URLS_Users_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="URLS" Type="Self.URLS" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="URLS">
+              <PropertyRef Name="ProcessedById" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_URLS_UsersDiscoveredBy_UserId">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="URLS" Type="Self.URLS" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="URLS">
+              <PropertyRef Name="DiscoveredById" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UrlSources_SourceURLS_UrlId">
+          <End Role="URLS" Type="Self.URLS" Multiplicity="1" />
+          <End Role="UrlSources" Type="Self.UrlSources" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="URLS">
+              <PropertyRef Name="UrlId" />
+            </Principal>
+            <Dependent Role="UrlSources">
+              <PropertyRef Name="URLSourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UrlSources_URLS_UrlId">
+          <End Role="URLS" Type="Self.URLS" Multiplicity="1" />
+          <End Role="UrlSources" Type="Self.UrlSources" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="URLS">
+              <PropertyRef Name="UrlId" />
+            </Principal>
+            <Dependent Role="UrlSources">
+              <PropertyRef Name="URLId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Countries_CountryId">
+          <End Role="Countries" Type="Self.Countries" Multiplicity="1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Countries">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdictions" Multiplicity="1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="JurisidictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Languages_LanguageId">
+          <End Role="Languages" Type="Self.Languages" Multiplicity="1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Languages">
+              <PropertyRef Name="LanguageId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="LanguagesId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_States_StateId">
+          <End Role="States" Type="Self.States" Multiplicity="1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="StateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="DamoclesModelStoreContainer">
+          <EntitySet Name="AccountStatus" EntityType="Self.AccountStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Allowed" EntityType="Self.Allowed" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ARC" EntityType="Self.ARC" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Clients" EntityType="Self.Clients" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ContentObjects" EntityType="Self.ContentObjects" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ContentObjectsSourceURLS" EntityType="Self.ContentObjectsSourceURLS" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Countries" EntityType="Self.Countries" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CrimeTypes" EntityType="Self.CrimeTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Criminal" EntityType="Self.Criminal" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Jurisdictions" EntityType="Self.Jurisdictions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Languages" EntityType="Self.Languages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LicenseNumbers" EntityType="Self.LicenseNumbers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LogonHistory" EntityType="Self.LogonHistory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Restricted" EntityType="Self.Restricted" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RestrictionTypes" EntityType="Self.RestrictionTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Settings" EntityType="Self.Settings" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="States" EntityType="Self.States" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="URLS" EntityType="Self.URLS" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UrlSources" EntityType="Self.UrlSources" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RaptorTCPServerIP" EntityType="Self.RaptorTCPServerIP" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RaptorTCPServerIP].[Id] AS [Id], 
+    [RaptorTCPServerIP].[IPAddress] AS [IPAddress]
+    FROM [dbo].[RaptorTCPServerIP] AS [RaptorTCPServerIP]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Allowed_Jurisdictions_JurisdictionId" Association="Self.FK_Allowed_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Allowed" EntitySet="Allowed" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Allowed_Users_UserId" Association="Self.FK_Allowed_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Allowed" EntitySet="Allowed" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Allowed_AId" Association="Self.FK_ARC_Allowed_AId">
+            <End Role="Allowed" EntitySet="Allowed" />
+            <End Role="ARC" EntitySet="ARC" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Criminal_CId" Association="Self.FK_ARC_Criminal_CId">
+            <End Role="Criminal" EntitySet="Criminal" />
+            <End Role="ARC" EntitySet="ARC" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Restricted_RId" Association="Self.FK_ARC_Restricted_RId">
+            <End Role="Restricted" EntitySet="Restricted" />
+            <End Role="ARC" EntitySet="ARC" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_Users_UserId" Association="Self.FK_Clients_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ContentObjects_ARC_ARCId" Association="Self.FK_ContentObjects_ARC_ARCId">
+            <End Role="ARC" EntitySet="ARC" />
+            <End Role="ContentObjects" EntitySet="ContentObjects" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" Association="Self.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId">
+            <End Role="ContentObjects" EntitySet="ContentObjects" />
+            <End Role="ContentObjectsSourceURLS" EntitySet="ContentObjectsSourceURLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Countries_States_StateId" Association="Self.FK_Countries_States_StateId">
+            <End Role="States" EntitySet="States" />
+            <End Role="Countries" EntitySet="Countries" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CrimeTypes_Criminal_CId" Association="Self.FK_CrimeTypes_Criminal_CId">
+            <End Role="Criminal" EntitySet="Criminal" />
+            <End Role="CrimeTypes" EntitySet="CrimeTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal" Association="Self.FK_Criminal">
+            <End Role="CrimeTypes" EntitySet="CrimeTypes" />
+            <End Role="Criminal" EntitySet="Criminal" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal_Jurisdictions_JurisdictionId" Association="Self.FK_Criminal_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Criminal" EntitySet="Criminal" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal_Users_UserId" Association="Self.FK_Criminal_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Criminal" EntitySet="Criminal" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions" Association="Self.FK_Jurisdictions">
+            <End Role="States" EntitySet="States" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions_Countries_CountryId" Association="Self.FK_Jurisdictions_Countries_CountryId">
+            <End Role="Countries" EntitySet="Countries" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions_Languages_LanguageId" Association="Self.FK_Jurisdictions_Languages_LanguageId">
+            <End Role="Languages" EntitySet="Languages" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogonHistory_Users_UserId" Association="Self.FK_LogonHistory_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="LogonHistory" EntitySet="LogonHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_Jurisdictions_JurisdictionId" Association="Self.FK_Restricted_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Restricted" EntitySet="Restricted" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_RestrictionTypes_RestrictionId" Association="Self.FK_Restricted_RestrictionTypes_RestrictionId">
+            <End Role="RestrictionTypes" EntitySet="RestrictionTypes" />
+            <End Role="Restricted" EntitySet="Restricted" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_Users_UserId" Association="Self.FK_Restricted_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Restricted" EntitySet="Restricted" />
+          </AssociationSet>
+          <AssociationSet Name="FK_URLS_Users_UserId" Association="Self.FK_URLS_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="URLS" EntitySet="URLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_URLS_UsersDiscoveredBy_UserId" Association="Self.FK_URLS_UsersDiscoveredBy_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="URLS" EntitySet="URLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UrlSources_SourceURLS_UrlId" Association="Self.FK_UrlSources_SourceURLS_UrlId">
+            <End Role="URLS" EntitySet="URLS" />
+            <End Role="UrlSources" EntitySet="UrlSources" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UrlSources_URLS_UrlId" Association="Self.FK_UrlSources_URLS_UrlId">
+            <End Role="URLS" EntitySet="URLS" />
+            <End Role="UrlSources" EntitySet="UrlSources" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Countries_CountryId" Association="Self.FK_Users_Countries_CountryId">
+            <End Role="Countries" EntitySet="Countries" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Jurisdictions_JurisdictionId" Association="Self.FK_Users_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Languages_LanguageId" Association="Self.FK_Users_Languages_LanguageId">
+            <End Role="Languages" EntitySet="Languages" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_States_StateId" Association="Self.FK_Users_States_StateId">
+            <End Role="States" EntitySet="States" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DamoclesModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="AccountStatu">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StatusName" Type="String" MaxLength="20" FixedLength="true" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Allowed">
+          <Key>
+            <PropertyRef Name="AId" />
+          </Key>
+          <Property Name="AId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Uid" Type="Int32" Nullable="false" />
+          <Property Name="JurisidctionId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Jurisdiction" Relationship="Self.FK_Allowed_Jurisdictions_JurisdictionId" FromRole="Allowed" ToRole="Jurisdictions" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Allowed_Users_UserId" FromRole="Allowed" ToRole="Users" />
+          <NavigationProperty Name="ARCs" Relationship="Self.FK_ARC_Allowed_AId" FromRole="Allowed" ToRole="ARC" />
+        </EntityType>
+        <EntityType Name="ARC">
+          <Key>
+            <PropertyRef Name="ARCId" />
+          </Key>
+          <Property Name="ARCId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AId" Type="Int32" />
+          <Property Name="RId" Type="Int32" />
+          <Property Name="CId" Type="Int32" />
+          <NavigationProperty Name="Allowed" Relationship="Self.FK_ARC_Allowed_AId" FromRole="ARC" ToRole="Allowed" />
+          <NavigationProperty Name="Criminal" Relationship="Self.FK_ARC_Criminal_CId" FromRole="ARC" ToRole="Criminal" />
+          <NavigationProperty Name="Restricted" Relationship="Self.FK_ARC_Restricted_RId" FromRole="ARC" ToRole="Restricted" />
+          <NavigationProperty Name="ContentObjects" Relationship="Self.FK_ContentObjects_ARC_ARCId" FromRole="ARC" ToRole="ContentObjects" />
+        </EntityType>
+        <EntityType Name="Client">
+          <Key>
+            <PropertyRef Name="ClientsID" />
+          </Key>
+          <Property Name="ClientsID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="RaptorClientID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IP_Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MachineName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="LoggedOnUserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Clients_Users_UserId" FromRole="Clients" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="ContentObject">
+          <Key>
+            <PropertyRef Name="ContentObjectId" />
+          </Key>
+          <Property Name="ContentObjectId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ContentPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ARCId" Type="Int32" />
+          <Property Name="ContentObjectExtension" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ContentObjectHash" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="ARC" Relationship="Self.FK_ContentObjects_ARC_ARCId" FromRole="ContentObjects" ToRole="ARC" />
+          <NavigationProperty Name="ContentObjectsSourceURLS" Relationship="Self.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" FromRole="ContentObjects" ToRole="ContentObjectsSourceURLS" />
+        </EntityType>
+        <EntityType Name="ContentObjectsSourceURL">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="URLHash" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ContentObjectId" Type="Int32" Nullable="false" />
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="ContentObject" Relationship="Self.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" FromRole="ContentObjectsSourceURLS" ToRole="ContentObjects" />
+        </EntityType>
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="CountryId" />
+          </Key>
+          <Property Name="CountryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CountryNameEnglish" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CountryNameLocal" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CountryTimeZone" Type="Int32" Nullable="false" />
+          <Property Name="StatesId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="State" Relationship="Self.FK_Countries_States_StateId" FromRole="Countries" ToRole="States" />
+          <NavigationProperty Name="Jurisdictions" Relationship="Self.FK_Jurisdictions_Countries_CountryId" FromRole="Countries" ToRole="Jurisdictions" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Users_Countries_CountryId" FromRole="Countries" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="CrimeType">
+          <Key>
+            <PropertyRef Name="CrimeId" />
+          </Key>
+          <Property Name="CrimeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CrimeName" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Criminal" Relationship="Self.FK_CrimeTypes_Criminal_CId" FromRole="CrimeTypes" ToRole="Criminal" />
+          <NavigationProperty Name="Criminals" Relationship="Self.FK_Criminal" FromRole="CrimeTypes" ToRole="Criminal" />
+        </EntityType>
+        <EntityType Name="Criminal">
+          <Key>
+            <PropertyRef Name="CId" />
+          </Key>
+          <Property Name="CId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UId" Type="Int32" Nullable="false" />
+          <Property Name="CrimeId" Type="Int32" Nullable="false" />
+          <Property Name="JurisidictionId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ARCs" Relationship="Self.FK_ARC_Criminal_CId" FromRole="Criminal" ToRole="ARC" />
+          <NavigationProperty Name="CrimeTypes" Relationship="Self.FK_CrimeTypes_Criminal_CId" FromRole="Criminal" ToRole="CrimeTypes" />
+          <NavigationProperty Name="CrimeType" Relationship="Self.FK_Criminal" FromRole="Criminal" ToRole="CrimeTypes" />
+          <NavigationProperty Name="Jurisdiction" Relationship="Self.FK_Criminal_Jurisdictions_JurisdictionId" FromRole="Criminal" ToRole="Jurisdictions" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Criminal_Users_UserId" FromRole="Criminal" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Jurisdiction">
+          <Key>
+            <PropertyRef Name="JurisdictionId" />
+          </Key>
+          <Property Name="JurisdictionId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="JurisdictionName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CountryId" Type="Int32" Nullable="false" />
+          <Property Name="StateId" Type="Int32" Nullable="false" />
+          <Property Name="LanguageId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Alloweds" Relationship="Self.FK_Allowed_Jurisdictions_JurisdictionId" FromRole="Jurisdictions" ToRole="Allowed" />
+          <NavigationProperty Name="Country" Relationship="Self.FK_Jurisdictions_Countries_CountryId" FromRole="Jurisdictions" ToRole="Countries" />
+          <NavigationProperty Name="Criminals" Relationship="Self.FK_Criminal_Jurisdictions_JurisdictionId" FromRole="Jurisdictions" ToRole="Criminal" />
+          <NavigationProperty Name="State" Relationship="Self.FK_Jurisdictions" FromRole="Jurisdictions" ToRole="States" />
+          <NavigationProperty Name="Language" Relationship="Self.FK_Jurisdictions_Languages_LanguageId" FromRole="Jurisdictions" ToRole="Languages" />
+          <NavigationProperty Name="Restricteds" Relationship="Self.FK_Restricted_Jurisdictions_JurisdictionId" FromRole="Jurisdictions" ToRole="Restricted" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Users_Jurisdictions_JurisdictionId" FromRole="Jurisdictions" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Language">
+          <Key>
+            <PropertyRef Name="LanguageId" />
+          </Key>
+          <Property Name="LanguageId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LanguageEnglishName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LanguageLocalName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TranslationAvailable" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Jurisdictions" Relationship="Self.FK_Jurisdictions_Languages_LanguageId" FromRole="Languages" ToRole="Jurisdictions" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Users_Languages_LanguageId" FromRole="Languages" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="LicenseNumber">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LicenseNumber1" Type="String" MaxLength="10" FixedLength="true" Unicode="true" Nullable="false" />
+          <Property Name="emailAddress" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="LogonHistory">
+          <Key>
+            <PropertyRef Name="LogonHistoryId" />
+          </Key>
+          <Property Name="LogonHistoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="LoggedOnDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LoggedOffDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="User" Relationship="Self.FK_LogonHistory_Users_UserId" FromRole="LogonHistory" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Restricted">
+          <Key>
+            <PropertyRef Name="RId" />
+          </Key>
+          <Property Name="RId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UId" Type="Int32" Nullable="false" />
+          <Property Name="RestrictedToId" Type="Int32" Nullable="false" />
+          <Property Name="JurisdictionId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ARCs" Relationship="Self.FK_ARC_Restricted_RId" FromRole="Restricted" ToRole="ARC" />
+          <NavigationProperty Name="Jurisdiction" Relationship="Self.FK_Restricted_Jurisdictions_JurisdictionId" FromRole="Restricted" ToRole="Jurisdictions" />
+          <NavigationProperty Name="RestrictionType" Relationship="Self.FK_Restricted_RestrictionTypes_RestrictionId" FromRole="Restricted" ToRole="RestrictionTypes" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Restricted_Users_UserId" FromRole="Restricted" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="RestrictionType">
+          <Key>
+            <PropertyRef Name="RestrictionId" />
+          </Key>
+          <Property Name="RestrictionId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Restriction_Reason" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Restricteds" Relationship="Self.FK_Restricted_RestrictionTypes_RestrictionId" FromRole="RestrictionTypes" ToRole="Restricted" />
+        </EntityType>
+        <EntityType Name="Setting">
+          <Key>
+            <PropertyRef Name="SettingsId" />
+          </Key>
+          <Property Name="SettingsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NumberOfNewsItemsToDisplay" Type="Int32" />
+        </EntityType>
+        <EntityType Name="State">
+          <Key>
+            <PropertyRef Name="StateId" />
+          </Key>
+          <Property Name="StateId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StateEnglishName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="StateLocalName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Countries" Relationship="Self.FK_Countries_States_StateId" FromRole="States" ToRole="Countries" />
+          <NavigationProperty Name="Jurisdictions" Relationship="Self.FK_Jurisdictions" FromRole="States" ToRole="Jurisdictions" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Users_States_StateId" FromRole="States" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="URL">
+          <Key>
+            <PropertyRef Name="UrlId" />
+          </Key>
+          <Property Name="UrlId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UrlHash" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="URLPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DiscoveryDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DiscoveredById" Type="Int32" Nullable="false" />
+          <Property Name="ProcessedDate" Type="DateTime" Precision="3" />
+          <Property Name="ProcessedById" Type="Int32" />
+          <Property Name="IsInProcessingQueue" Type="Boolean" Nullable="false" />
+          <Property Name="JoinedProcessingQueueDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="User" Relationship="Self.FK_URLS_Users_UserId" FromRole="URLS" ToRole="Users" />
+          <NavigationProperty Name="User1" Relationship="Self.FK_URLS_UsersDiscoveredBy_UserId" FromRole="URLS" ToRole="Users" />
+          <NavigationProperty Name="UrlSources" Relationship="Self.FK_UrlSources_SourceURLS_UrlId" FromRole="URLS" ToRole="UrlSources" />
+          <NavigationProperty Name="UrlSources1" Relationship="Self.FK_UrlSources_URLS_UrlId" FromRole="URLS" ToRole="UrlSources" />
+        </EntityType>
+        <EntityType Name="UrlSource">
+          <Key>
+            <PropertyRef Name="UrlSourcesId" />
+          </Key>
+          <Property Name="UrlSourcesId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="URLId" Type="Int32" Nullable="false" />
+          <Property Name="URLSourceId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="URL" Relationship="Self.FK_UrlSources_SourceURLS_UrlId" FromRole="UrlSources" ToRole="URLS" />
+          <NavigationProperty Name="URL1" Relationship="Self.FK_UrlSources_URLS_UrlId" FromRole="UrlSources" ToRole="URLS" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Username" Type="String" MaxLength="400" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UserPasswordHash" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="RegisteredDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CountryId" Type="Int32" Nullable="false" />
+          <Property Name="StateId" Type="Int32" Nullable="false" />
+          <Property Name="JurisidictionId" Type="Int32" Nullable="false" />
+          <Property Name="LanguagesId" Type="Int32" Nullable="false" />
+          <Property Name="IsOnline" Type="Boolean" Nullable="false" />
+          <Property Name="AccountStatusId" Type="Int32" Nullable="false" />
+          <Property Name="LicenseNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="emailAddress" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="UserClientID" Type="Int32" />
+          <Property Name="CurrentClientID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Alloweds" Relationship="Self.FK_Allowed_Users_UserId" FromRole="Users" ToRole="Allowed" />
+          <NavigationProperty Name="Clients" Relationship="Self.FK_Clients_Users_UserId" FromRole="Users" ToRole="Clients" />
+          <NavigationProperty Name="Country" Relationship="Self.FK_Users_Countries_CountryId" FromRole="Users" ToRole="Countries" />
+          <NavigationProperty Name="Criminals" Relationship="Self.FK_Criminal_Users_UserId" FromRole="Users" ToRole="Criminal" />
+          <NavigationProperty Name="Jurisdiction" Relationship="Self.FK_Users_Jurisdictions_JurisdictionId" FromRole="Users" ToRole="Jurisdictions" />
+          <NavigationProperty Name="Language" Relationship="Self.FK_Users_Languages_LanguageId" FromRole="Users" ToRole="Languages" />
+          <NavigationProperty Name="LogonHistories" Relationship="Self.FK_LogonHistory_Users_UserId" FromRole="Users" ToRole="LogonHistory" />
+          <NavigationProperty Name="Restricteds" Relationship="Self.FK_Restricted_Users_UserId" FromRole="Users" ToRole="Restricted" />
+          <NavigationProperty Name="State" Relationship="Self.FK_Users_States_StateId" FromRole="Users" ToRole="States" />
+          <NavigationProperty Name="URLS" Relationship="Self.FK_URLS_Users_UserId" FromRole="Users" ToRole="URLS" />
+          <NavigationProperty Name="URLS1" Relationship="Self.FK_URLS_UsersDiscoveredBy_UserId" FromRole="Users" ToRole="URLS" />
+        </EntityType>
+        <EntityType Name="RaptorTCPServerIP">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="IPAddress" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IPAddress" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Allowed_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Allowed">
+              <PropertyRef Name="JurisidctionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Allowed_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Allowed">
+              <PropertyRef Name="Uid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Allowed_AId">
+          <End Role="Allowed" Type="Self.Allowed" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Allowed">
+              <PropertyRef Name="AId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="AId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Criminal_CId">
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Criminal">
+              <PropertyRef Name="CId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="CId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ARC_Restricted_RId">
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="0..1" />
+          <End Role="ARC" Type="Self.ARC" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Restricted">
+              <PropertyRef Name="RId" />
+            </Principal>
+            <Dependent Role="ARC">
+              <PropertyRef Name="RId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ContentObjects_ARC_ARCId">
+          <End Role="ARC" Type="Self.ARC" Multiplicity="0..1" />
+          <End Role="ContentObjects" Type="Self.ContentObject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ARC">
+              <PropertyRef Name="ARCId" />
+            </Principal>
+            <Dependent Role="ContentObjects">
+              <PropertyRef Name="ARCId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Clients" Type="Self.Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId">
+          <End Role="ContentObjects" Type="Self.ContentObject" Multiplicity="1" />
+          <End Role="ContentObjectsSourceURLS" Type="Self.ContentObjectsSourceURL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContentObjects">
+              <PropertyRef Name="ContentObjectId" />
+            </Principal>
+            <Dependent Role="ContentObjectsSourceURLS">
+              <PropertyRef Name="ContentObjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Countries_States_StateId">
+          <End Role="States" Type="Self.State" Multiplicity="1" />
+          <End Role="Countries" Type="Self.Country" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Countries">
+              <PropertyRef Name="StatesId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions_Countries_CountryId">
+          <End Role="Countries" Type="Self.Country" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Countries">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Countries_CountryId">
+          <End Role="Countries" Type="Self.Country" Multiplicity="1" />
+          <End Role="Users" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Countries">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CrimeTypes_Criminal_CId">
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="1" />
+          <End Role="CrimeTypes" Type="Self.CrimeType" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Criminal">
+              <PropertyRef Name="CId" />
+            </Principal>
+            <Dependent Role="CrimeTypes">
+              <PropertyRef Name="CId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal">
+          <End Role="CrimeTypes" Type="Self.CrimeType" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CrimeTypes">
+              <PropertyRef Name="CrimeId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="CrimeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="JurisidictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Criminal_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Criminal" Type="Self.Criminal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Criminal">
+              <PropertyRef Name="UId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions">
+          <End Role="States" Type="Self.State" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="StateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Jurisdictions_Languages_LanguageId">
+          <End Role="Languages" Type="Self.Language" Multiplicity="1" />
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Languages">
+              <PropertyRef Name="LanguageId" />
+            </Principal>
+            <Dependent Role="Jurisdictions">
+              <PropertyRef Name="LanguageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="JurisdictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Jurisdictions_JurisdictionId">
+          <End Role="Jurisdictions" Type="Self.Jurisdiction" Multiplicity="1" />
+          <End Role="Users" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jurisdictions">
+              <PropertyRef Name="JurisdictionId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="JurisidictionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Languages_LanguageId">
+          <End Role="Languages" Type="Self.Language" Multiplicity="1" />
+          <End Role="Users" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Languages">
+              <PropertyRef Name="LanguageId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="LanguagesId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogonHistory_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="LogonHistory" Type="Self.LogonHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="LogonHistory">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_RestrictionTypes_RestrictionId">
+          <End Role="RestrictionTypes" Type="Self.RestrictionType" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RestrictionTypes">
+              <PropertyRef Name="RestrictionId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="RestrictedToId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Restricted_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Restricted" Type="Self.Restricted" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Restricted">
+              <PropertyRef Name="UId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_States_StateId">
+          <End Role="States" Type="Self.State" Multiplicity="1" />
+          <End Role="Users" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="States">
+              <PropertyRef Name="StateId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="StateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_URLS_Users_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="0..1" />
+          <End Role="URLS" Type="Self.URL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="URLS">
+              <PropertyRef Name="ProcessedById" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_URLS_UsersDiscoveredBy_UserId">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="URLS" Type="Self.URL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="URLS">
+              <PropertyRef Name="DiscoveredById" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UrlSources_SourceURLS_UrlId">
+          <End Role="URLS" Type="Self.URL" Multiplicity="1" />
+          <End Role="UrlSources" Type="Self.UrlSource" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="URLS">
+              <PropertyRef Name="UrlId" />
+            </Principal>
+            <Dependent Role="UrlSources">
+              <PropertyRef Name="URLSourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UrlSources_URLS_UrlId">
+          <End Role="URLS" Type="Self.URL" Multiplicity="1" />
+          <End Role="UrlSources" Type="Self.UrlSource" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="URLS">
+              <PropertyRef Name="UrlId" />
+            </Principal>
+            <Dependent Role="UrlSources">
+              <PropertyRef Name="URLId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="DamoclesEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="AccountStatus" EntityType="Self.AccountStatu" />
+          <EntitySet Name="Alloweds" EntityType="Self.Allowed" />
+          <EntitySet Name="ARCs" EntityType="Self.ARC" />
+          <EntitySet Name="Clients" EntityType="Self.Client" />
+          <EntitySet Name="ContentObjects" EntityType="Self.ContentObject" />
+          <EntitySet Name="ContentObjectsSourceURLS" EntityType="Self.ContentObjectsSourceURL" />
+          <EntitySet Name="Countries" EntityType="Self.Country" />
+          <EntitySet Name="CrimeTypes" EntityType="Self.CrimeType" />
+          <EntitySet Name="Criminals" EntityType="Self.Criminal" />
+          <EntitySet Name="Jurisdictions" EntityType="Self.Jurisdiction" />
+          <EntitySet Name="Languages" EntityType="Self.Language" />
+          <EntitySet Name="LicenseNumbers" EntityType="Self.LicenseNumber" />
+          <EntitySet Name="LogonHistories" EntityType="Self.LogonHistory" />
+          <EntitySet Name="Restricteds" EntityType="Self.Restricted" />
+          <EntitySet Name="RestrictionTypes" EntityType="Self.RestrictionType" />
+          <EntitySet Name="Settings" EntityType="Self.Setting" />
+          <EntitySet Name="States" EntityType="Self.State" />
+          <EntitySet Name="URLS" EntityType="Self.URL" />
+          <EntitySet Name="UrlSources" EntityType="Self.UrlSource" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <EntitySet Name="RaptorTCPServerIPs" EntityType="Self.RaptorTCPServerIP" />
+          <AssociationSet Name="FK_Allowed_Jurisdictions_JurisdictionId" Association="Self.FK_Allowed_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Allowed" EntitySet="Alloweds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Allowed_Users_UserId" Association="Self.FK_Allowed_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Allowed" EntitySet="Alloweds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Allowed_AId" Association="Self.FK_ARC_Allowed_AId">
+            <End Role="Allowed" EntitySet="Alloweds" />
+            <End Role="ARC" EntitySet="ARCs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Criminal_CId" Association="Self.FK_ARC_Criminal_CId">
+            <End Role="Criminal" EntitySet="Criminals" />
+            <End Role="ARC" EntitySet="ARCs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ARC_Restricted_RId" Association="Self.FK_ARC_Restricted_RId">
+            <End Role="Restricted" EntitySet="Restricteds" />
+            <End Role="ARC" EntitySet="ARCs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ContentObjects_ARC_ARCId" Association="Self.FK_ContentObjects_ARC_ARCId">
+            <End Role="ARC" EntitySet="ARCs" />
+            <End Role="ContentObjects" EntitySet="ContentObjects" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_Users_UserId" Association="Self.FK_Clients_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId" Association="Self.FK_ContentObjectsSourceURLS_ContentObjects_ContentObjectId">
+            <End Role="ContentObjects" EntitySet="ContentObjects" />
+            <End Role="ContentObjectsSourceURLS" EntitySet="ContentObjectsSourceURLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Countries_States_StateId" Association="Self.FK_Countries_States_StateId">
+            <End Role="States" EntitySet="States" />
+            <End Role="Countries" EntitySet="Countries" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions_Countries_CountryId" Association="Self.FK_Jurisdictions_Countries_CountryId">
+            <End Role="Countries" EntitySet="Countries" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Countries_CountryId" Association="Self.FK_Users_Countries_CountryId">
+            <End Role="Countries" EntitySet="Countries" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CrimeTypes_Criminal_CId" Association="Self.FK_CrimeTypes_Criminal_CId">
+            <End Role="Criminal" EntitySet="Criminals" />
+            <End Role="CrimeTypes" EntitySet="CrimeTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal" Association="Self.FK_Criminal">
+            <End Role="CrimeTypes" EntitySet="CrimeTypes" />
+            <End Role="Criminal" EntitySet="Criminals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal_Jurisdictions_JurisdictionId" Association="Self.FK_Criminal_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Criminal" EntitySet="Criminals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Criminal_Users_UserId" Association="Self.FK_Criminal_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Criminal" EntitySet="Criminals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions" Association="Self.FK_Jurisdictions">
+            <End Role="States" EntitySet="States" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Jurisdictions_Languages_LanguageId" Association="Self.FK_Jurisdictions_Languages_LanguageId">
+            <End Role="Languages" EntitySet="Languages" />
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_Jurisdictions_JurisdictionId" Association="Self.FK_Restricted_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Restricted" EntitySet="Restricteds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Jurisdictions_JurisdictionId" Association="Self.FK_Users_Jurisdictions_JurisdictionId">
+            <End Role="Jurisdictions" EntitySet="Jurisdictions" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Languages_LanguageId" Association="Self.FK_Users_Languages_LanguageId">
+            <End Role="Languages" EntitySet="Languages" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogonHistory_Users_UserId" Association="Self.FK_LogonHistory_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="LogonHistory" EntitySet="LogonHistories" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_RestrictionTypes_RestrictionId" Association="Self.FK_Restricted_RestrictionTypes_RestrictionId">
+            <End Role="RestrictionTypes" EntitySet="RestrictionTypes" />
+            <End Role="Restricted" EntitySet="Restricteds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Restricted_Users_UserId" Association="Self.FK_Restricted_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Restricted" EntitySet="Restricteds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_States_StateId" Association="Self.FK_Users_States_StateId">
+            <End Role="States" EntitySet="States" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_URLS_Users_UserId" Association="Self.FK_URLS_Users_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="URLS" EntitySet="URLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_URLS_UsersDiscoveredBy_UserId" Association="Self.FK_URLS_UsersDiscoveredBy_UserId">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="URLS" EntitySet="URLS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UrlSources_SourceURLS_UrlId" Association="Self.FK_UrlSources_SourceURLS_UrlId">
+            <End Role="URLS" EntitySet="URLS" />
+            <End Role="UrlSources" EntitySet="UrlSources" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UrlSources_URLS_UrlId" Association="Self.FK_UrlSources_URLS_UrlId">
+            <End Role="URLS" EntitySet="URLS" />
+            <End Role="UrlSources" EntitySet="UrlSources" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DamoclesModelStoreContainer" CdmEntityContainer="DamoclesEntities">
+          <EntitySetMapping Name="AccountStatus">
+            <EntityTypeMapping TypeName="DamoclesModel.AccountStatu">
+              <MappingFragment StoreEntitySet="AccountStatus">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="StatusName" ColumnName="StatusName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Alloweds">
+            <EntityTypeMapping TypeName="DamoclesModel.Allowed">
+              <MappingFragment StoreEntitySet="Allowed">
+                <ScalarProperty Name="AId" ColumnName="AId" />
+                <ScalarProperty Name="Uid" ColumnName="Uid" />
+                <ScalarProperty Name="JurisidctionId" ColumnName="JurisidctionId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ARCs">
+            <EntityTypeMapping TypeName="DamoclesModel.ARC">
+              <MappingFragment StoreEntitySet="ARC">
+                <ScalarProperty Name="ARCId" ColumnName="ARCId" />
+                <ScalarProperty Name="AId" ColumnName="AId" />
+                <ScalarProperty Name="RId" ColumnName="RId" />
+                <ScalarProperty Name="CId" ColumnName="CId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clients">
+            <EntityTypeMapping TypeName="DamoclesModel.Client">
+              <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="ClientsID" ColumnName="ClientsID" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RaptorClientID" ColumnName="RaptorClientID" />
+                <ScalarProperty Name="IP_Address" ColumnName="IP Address" />
+                <ScalarProperty Name="MachineName" ColumnName="MachineName" />
+                <ScalarProperty Name="LoggedOnUserName" ColumnName="LoggedOnUserName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContentObjects">
+            <EntityTypeMapping TypeName="DamoclesModel.ContentObject">
+              <MappingFragment StoreEntitySet="ContentObjects">
+                <ScalarProperty Name="ContentObjectId" ColumnName="ContentObjectId" />
+                <ScalarProperty Name="ContentPath" ColumnName="ContentPath" />
+                <ScalarProperty Name="ARCId" ColumnName="ARCId" />
+                <ScalarProperty Name="ContentObjectExtension" ColumnName="ContentObjectExtension" />
+                <ScalarProperty Name="ContentObjectHash" ColumnName="ContentObjectHash" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContentObjectsSourceURLS">
+            <EntityTypeMapping TypeName="DamoclesModel.ContentObjectsSourceURL">
+              <MappingFragment StoreEntitySet="ContentObjectsSourceURLS">
+                <ScalarProperty Name="URLHash" ColumnName="URLHash" />
+                <ScalarProperty Name="ContentObjectId" ColumnName="ContentObjectId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Countries">
+            <EntityTypeMapping TypeName="DamoclesModel.Country">
+              <MappingFragment StoreEntitySet="Countries">
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
+                <ScalarProperty Name="CountryNameEnglish" ColumnName="CountryNameEnglish" />
+                <ScalarProperty Name="CountryNameLocal" ColumnName="CountryNameLocal" />
+                <ScalarProperty Name="CountryTimeZone" ColumnName="CountryTimeZone" />
+                <ScalarProperty Name="StatesId" ColumnName="StatesId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CrimeTypes">
+            <EntityTypeMapping TypeName="DamoclesModel.CrimeType">
+              <MappingFragment StoreEntitySet="CrimeTypes">
+                <ScalarProperty Name="CrimeId" ColumnName="CrimeId" />
+                <ScalarProperty Name="CrimeName" ColumnName="CrimeName" />
+                <ScalarProperty Name="CId" ColumnName="CId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Criminals">
+            <EntityTypeMapping TypeName="DamoclesModel.Criminal">
+              <MappingFragment StoreEntitySet="Criminal">
+                <ScalarProperty Name="CId" ColumnName="CId" />
+                <ScalarProperty Name="UId" ColumnName="UId" />
+                <ScalarProperty Name="CrimeId" ColumnName="CrimeId" />
+                <ScalarProperty Name="JurisidictionId" ColumnName="JurisidictionId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Jurisdictions">
+            <EntityTypeMapping TypeName="DamoclesModel.Jurisdiction">
+              <MappingFragment StoreEntitySet="Jurisdictions">
+                <ScalarProperty Name="JurisdictionId" ColumnName="JurisdictionId" />
+                <ScalarProperty Name="JurisdictionName" ColumnName="JurisdictionName" />
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
+                <ScalarProperty Name="StateId" ColumnName="StateId" />
+                <ScalarProperty Name="LanguageId" ColumnName="LanguageId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Languages">
+            <EntityTypeMapping TypeName="DamoclesModel.Language">
+              <MappingFragment StoreEntitySet="Languages">
+                <ScalarProperty Name="LanguageId" ColumnName="LanguageId" />
+                <ScalarProperty Name="LanguageEnglishName" ColumnName="LanguageEnglishName" />
+                <ScalarProperty Name="LanguageLocalName" ColumnName="LanguageLocalName" />
+                <ScalarProperty Name="TranslationAvailable" ColumnName="TranslationAvailable" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LicenseNumbers">
+            <EntityTypeMapping TypeName="DamoclesModel.LicenseNumber">
+              <MappingFragment StoreEntitySet="LicenseNumbers">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="LicenseNumber1" ColumnName="LicenseNumber" />
+                <ScalarProperty Name="emailAddress" ColumnName="emailAddress" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LogonHistories">
+            <EntityTypeMapping TypeName="DamoclesModel.LogonHistory">
+              <MappingFragment StoreEntitySet="LogonHistory">
+                <ScalarProperty Name="LogonHistoryId" ColumnName="LogonHistoryId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="LoggedOnDate" ColumnName="LoggedOnDate" />
+                <ScalarProperty Name="LoggedOffDate" ColumnName="LoggedOffDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Restricteds">
+            <EntityTypeMapping TypeName="DamoclesModel.Restricted">
+              <MappingFragment StoreEntitySet="Restricted">
+                <ScalarProperty Name="RId" ColumnName="RId" />
+                <ScalarProperty Name="UId" ColumnName="UId" />
+                <ScalarProperty Name="RestrictedToId" ColumnName="RestrictedToId" />
+                <ScalarProperty Name="JurisdictionId" ColumnName="JurisdictionId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RestrictionTypes">
+            <EntityTypeMapping TypeName="DamoclesModel.RestrictionType">
+              <MappingFragment StoreEntitySet="RestrictionTypes">
+                <ScalarProperty Name="RestrictionId" ColumnName="RestrictionId" />
+                <ScalarProperty Name="Restriction_Reason" ColumnName="Restriction Reason" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Settings">
+            <EntityTypeMapping TypeName="DamoclesModel.Setting">
+              <MappingFragment StoreEntitySet="Settings">
+                <ScalarProperty Name="SettingsId" ColumnName="SettingsId" />
+                <ScalarProperty Name="NumberOfNewsItemsToDisplay" ColumnName="NumberOfNewsItemsToDisplay" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="States">
+            <EntityTypeMapping TypeName="DamoclesModel.State">
+              <MappingFragment StoreEntitySet="States">
+                <ScalarProperty Name="StateId" ColumnName="StateId" />
+                <ScalarProperty Name="StateEnglishName" ColumnName="StateEnglishName" />
+                <ScalarProperty Name="StateLocalName" ColumnName="StateLocalName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="URLS">
+            <EntityTypeMapping TypeName="DamoclesModel.URL">
+              <MappingFragment StoreEntitySet="URLS">
+                <ScalarProperty Name="UrlId" ColumnName="UrlId" />
+                <ScalarProperty Name="UrlHash" ColumnName="UrlHash" />
+                <ScalarProperty Name="URLPath" ColumnName="URLPath" />
+                <ScalarProperty Name="DiscoveryDate" ColumnName="DiscoveryDate" />
+                <ScalarProperty Name="DiscoveredById" ColumnName="DiscoveredById" />
+                <ScalarProperty Name="ProcessedDate" ColumnName="ProcessedDate" />
+                <ScalarProperty Name="ProcessedById" ColumnName="ProcessedById" />
+                <ScalarProperty Name="IsInProcessingQueue" ColumnName="IsInProcessingQueue" />
+                <ScalarProperty Name="JoinedProcessingQueueDate" ColumnName="JoinedProcessingQueueDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UrlSources">
+            <EntityTypeMapping TypeName="DamoclesModel.UrlSource">
+              <MappingFragment StoreEntitySet="UrlSources">
+                <ScalarProperty Name="UrlSourcesId" ColumnName="UrlSourcesId" />
+                <ScalarProperty Name="URLId" ColumnName="URLId" />
+                <ScalarProperty Name="URLSourceId" ColumnName="URLSourceId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="DamoclesModel.User">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Username" ColumnName="Username" />
+                <ScalarProperty Name="UserPasswordHash" ColumnName="UserPasswordHash" />
+                <ScalarProperty Name="RegisteredDate" ColumnName="RegisteredDate" />
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
+                <ScalarProperty Name="StateId" ColumnName="StateId" />
+                <ScalarProperty Name="JurisidictionId" ColumnName="JurisidictionId" />
+                <ScalarProperty Name="LanguagesId" ColumnName="LanguagesId" />
+                <ScalarProperty Name="IsOnline" ColumnName="IsOnline" />
+                <ScalarProperty Name="AccountStatusId" ColumnName="AccountStatusId" />
+                <ScalarProperty Name="LicenseNumber" ColumnName="LicenseNumber" />
+                <ScalarProperty Name="emailAddress" ColumnName="emailAddress" />
+                <ScalarProperty Name="UserClientID" ColumnName="UserClientID" />
+                <ScalarProperty Name="CurrentClientID" ColumnName="CurrentClientID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RaptorTCPServerIPs">
+            <EntityTypeMapping TypeName="DamoclesModel.RaptorTCPServerIP">
+              <MappingFragment StoreEntitySet="RaptorTCPServerIP">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

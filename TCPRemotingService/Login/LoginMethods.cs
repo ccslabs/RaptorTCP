@@ -19,7 +19,7 @@ namespace RaptorTCP3.Methods.Login
 
         Users.Users User = new Users.Users();
 
-        private void Login(string emailAddress, string Password)
+        internal void Login(string emailAddress, string Password)
         {
             if (LogEvent != null) LogEvent(emailAddress + " Is Loging in");
             // Does the User Exist in the Database?
