@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace TCPRemotingService
 {
-   public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService.ITCPRemotingService
+    public class TCPRemotingService : MarshalByRefObject, ITCPRemotingService.ITCPRemotingService
     {
+
 
         public bool Login(string EmailAddress, string Password)
         {
-            throw new NotImplementedException();
+            // Log the User In
         }
 
         public bool Register(string EmailAddress, string Password)
@@ -27,6 +28,11 @@ namespace TCPRemotingService
         public bool GiveUrls(string[] UrlList)
         {
             throw new NotImplementedException();
+        }
+
+        public bool Hello()
+        {
+            return true;
         }
     }
 

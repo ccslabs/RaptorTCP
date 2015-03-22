@@ -235,9 +235,9 @@ namespace RaptorTCP3.Methods.TCPServer
         {
             TCPRemotingService.TCPRemotingService TCPServer = new TCPRemotingService.TCPRemotingService();
             TcpChannel channel = new TcpChannel(9119);
-            ChannelServices.RegisterChannel(channel, true);
+            ChannelServices.RegisterChannel(channel, false);
             RemotingConfiguration.RegisterWellKnownServiceType(typeof(TCPRemotingService.TCPRemotingService), "TCPServer", WellKnownObjectMode.Singleton);
-            LogEvent("TCPServer Host has started");
+           if(LogEvent != null) LogEvent("TCPServer Host has started");
         }
     }
 

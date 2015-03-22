@@ -11,7 +11,7 @@ namespace RaptorTCP3.Methods.Login
     class LoginMethods
     {
         // Returns the result of the Attempted Login
-        public delegate void LoginResultEventHandler(bool Result, string Cid);
+        public delegate void LoginResultEventHandler(bool Result);
         public event LoginResultEventHandler LoginResultEvent;
         // Informs the main program that a log message is ready
         public delegate void LogEventHandler(string Message);
@@ -19,42 +19,42 @@ namespace RaptorTCP3.Methods.Login
 
         Users.Users User = new Users.Users();
 
-        private void Login(string Cid, string emailAddress, string Password)
+        private void Login(string emailAddress, string Password)
         {
-            if (LogEvent != null) LogEvent(Cid + " Is Loging in");
+            if (LogEvent != null) LogEvent(emailAddress + " Is Loging in");
             // Does the User Exist in the Database?
             using (var db = new DamoclesEntities())
             {
-                AddClient(Cid, emailAddress);   // Add the User's Client for this logon
+                AddClient(emailAddress);   // Add the User's Client for this logon
                 var uid = User.GetUserID(emailAddress);
                 var user = db.Users.First(u => u.UserId == uid);
                 user.IsOnline = true;   // Set the User to Online
-                //user.CurrentClientID = Cid;
+                
                 int rows = db.SaveChanges();
                 UpdateLoginHistory(emailAddress); // Add the User's Logon History
 
                 if (rows == 1)
                 {
                     LogEvent(emailAddress + " is Logged In");
-                    LoginResultEvent(true, Cid);
+                    LoginResultEvent(true);
                 }
                 else
                 {
                     LogEvent(emailAddress + " Failed to Log In");
-                    LoginResultEvent(false, Cid);
+                    LoginResultEvent(false);
                 }
             }
         }
 
-        private int AddClient(string ClientID, string emailAddress)
+        private int AddClient(string emailAddress)
         {
-            if (LogEvent != null) LogEvent(ClientID + " Is Being Added in");
+            if (LogEvent != null) LogEvent(emailAddress + " Is Being Added in");
             int rid = 0;
             using (var db = new DamoclesEntities())
             {
                 var c = db.Clients;
                 var nclient = new Client();
-                nclient.RaptorClientID = ClientID;
+                nclient.RaptorClientID = emailAddress;
                 nclient.UserId = User.GetUserID(emailAddress);
                 c.Add(nclient);
                 db.SaveChanges();

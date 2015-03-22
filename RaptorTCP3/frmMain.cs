@@ -21,7 +21,6 @@ using RaptorTCP3.Methods.Login;
 using RaptorTCP3.Methods.LogOff;
 using RaptorTCP3.Methods.TCPServer;
 using RaptorTCP3.Methods.SystemURLS;
-using RaptorTCP3.Methods.SqlClient;
 using RaptorTCP3.Methods;
 using RaptorTCP3.Methods.Users;
 
@@ -46,7 +45,6 @@ namespace RaptorTCP3
 
         private sUrls URLS;
         private Users Users;
-        private SqlClient DatabaseClient;
         private TCPRemotingServiceHost tcpServer = new TCPRemotingServiceHost();
         private Task t;
 
@@ -57,7 +55,7 @@ namespace RaptorTCP3
         private int SecondsIdle;
 
         private bool IsIdle = true;
-       
+
 
         public frmMain(bool ForceRegistration = false)
         {
@@ -79,8 +77,7 @@ namespace RaptorTCP3
             Log("Instantiating");
             Log("\tUtilities");
             Utils = new Utilities();
-            Log("\tLogin Methods");
-            LoginMethods = new LoginMethods();
+           
             Log("\tLogOff Methods");
             Logoff = new LogOff();
             Log("\tSeeding Class");
@@ -91,26 +88,14 @@ namespace RaptorTCP3
             Users = new Users();
             Log("\tURLS Class");
             URLS = new sUrls();
-            Log("\tDatabase Client [obsolete?]");
-            DatabaseClient = new SqlClient();
+           
 
             Log("Subscribing to User Events");
             Users.UserCountEvent += Users_UserCountEvent;
 
-            //  Log("Subscribing to Login Events");
-
-            //   Log("Subscribing to URL Events");
-
-
-            //  Log("Subscribing to TCP  Server Events");
-
-
             Log("Subscribing to Seeding Events");
             Seeding.AddUrlEvent += Seeding_AddUrlEvent;
             Seeding.DeleteAllUrlsEvent += Seeding_DeleteAllUrlsEvent;
-
-            Log("Subscribing to Database Client Events");
-            DatabaseClient.LogEvent += LogEvent;
 
             Log("Subscribing to Globally Shared Events");
             Log("\t Logging");
@@ -120,7 +105,7 @@ namespace RaptorTCP3
             LoginMethods.LogEvent += LogEvent;
             Users.LogEvent += LogEvent;
             Log("\t Progress Changed");
-          
+
             URLS.ProgressChangedEvent += ProgressChangedEvent;
             URLS.ProgressMaximumChangedEvent += ProgressMaximumChangedEvent;
             // Log("\t Broadcast Messages");
